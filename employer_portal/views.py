@@ -2,7 +2,6 @@
 
 Views for the employer access portal.
 
-
 The staff dashboard renders ``employer_portal/staff_dashboard.html`` — a
 
 self-contained, tabbed triage workspace with its own rail and theme. It
@@ -10,7 +9,6 @@ self-contained, tabbed triage workspace with its own rail and theme. It
 does not extend ``admin/base.html`` and does not depend on
 
 ``admin_site.each_context()``.
-
 
 Domain mutations (approve / reject / revoke / expire) are performed via
 
@@ -24,9 +22,7 @@ user-agent consistently.
 
 """
 
-
 from __future__ import annotations
-
 
 from datetime import timedelta
 
@@ -35,7 +31,6 @@ from functools import wraps
 from mimetypes import guess_type
 
 from pathlib import Path
-
 
 from django.conf import settings
 
@@ -77,7 +72,6 @@ from django.views.decorators.http import (
 
 )
 
-
 from .forms import AccessRequestForm
 
 from .models import (
@@ -100,9 +94,7 @@ from .models import (
 
 )
 
-
 DEFAULT_ACCESS_DURATION_DAYS = 7
-
 
 # ---------------------------------------------------------------------------
 
@@ -110,11 +102,9 @@ DEFAULT_ACCESS_DURATION_DAYS = 7
 
 # ---------------------------------------------------------------------------
 
-
 def staff_required(view_func):
 
     """Require an authenticated Django staff account."""
-
 
     @wraps(view_func)
 
@@ -130,24 +120,19 @@ def staff_required(view_func):
 
             )
 
-
         if not request.user.is_active or not request.user.is_staff:
 
             raise PermissionDenied("Active staff access is required.")
 
-
         return view_func(request, *args, **kwargs)
 
-
     return wrapped_view
-
 
 # ---------------------------------------------------------------------------
 
 # AUDIT LOGGING
 
 # ---------------------------------------------------------------------------
-
 
 def log_event(
 
@@ -173,7 +158,6 @@ def log_event(
 
     Create an immutable audit record.
 
-
     Delegates to ``AccessLog.log_from_request`` when a request is
 
     available (captures IP + UA), otherwise falls back to a plain create
@@ -185,7 +169,6 @@ def log_event(
     identifier = str(resource_identifier) if resource_identifier is not None else ""
 
     meta = metadata or {}
-
 
     if request is None:
 
@@ -205,7 +188,6 @@ def log_event(
 
         )
 
-
     return AccessLog.log_from_request(
 
         request,
@@ -224,20 +206,17 @@ def log_event(
 
     )
 
-
 # ---------------------------------------------------------------------------
 
 # GRANT HELPERS
 
 # ---------------------------------------------------------------------------
 
-
 def get_valid_grant(token) -> AccessGrant | None:
 
     """
 
     Return a currently valid grant for the given token, or ``None``.
-
 
     Automatically marks the grant as expired (and its request as
 
@@ -269,11 +248,9 @@ def get_valid_grant(token) -> AccessGrant | None:
 
     )
 
-
     if grant is None:
 
         return None
-
 
     if grant.expires_at <= now:
 
@@ -281,16 +258,13 @@ def get_valid_grant(token) -> AccessGrant | None:
 
         return None
 
-
     return grant
-
 
 # ---------------------------------------------------------------------------
 
 # RESOURCE LOOKUPS
 
 # ---------------------------------------------------------------------------
-
 
 def _approved_documents(access_request: AccessRequest):
 
@@ -314,7 +288,6 @@ def _approved_documents(access_request: AccessRequest):
 
     )
 
-
 def _approved_referees(access_request: AccessRequest):
 
     return list(
@@ -337,7 +310,6 @@ def _approved_referees(access_request: AccessRequest):
 
     )
 
-
 def _requested_documents_for_review(access_request: AccessRequest):
 
     return list(
@@ -357,7 +329,6 @@ def _requested_documents_for_review(access_request: AccessRequest):
         .order_by("document_type", "title")
 
     )
-
 
 def _requested_referees_for_review(access_request: AccessRequest):
 
@@ -379,7 +350,6 @@ def _requested_referees_for_review(access_request: AccessRequest):
 
     )
 
-
 def _resource_availability(form: AccessRequestForm):
 
     """Return whether active documents or referees are selectable."""
@@ -395,7 +365,6 @@ def _resource_availability(form: AccessRequestForm):
         form.fields.get("requested_referees") or form.fields.get("referees")
 
     )
-
 
     has_documents = bool(
 
@@ -419,13 +388,11 @@ def _resource_availability(form: AccessRequestForm):
 
     return has_documents, has_referees
 
-
 # ---------------------------------------------------------------------------
 
 # EMAIL HELPERS
 
 # ---------------------------------------------------------------------------
-
 
 def _notify_staff_of_new_request(
 
@@ -443,7 +410,6 @@ def _notify_staff_of_new_request(
 
         return False, ""
 
-
     try:
 
         review_url = request.build_absolute_uri(
@@ -457,7 +423,6 @@ def _notify_staff_of_new_request(
             )
 
         )
-
 
         subject = (
 
@@ -501,7 +466,6 @@ def _notify_staff_of_new_request(
 
         )
 
-
         send_mail(
 
             subject=subject,
@@ -522,7 +486,6 @@ def _notify_staff_of_new_request(
 
         return False, str(exc)[:500]
 
-
 def _notify_employer_of_approval(
 
     request: HttpRequest,
@@ -541,7 +504,6 @@ def _notify_employer_of_approval(
 
         return False, ""
 
-
     try:
 
         portal_url = request.build_absolute_uri(
@@ -555,7 +517,6 @@ def _notify_employer_of_approval(
             )
 
         )
-
 
         send_mail(
 
@@ -619,13 +580,11 @@ def _notify_employer_of_approval(
 
         return False, str(exc)[:500]
 
-
 # ---------------------------------------------------------------------------
 
 # PUBLIC REQUEST FLOW
 
 # ---------------------------------------------------------------------------
-
 
 @require_http_methods(["GET", "POST"])
 
@@ -636,7 +595,6 @@ def request_access(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
 
         form = AccessRequestForm(request.POST)
-
 
         if not form.is_valid():
 
@@ -664,7 +622,6 @@ def request_access(request: HttpRequest) -> HttpResponse:
 
             )
 
-
         access_request = form.save(commit=True)
 
         access_request.ip_address = request.META.get("REMOTE_ADDR", "")
@@ -677,13 +634,11 @@ def request_access(request: HttpRequest) -> HttpResponse:
 
         )
 
-
         notification_sent, notification_error = _notify_staff_of_new_request(
 
             request, access_request
 
         )
-
 
         log_event(
 
@@ -723,7 +678,6 @@ def request_access(request: HttpRequest) -> HttpResponse:
 
         )
 
-
         return redirect(
 
             "employer_portal:request_submitted",
@@ -732,11 +686,9 @@ def request_access(request: HttpRequest) -> HttpResponse:
 
         )
 
-
     form = AccessRequestForm()
 
     has_documents, has_referees = _resource_availability(form)
-
 
     return render(
 
@@ -758,7 +710,6 @@ def request_access(request: HttpRequest) -> HttpResponse:
 
     )
 
-
 @require_GET
 
 def request_submitted(request: HttpRequest, request_id) -> HttpResponse:
@@ -772,7 +723,6 @@ def request_submitted(request: HttpRequest, request_id) -> HttpResponse:
         request_id=request_id,
 
     )
-
 
     response = render(
 
@@ -796,7 +746,6 @@ def request_submitted(request: HttpRequest, request_id) -> HttpResponse:
 
     return response
 
-
 @require_GET
 
 def request_status(request: HttpRequest, request_id) -> HttpResponse:
@@ -811,9 +760,7 @@ def request_status(request: HttpRequest, request_id) -> HttpResponse:
 
     )
 
-
     grant = getattr(access_request, "grant", None)
-
 
     # Self-heal if the grant window has passed.
 
@@ -832,7 +779,6 @@ def request_status(request: HttpRequest, request_id) -> HttpResponse:
         access_request.refresh_from_db(fields=["status", "updated_at"])
 
         grant.refresh_from_db(fields=["is_active", "revoked_at"])
-
 
     response = render(
 
@@ -856,13 +802,11 @@ def request_status(request: HttpRequest, request_id) -> HttpResponse:
 
     return response
 
-
 # ---------------------------------------------------------------------------
 
 # EMPLOYER PORTAL
 
 # ---------------------------------------------------------------------------
-
 
 @require_GET
 
@@ -876,13 +820,11 @@ def portal(request: HttpRequest, token) -> HttpResponse:
 
         raise Http404("This employer access link is invalid or has expired.")
 
-
     access_request = grant.access_request
 
     documents = _approved_documents(access_request)
 
     referees = _approved_referees(access_request)
-
 
     log_event(
 
@@ -907,7 +849,6 @@ def portal(request: HttpRequest, token) -> HttpResponse:
         },
 
     )
-
 
     response = render(
 
@@ -935,7 +876,6 @@ def portal(request: HttpRequest, token) -> HttpResponse:
 
     return response
 
-
 def _get_grant_document(grant: AccessGrant, document_id: int) -> Document:
 
     return get_object_or_404(
@@ -951,7 +891,6 @@ def _get_grant_document(grant: AccessGrant, document_id: int) -> Document:
         document__is_active=True,
 
     ).document
-
 
 def _get_grant_referee(grant: AccessGrant, referee_id: int) -> Referee:
 
@@ -969,20 +908,17 @@ def _get_grant_referee(grant: AccessGrant, referee_id: int) -> Referee:
 
     ).referee
 
-
 def _open_private_document(document: Document):
 
     if not document.file:
 
         raise Http404("The requested document is unavailable.")
 
-
     storage = document.file.storage
 
     if not storage.exists(document.file.name):
 
         raise Http404("The requested document is unavailable.")
-
 
     try:
 
@@ -991,7 +927,6 @@ def _open_private_document(document: Document):
     except (FileNotFoundError, OSError):
 
         raise Http404("The requested document is unavailable.")
-
 
 def _mark_document_viewed(access_request: AccessRequest, document: Document) -> None:
 
@@ -1007,7 +942,6 @@ def _mark_document_viewed(access_request: AccessRequest, document: Document) -> 
 
         item.mark_viewed()
 
-
 def _mark_referee_viewed(access_request: AccessRequest, referee: Referee) -> None:
 
     item = RefereeAccessRequest.objects.filter(
@@ -1022,21 +956,32 @@ def _mark_referee_viewed(access_request: AccessRequest, referee: Referee) -> Non
 
         item.mark_viewed()
 
-
 @require_GET
+
 def document_view(
+
     request: HttpRequest,
+
     token,
+
     document_id: int,
+
 ) -> HttpResponse:
+
     """
+
     Render the secure document preview page.
 
     The page does not expose the private file path. The browser loads the
+
     protected file through ``document_stream`` using the same grant checks.
+
     """
+
     grant = get_valid_grant(token)
+
     if grant is None:
+
         raise Http404("This employer access link is invalid or has expired.")
 
     document = _get_grant_document(grant, document_id)
@@ -1044,84 +989,144 @@ def document_view(
     _mark_document_viewed(grant.access_request, document)
 
     log_event(
+
         AccessLog.EventType.DOCUMENT_VIEWED,
+
         request,
+
         access_request=grant.access_request,
+
         employer=grant.access_request.employer,
+
         resource_type="document",
+
         resource_identifier=document.id,
+
         metadata={
+
             "document_title": document.title,
+
             "document_type": document.document_type,
+
             "grant_token": str(grant.token),
+
         },
+
     )
 
     return render(
+
         request,
+
         "employer_portal/document_preview.html",
+
         {
+
             "grant": grant,
+
             "access_request": grant.access_request,
+
             "document": document,
+
             "stream_url": reverse(
+
                 "employer_portal:document_stream",
+
                 kwargs={
+
                     "token": grant.token,
+
                     "document_id": document.id,
+
                 },
+
             ),
+
             "download_url": reverse(
+
                 "employer_portal:document_download",
+
                 kwargs={
+
                     "token": grant.token,
+
                     "document_id": document.id,
+
                 },
+
             ),
+
             "portal_url": reverse(
+
                 "employer_portal:portal",
+
                 kwargs={"token": grant.token},
+
             ),
+
         },
+
     )
 
-
 @require_GET
+
 def document_stream(
+
     request: HttpRequest,
+
     token,
+
     document_id: int,
+
 ) -> FileResponse:
+
     """
+
     Stream one approved private document to the preview page.
 
     The grant and document permissions are re-checked for every request so
+
     the preview endpoint cannot be used after access is revoked or expires.
+
     """
+
     grant = get_valid_grant(token)
+
     if grant is None:
+
         raise Http404("This employer access link is invalid or has expired.")
 
     document = _get_grant_document(grant, document_id)
+
     file_handle = _open_private_document(document)
 
     filename = Path(document.file.name).name
+
     guessed_type, _ = guess_type(filename)
+
     content_type = guessed_type or "application/octet-stream"
 
     response = FileResponse(
+
         file_handle,
+
         content_type=content_type,
+
     )
+
     response["Content-Disposition"] = f'inline; filename="{filename}"'
+
     response["X-Content-Type-Options"] = "nosniff"
+
     response["Cache-Control"] = "private, no-store, no-cache, must-revalidate"
+
     response["Pragma"] = "no-cache"
+
     response["Expires"] = "0"
+
     response["Referrer-Policy"] = "no-referrer"
 
     return response
-
 
 @require_GET
 
@@ -1143,16 +1148,13 @@ def document_download(
 
         raise Http404("This employer access link is invalid or has expired.")
 
-
     document = _get_grant_document(grant, document_id)
 
     file_handle = _open_private_document(document)
 
     filename = Path(document.file.name).name
 
-
     _mark_document_viewed(grant.access_request, document)
-
 
     log_event(
 
@@ -1180,7 +1182,6 @@ def document_download(
 
     )
 
-
     response = FileResponse(
 
         file_handle,
@@ -1203,7 +1204,6 @@ def document_download(
 
     return response
 
-
 @require_GET
 
 def referee_view(
@@ -1224,11 +1224,9 @@ def referee_view(
 
         raise Http404("This employer access link is invalid or has expired.")
 
-
     referee = _get_grant_referee(grant, referee_id)
 
     _mark_referee_viewed(grant.access_request, referee)
-
 
     log_event(
 
@@ -1256,7 +1254,6 @@ def referee_view(
 
     )
 
-
     response = render(
 
         request,
@@ -1281,13 +1278,11 @@ def referee_view(
 
     return response
 
-
 # ---------------------------------------------------------------------------
 
 # STAFF DASHBOARD
 
 # ---------------------------------------------------------------------------
-
 
 @staff_required
 
@@ -1297,9 +1292,7 @@ def staff_dashboard(request: HttpRequest) -> HttpResponse:
 
     Render the private staff dashboard.
 
-
     Provides the triage context the template expects:
-
 
     * ``pending_requests`` — awaiting review, most recent first
 
@@ -1310,7 +1303,6 @@ def staff_dashboard(request: HttpRequest) -> HttpResponse:
     """
 
     now = timezone.now()
-
 
     # Self-heal any grants whose window has already closed before we
 
@@ -1329,7 +1321,6 @@ def staff_dashboard(request: HttpRequest) -> HttpResponse:
     for grant in expired_grants:
 
         grant.access_request.mark_expired(now=now)
-
 
     pending_requests = (
 
@@ -1350,7 +1341,6 @@ def staff_dashboard(request: HttpRequest) -> HttpResponse:
         .order_by("-created_at")
 
     )
-
 
     active_grants = (
 
@@ -1376,7 +1366,6 @@ def staff_dashboard(request: HttpRequest) -> HttpResponse:
 
     )
 
-
     recent_logs = (
 
         AccessLog.objects
@@ -1386,7 +1375,6 @@ def staff_dashboard(request: HttpRequest) -> HttpResponse:
         .order_by("-created_at")[:20]
 
     )
-
 
     return render(
 
@@ -1406,7 +1394,6 @@ def staff_dashboard(request: HttpRequest) -> HttpResponse:
 
     )
 
-
 @staff_required
 
 def staff_request_detail(request: HttpRequest, request_id) -> HttpResponse:
@@ -1420,7 +1407,6 @@ def staff_request_detail(request: HttpRequest, request_id) -> HttpResponse:
         request_id=request_id,
 
     )
-
 
     # Optional "Assign to me" — triggered from the dashboard.
 
@@ -1442,11 +1428,9 @@ def staff_request_detail(request: HttpRequest, request_id) -> HttpResponse:
 
         )
 
-
     documents = _requested_documents_for_review(access_request)
 
     referees = _requested_referees_for_review(access_request)
-
 
     document_permissions = {
 
@@ -1464,9 +1448,7 @@ def staff_request_detail(request: HttpRequest, request_id) -> HttpResponse:
 
     }
 
-
     grant = getattr(access_request, "grant", None)
-
 
     # Self-heal on load.
 
@@ -1486,7 +1468,6 @@ def staff_request_detail(request: HttpRequest, request_id) -> HttpResponse:
 
         grant.refresh_from_db()
 
-
     logs = (
 
         AccessLog.objects
@@ -1496,7 +1477,6 @@ def staff_request_detail(request: HttpRequest, request_id) -> HttpResponse:
         .order_by("-created_at")[:50]
 
     )
-
 
     return render(
 
@@ -1524,7 +1504,6 @@ def staff_request_detail(request: HttpRequest, request_id) -> HttpResponse:
 
     )
 
-
 @require_POST
 
 @staff_required
@@ -1540,7 +1519,6 @@ def approve_request(request: HttpRequest, request_id) -> HttpResponse:
         request_id=request_id,
 
     )
-
 
     if access_request.status != AccessRequest.Status.PENDING:
 
@@ -1560,11 +1538,9 @@ def approve_request(request: HttpRequest, request_id) -> HttpResponse:
 
         )
 
-
     now = timezone.now()
 
     expiry = now + timedelta(days=DEFAULT_ACCESS_DURATION_DAYS)
-
 
     with transaction.atomic():
 
@@ -1572,14 +1548,13 @@ def approve_request(request: HttpRequest, request_id) -> HttpResponse:
 
             AccessRequest.objects
 
-            .select_for_update()
+            .select_for_update(of=("self",))
 
             .select_related("employer")
 
             .get(pk=access_request.pk)
 
         )
-
 
         try:
 
@@ -1605,13 +1580,11 @@ def approve_request(request: HttpRequest, request_id) -> HttpResponse:
 
             )
 
-
     notification_sent, notification_error = _notify_employer_of_approval(
 
         request, access_request, grant
 
     )
-
 
     log_event(
 
@@ -1655,7 +1628,6 @@ def approve_request(request: HttpRequest, request_id) -> HttpResponse:
 
     )
 
-
     messages.success(
 
         request,
@@ -1670,7 +1642,6 @@ def approve_request(request: HttpRequest, request_id) -> HttpResponse:
 
     )
 
-
     return redirect(
 
         "employer_portal:staff_request_detail",
@@ -1678,7 +1649,6 @@ def approve_request(request: HttpRequest, request_id) -> HttpResponse:
         request_id=access_request.request_id,
 
     )
-
 
 @require_POST
 
@@ -1695,7 +1665,6 @@ def reject_request(request: HttpRequest, request_id) -> HttpResponse:
         request_id=request_id,
 
     )
-
 
     if access_request.status != AccessRequest.Status.PENDING:
 
@@ -1715,9 +1684,7 @@ def reject_request(request: HttpRequest, request_id) -> HttpResponse:
 
         )
 
-
     now = timezone.now()
-
 
     with transaction.atomic():
 
@@ -1725,14 +1692,12 @@ def reject_request(request: HttpRequest, request_id) -> HttpResponse:
 
             AccessRequest.objects
 
-            .select_for_update()
-
+            .select_for_update(of=("self",))
             .select_related("employer")
 
             .get(pk=access_request.pk)
 
         )
-
 
         try:
 
@@ -1749,7 +1714,6 @@ def reject_request(request: HttpRequest, request_id) -> HttpResponse:
                 request_id=access_request.request_id,
 
             )
-
 
     log_event(
 
@@ -1769,9 +1733,7 @@ def reject_request(request: HttpRequest, request_id) -> HttpResponse:
 
     )
 
-
     messages.success(request, "The employer access request has been rejected.")
-
 
     return redirect(
 
@@ -1780,7 +1742,6 @@ def reject_request(request: HttpRequest, request_id) -> HttpResponse:
         request_id=access_request.request_id,
 
     )
-
 
 @require_POST
 
@@ -1798,9 +1759,7 @@ def revoke_access(request: HttpRequest, request_id) -> HttpResponse:
 
     )
 
-
     now = timezone.now()
-
 
     with transaction.atomic():
 
@@ -1808,8 +1767,7 @@ def revoke_access(request: HttpRequest, request_id) -> HttpResponse:
 
             AccessRequest.objects
 
-            .select_for_update()
-
+            .select_for_update(of=("self",))
             .select_related("employer")
 
             .get(pk=access_request.pk)
@@ -1827,7 +1785,6 @@ def revoke_access(request: HttpRequest, request_id) -> HttpResponse:
             .first()
 
         )
-
 
         if grant is None:
 
@@ -1847,7 +1804,6 @@ def revoke_access(request: HttpRequest, request_id) -> HttpResponse:
 
             )
 
-
         try:
 
             access_request.mark_revoked(reviewer=request.user, now=now)
@@ -1863,7 +1819,6 @@ def revoke_access(request: HttpRequest, request_id) -> HttpResponse:
                 request_id=access_request.request_id,
 
             )
-
 
     log_event(
 
@@ -1889,9 +1844,7 @@ def revoke_access(request: HttpRequest, request_id) -> HttpResponse:
 
     )
 
-
     messages.success(request, "Employer portal access has been revoked.")
-
 
     return redirect(
 
