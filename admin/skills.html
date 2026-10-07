@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description" content="Skills management | Dennis Ndwigah Portfolio Admin">
+
+    <title>Skills | Dennis Ndwigah Portfolio Admin</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap"
+        rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/skills.css">
+</head>
+
+<body class="admin-skills-page">
+
+    <div class="admin-app">
+
+        <!-- Mobile overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+
+        <!-- =========================================
+             SIDEBAR
+             ========================================= -->
+
+        <aside class="admin-sidebar" id="adminSidebar">
+
+            <div class="sidebar-header">
+
+                <a href="dashboard.html" class="admin-logo">
+                    <span class="brand-mark">DN</span>
+
+                    <span class="brand-text">
+                        <strong>DN Portfolio</strong>
+                        <small>Admin console</small>
+                    </span>
+                </a>
+
+                <button
+                    type="button"
+                    class="mobile-close"
+                    id="closeSidebar"
+                    aria-label="Close navigation"
+                >
+                    <i data-lucide="x" aria-hidden="true"></i>
+                </button>
+
+            </div>
+
+
+            <nav class="admin-navigation" aria-label="Admin navigation">
+
+                <div class="nav-section">
+                    <span class="nav-section-title">Workspace</span>
+
+                    <a href="dashboard.html" class="nav-link">
+                        <span class="nav-icon"><i data-lucide="layout-dashboard" aria-hidden="true"></i></span>
+                        <span>Dashboard</span>
+                    </a>
+
+                    <a href="profile.html" class="nav-link">
+                        <span class="nav-icon"><i data-lucide="user-round" aria-hidden="true"></i></span>
+                        <span>Profile</span>
+                    </a>
+
+                    <a href="experience.html" class="nav-link">
+                        <span class="nav-icon"><i data-lucide="briefcase" aria-hidden="true"></i></span>
+                        <span>Experience</span>
+                    </a>
+
+                    <a href="projects.html" class="nav-link">
+                        <span class="nav-icon"><i data-lucide="folder-kanban" aria-hidden="true"></i></span>
+                        <span>Projects</span>
+                    </a>
+
+                    <a href="skills.html" class="nav-link active" aria-current="page">
+                        <span class="nav-icon"><i data-lucide="sparkles" aria-hidden="true"></i></span>
+                        <span>Skills</span>
+                    </a>
+                </div>
+
+
+                <div class="nav-section">
+                    <span class="nav-section-title">Credentials</span>
+
+                    <a href="certifications.html" class="nav-link">
+                        <span class="nav-icon"><i data-lucide="award" aria-hidden="true"></i></span>
+                        <span>Certifications</span>
+                    </a>
+
+                    <a href="documents.html" class="nav-link">
+                        <span class="nav-icon"><i data-lucide="file-text" aria-hidden="true"></i></span>
+                        <span>Documents</span>
+                    </a>
+                </div>
+
+
+                <div class="nav-section">
+                    <span class="nav-section-title">System</span>
+
+                    <a href="settings.html" class="nav-link">
+                        <span class="nav-icon"><i data-lucide="settings-2" aria-hidden="true"></i></span>
+                        <span>Settings</span>
+                    </a>
+
+                    <a href="employer-access.html" class="nav-link">
+                        <span class="nav-icon"><i data-lucide="shield-check" aria-hidden="true"></i></span>
+                        <span>Employer Access</span>
+                    </a>
+                </div>
+
+            </nav>
+
+
+            <div class="sidebar-footer">
+
+                <div class="admin-user">
+                    <div class="user-avatar" aria-hidden="true">DN</div>
+
+                    <div class="user-details">
+                        <strong>Dennis Ndwigah</strong>
+                        <span>Administrator</span>
+                    </div>
+                </div>
+
+                <button type="button" class="logout-button" id="logoutButton">
+                    <i data-lucide="log-out" aria-hidden="true"></i>
+                    <span>Sign out</span>
+                </button>
+
+            </div>
+
+        </aside>
+
+
+        <!-- =========================================
+             MAIN
+             ========================================= -->
+
+        <main class="admin-main">
+
+            <header class="admin-topbar">
+
+                <button
+                    type="button"
+                    class="menu-button"
+                    id="openSidebar"
+                    aria-label="Open navigation"
+                >
+                    <i data-lucide="menu" aria-hidden="true"></i>
+                </button>
+
+                <div class="topbar-title">
+                    <span>Skills</span>
+                </div>
+
+                <div class="topbar-actions">
+                    <a href="../index.html" class="view-site-button" target="_blank" rel="noopener">
+                        <i data-lucide="external-link" aria-hidden="true"></i><span>View site</span>
+                    </a>
+                </div>
+
+            </header>
+
+
+            <div class="admin-content">
+
+                <!-- Page heading -->
+
+                <section class="page-heading compact">
+
+                    <div>
+                        <span class="eyebrow">Capabilities</span>
+
+                        <h1>Skills</h1>
+
+                        <p>
+                            Manage the professional capabilities shown
+                            across your public portfolio.
+                        </p>
+                    </div>
+
+                    <div class="page-heading-actions">
+
+                        <button type="button" class="secondary-button" id="restoreDefaults">
+                            <i data-lucide="rotate-ccw" aria-hidden="true"></i>
+                            <span>Restore defaults</span>
+                        </button>
+
+                        <button type="button" class="primary-button" id="addSkillButton">
+                            <i data-lucide="plus" aria-hidden="true"></i>
+                            <span>Add skill</span>
+                        </button>
+
+                    </div>
+
+                </section>
+
+
+                <!-- Summary -->
+
+                <section class="skills-summary" aria-label="Skills summary">
+
+                    <div class="summary-card">
+                        <span class="summary-label">Skills</span>
+                        <span class="summary-value" id="totalSkills">0</span>
+                    </div>
+
+                    <div class="summary-card">
+                        <span class="summary-label">Featured</span>
+                        <span class="summary-value" id="featuredSkills">0</span>
+                    </div>
+
+                    <div class="summary-card">
+                        <span class="summary-label">Public</span>
+                        <span class="summary-value" id="visibleSkills">0</span>
+                    </div>
+
+                    <div class="summary-card">
+                        <span class="summary-label">Categories</span>
+                        <span class="summary-value" id="skillCategories">0</span>
+                    </div>
+
+                </section>
+
+
+                <!-- List + editor -->
+
+                <div class="skills-workspace">
+
+                    <!-- Skills list -->
+
+                    <section class="dashboard-card skills-section">
+
+                        <div class="card-header">
+
+                            <div>
+                                <h2>Your skills</h2>
+                                <p class="card-subtitle">
+                                    Organise your experience into clear,
+                                    recruiter-friendly capabilities.
+                                </p>
+                            </div>
+
+                            <div class="skills-filter">
+                                <label for="categoryFilter" class="sr-only">
+                                    Filter skills by category
+                                </label>
+
+                                <select id="categoryFilter">
+                                    <option value="all">All categories</option>
+                                </select>
+                            </div>
+
+                        </div>
+
+
+                        <!-- Rendered by skills.js -->
+                        <div class="skills-grid" id="skillsGrid" aria-live="polite"></div>
+
+
+                        <div class="empty-state" id="emptySkillsState" hidden>
+
+                            <div class="empty-state-icon" aria-hidden="true">
+                                <i data-lucide="sparkles"></i>
+                            </div>
+
+                            <h3>No skills found</h3>
+
+                            <p>
+                                Add a skill, or change the category filter
+                                to see your capabilities.
+                            </p>
+
+                            <button type="button" class="primary-button" id="emptyAddSkillButton">
+                                <i data-lucide="plus" aria-hidden="true"></i>
+                                <span>Add your first skill</span>
+                            </button>
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- Editor -->
+
+                    <section class="dashboard-card skill-editor" id="skillEditor">
+
+                        <div class="card-header">
+                            <div>
+                                <h2 id="editorTitle">Add a skill</h2>
+                                <p class="card-subtitle">
+                                    Keep descriptions concise and evidence-based.
+                                </p>
+                            </div>
+                        </div>
+
+
+                        <form id="skillForm" novalidate>
+
+                            <input type="hidden" id="skillId" name="id">
+
+                            <div class="form-grid">
+
+                                <div class="form-group">
+                                    <label for="skillName">
+                                        Skill or capability
+                                        <span class="required" aria-hidden="true">*</span>
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="skillName"
+                                        name="skill"
+                                        maxlength="100"
+                                        placeholder="e.g. Warehouse management"
+                                        required
+                                    >
+
+                                    <small>Use a clear professional skill name.</small>
+                                </div>
+
+
+                                <div class="form-group">
+                                    <label for="skillCategory">
+                                        Category
+                                        <span class="required" aria-hidden="true">*</span>
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="skillCategory"
+                                        name="category"
+                                        maxlength="80"
+                                        placeholder="e.g. Warehouse &amp; inventory"
+                                        required
+                                    >
+
+                                    <small>Group similar capabilities together.</small>
+                                </div>
+
+
+                                <div class="form-group">
+                                    <label for="skillProficiency">Proficiency</label>
+
+                                    <select id="skillProficiency" name="proficiency">
+                                        <option value="Expert">Expert</option>
+                                        <option value="Advanced" selected>Advanced</option>
+                                        <option value="Intermediate">Intermediate</option>
+                                        <option value="Working Knowledge">Working knowledge</option>
+                                    </select>
+                                </div>
+
+
+                                <div class="form-group">
+                                    <label for="skillEvidence">Evidence or experience</label>
+
+                                    <input
+                                        type="text"
+                                        id="skillEvidence"
+                                        name="evidence"
+                                        maxlength="180"
+                                        placeholder="e.g. Managed 560+ SKUs across multiple warehouses"
+                                    >
+
+                                    <small>Add a measurable example where possible.</small>
+                                </div>
+
+
+                                <div class="form-group full-width">
+                                    <label for="skillDescription">Description</label>
+
+                                    <textarea
+                                        id="skillDescription"
+                                        name="description"
+                                        rows="4"
+                                        maxlength="500"
+                                        placeholder="Briefly explain how you apply this skill in your work."
+                                    ></textarea>
+
+                                    <small>Keep this concise and recruiter-friendly.</small>
+                                </div>
+
+                            </div>
+
+
+                            <div class="publishing-box">
+
+                                <div class="publishing-heading">
+                                    <strong>Publishing</strong>
+                                    <span>Control how this skill appears on your public portfolio.</span>
+                                </div>
+
+                                <label class="check-option" for="skillVisible">
+                                    <input type="checkbox" id="skillVisible" name="visible" checked>
+                                    <span>Show on public website</span>
+                                </label>
+
+                                <label class="check-option" for="skillFeatured">
+                                    <input type="checkbox" id="skillFeatured" name="featured">
+                                    <span>Mark as featured</span>
+                                </label>
+
+                            </div>
+
+
+                            <div class="form-actions">
+
+                                <div
+                                    class="save-message"
+                                    id="saveMessage"
+                                    role="status"
+                                    aria-live="polite"
+                                ></div>
+
+                                <button type="button" class="secondary-button" id="clearSkillForm">
+                                    Clear
+                                </button>
+
+                                <button type="submit" class="primary-button" id="saveSkillButton">
+                                    <i data-lucide="check" aria-hidden="true"></i>
+                                    <span>Save skill</span>
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                    </section>
+
+                </div>
+
+
+                <footer class="admin-footer">
+                    <span>
+                        &copy; <span id="currentYear"></span>
+                        Dennis Ndwigah
+                    </span>
+
+                    <span>Administrator access only</span>
+                </footer>
+
+            </div>
+
+        </main>
+
+    </div>
+
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/skills.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+
+            const yearEl = document.getElementById("currentYear");
+            if (yearEl && !yearEl.textContent) {
+                yearEl.textContent = new Date().getFullYear();
+            }
+
+            if (!window.lucide) return;
+
+            const render = () => window.lucide.createIcons({ attrs: { "stroke-width": 1.8 } });
+            render();
+
+            /* skills.js renders cards after load: draw any icons it adds */
+            const grid = document.getElementById("skillsGrid");
+            if (grid) {
+                let queued = false;
+                new MutationObserver(() => {
+                    if (queued) return;
+                    queued = true;
+                    requestAnimationFrame(() => { queued = false; render(); });
+                }).observe(grid, { childList: true, subtree: true });
+            }
+        });
+    </script>
+
+</body>
+</html>

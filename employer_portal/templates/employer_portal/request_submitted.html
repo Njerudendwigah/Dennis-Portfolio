@@ -1,0 +1,387 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta
+    name="description"
+    content="Employer document access request received by Dennis Ndwigah Njeru."
+  >
+  <meta name="theme-color" content="#111315">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <meta name="referrer" content="same-origin">
+  <title>Request Received | Dennis Ndwigah Njeru</title>
+  <link
+    rel="icon"
+    href="{% static 'images/favicon.png' %}"
+    type="image/png"
+  >
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <style>
+    :root {
+      --obsidian: #111315;
+      --ink: #172021;
+      --muted: #66706f;
+      --cream: #f6f2e8;
+      --paper: #ffffff;
+      --line: #dfe5e2;
+      --teal: #087f73;
+      --teal-dark: #075f56;
+      --teal-soft: #e9f5f2;
+      --gold: #d9bf88;
+      --shadow: 0 20px 55px rgba(15, 35, 34, 0.10);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 28px 18px;
+      color: var(--ink);
+      background:
+        radial-gradient(
+          circle at top right,
+          rgba(8, 127, 115, 0.08),
+          transparent 30rem
+        ),
+        var(--cream);
+      font-family:
+        "DM Sans",
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    a:focus-visible {
+      outline: 2px solid var(--teal);
+      outline-offset: 3px;
+      border-radius: 6px;
+    }
+
+    .page {
+      width: min(720px, 100%);
+    }
+
+    .brand {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: var(--obsidian);
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      text-decoration: none;
+    }
+
+    .brand span {
+      color: var(--gold);
+    }
+
+    .card {
+      padding: 38px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+
+    .icon {
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 22px;
+      border-radius: 50%;
+      color: var(--teal);
+      background: var(--teal-soft);
+    }
+
+    .icon svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--teal);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--obsidian);
+      font-size: clamp(2.25rem, 6vw, 4rem);
+      line-height: 1;
+      letter-spacing: -0.045em;
+    }
+
+    .lead {
+      margin: 20px 0 0;
+      color: var(--muted);
+      font-size: 1.03rem;
+    }
+
+    .request-box {
+      margin-top: 26px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fbfcfb;
+    }
+
+    .request-box p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .request-id {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 7px 10px;
+      border-radius: 9px;
+      color: var(--ink);
+      background: #eef2f0;
+      font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        monospace;
+      font-size: 12px;
+      word-break: break-all;
+    }
+
+    .steps {
+      display: grid;
+      gap: 12px;
+      margin: 28px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .steps li {
+      display: grid;
+      grid-template-columns: 32px 1fr;
+      gap: 12px;
+      align-items: start;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .step-number {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: #fff;
+      background: var(--teal);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .steps strong {
+      display: block;
+      margin-bottom: 2px;
+      color: var(--ink);
+      font-size: 14px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 30px;
+    }
+
+    .btn {
+      display: inline-flex;
+      min-height: 46px;
+      align-items: center;
+      justify-content: center;
+      padding: 0 18px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .btn.primary {
+      color: #fff;
+      background: var(--teal);
+    }
+
+    .btn.primary:hover,
+    .btn.primary:focus-visible {
+      background: var(--teal-dark);
+      text-decoration: none;
+    }
+
+    .btn.secondary {
+      border: 1px solid var(--line);
+      color: var(--ink);
+      background: #fff;
+    }
+
+    .btn.secondary:hover,
+    .btn.secondary:focus-visible {
+      border-color: rgba(8, 127, 115, 0.35);
+      color: var(--teal);
+      text-decoration: none;
+    }
+
+    .footer-note {
+      margin: 22px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .card {
+        padding: 26px 22px;
+        border-radius: 20px;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <a
+      class="brand"
+      href="/"
+      aria-label="Dennis Ndwigah Njeru portfolio home"
+    >
+      DN<span>.</span>
+    </a>
+
+    <section
+      class="card"
+      aria-labelledby="page-title"
+      aria-describedby="submission-summary"
+      role="status"
+      aria-live="polite"
+    >
+      <div class="icon" aria-hidden="true">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="m5 12 4 4L19 6"></path>
+        </svg>
+      </div>
+
+      <p class="eyebrow">Request received</p>
+
+      <h1 id="page-title">
+        Thank you. Your request has been submitted.
+      </h1>
+
+      <p class="lead" id="submission-summary">
+        Your request has been recorded and will be reviewed before any private
+        professional documents or referee information are made available.
+      </p>
+
+      <div class="request-box">
+        <p>Reference ID</p>
+        <span
+          class="request-id"
+          aria-label="Your request reference ID is {{ request_id }}"
+        >
+          {{ request_id }}
+        </span>
+      </div>
+
+      <ol class="steps" aria-label="What happens next">
+        <li>
+          <span class="step-number" aria-hidden="true">1</span>
+          <div>
+            <strong>Request recorded</strong>
+            Your submission is now in the employer access review queue.
+          </div>
+        </li>
+
+        <li>
+          <span class="step-number" aria-hidden="true">2</span>
+          <div>
+            <strong>Request reviewed</strong>
+            The requested documents and referee access will be considered
+            individually.
+          </div>
+        </li>
+
+        <li>
+          <span class="step-number" aria-hidden="true">3</span>
+          <div>
+            <strong>Access granted if approved</strong>
+            Approved requests will receive secure access instructions.
+          </div>
+        </li>
+      </ol>
+
+      <div class="actions">
+        <a class="btn primary" href="/">
+          Back to portfolio
+        </a>
+
+        <a
+          class="btn secondary"
+          href="{% url 'employer_portal:request_status' request_id=request_id %}"
+        >
+          Check request status
+        </a>
+      </div>
+
+      <p class="footer-note">
+        Please keep your reference ID for future correspondence about this
+        request.
+      </p>
+    </section>
+  </main>
+</body>
+</html>

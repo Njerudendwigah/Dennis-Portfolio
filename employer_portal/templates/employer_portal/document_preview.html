@@ -1,0 +1,296 @@
+{% extends "employer_portal/base.html" %}
+
+{% block title %}{{ document.title }}{% endblock %}
+
+{% block head %}
+<style>
+  .document-preview {
+    display: grid;
+    gap: 1.25rem;
+    padding-bottom: 2rem;
+  }
+
+  .document-preview__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem 1.5rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid #dcdfe5;
+  }
+
+  .document-preview__meta {
+    margin: 0.375rem 0 0;
+    color: #545d6b;
+    font-size: 0.875rem;
+  }
+
+  .document-preview__actions {
+    justify-content: flex-end;
+  }
+
+  .document-preview__viewer {
+    position: relative;
+    min-height: 48rem;
+    overflow: hidden;
+    border: 1px solid #dcdfe5;
+    border-radius: 10px;
+    background: #202833;
+    box-shadow:
+      0 1px 2px rgba(16, 24, 40, 0.06),
+      0 1px 3px rgba(16, 24, 40, 0.07);
+  }
+
+  .document-preview__frame {
+    display: block;
+    width: 100%;
+    min-height: 48rem;
+    border: 0;
+    background: #ffffff;
+  }
+
+  .document-preview__state {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    padding: 2rem;
+    background: #ffffff;
+    text-align: center;
+  }
+
+  .document-preview__state[hidden] {
+    display: none;
+  }
+
+  .document-preview__state-content {
+    width: min(30rem, 100%);
+  }
+
+  .document-preview__state h2 {
+    margin: 0 0 0.5rem;
+  }
+
+  .document-preview__state p {
+    margin: 0;
+    color: #545d6b;
+  }
+
+  .document-preview__spinner {
+    width: 2rem;
+    height: 2rem;
+    margin: 0 auto 1rem;
+    border: 3px solid #dcdfe5;
+    border-top-color: #1d4e79;
+    border-radius: 50%;
+    animation: document-preview-spin 0.8s linear infinite;
+  }
+
+  @keyframes document-preview-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (max-width: 40rem) {
+    .document-preview__viewer,
+    .document-preview__frame {
+      min-height: 34rem;
+    }
+
+    .document-preview__actions,
+    .document-preview__actions .btn {
+      width: 100%;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="document-preview">
+  <div class="page-head document-preview__head">
+    <div>
+      <p class="eyebrow">Secure document preview</p>
+
+      <h1>{{ document.title }}</h1>
+
+      <p class="document-preview__meta">
+        Approved for {{ access_request.requester_name }}
+
+        {% if access_request.requester_company %}
+          · {{ access_request.requester_company }}
+        {% endif %}
+
+        · Access expires {{ grant.expires_at|date:"j F Y, H:i" }}
+      </p>
+    </div>
+
+    <div class="btn-row document-preview__actions">
+      <a
+        class="btn btn--secondary"
+        href="{{ portal_url }}"
+      >
+        ← Back to portal
+      </a>
+
+      <a
+        class="btn"
+        href="{{ download_url }}"
+      >
+        Download copy
+      </a>
+    </div>
+  </div>
+
+  <section
+    class="panel"
+    aria-labelledby="document-preview-heading"
+  >
+    <div class="panel__head">
+      <div>
+        <h2 id="document-preview-heading">Document</h2>
+
+        <p class="small muted">
+          This document is available only while the access grant remains active.
+        </p>
+      </div>
+    </div>
+
+    <div
+      class="panel__body"
+      style="padding: 0;"
+    >
+      <div class="document-preview__viewer" data-stream-url="{{ stream_url }}">
+
+        <div
+          class="document-preview__state"
+          id="document-preview-loading"
+          role="status"
+          aria-live="polite"
+        >
+          <div class="document-preview__state-content">
+            <div
+              class="document-preview__spinner"
+              aria-hidden="true"
+            ></div>
+
+            <h2>Loading document</h2>
+
+            <p>
+              Preparing the approved document for secure browser viewing.
+            </p>
+          </div>
+        </div>
+
+        <div
+          class="document-preview__state"
+          id="document-preview-error"
+          role="alert"
+          hidden
+        >
+          <div class="document-preview__state-content">
+            <h2>Preview unavailable</h2>
+
+            <p>
+              The document could not be displayed in this browser.
+              Use “Download copy” to open the approved file locally.
+            </p>
+          </div>
+        </div>
+
+        <iframe
+          class="document-preview__frame"
+          id="document-preview-frame"
+          title="{{ document.title }}"
+          hidden
+        ></iframe>
+
+      </div>
+    </div>
+  </section>
+
+  <div
+    class="notice notice--info"
+    role="note"
+  >
+    <p>
+      <strong>Private document.</strong>
+      Do not forward this portal link.
+      Access ends automatically when the grant expires or is revoked.
+    </p>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (() => {
+    const frame = document.getElementById("document-preview-frame");
+    const loading = document.getElementById("document-preview-loading");
+    const error = document.getElementById("document-preview-error");
+
+    const streamUrl = frame.closest(".document-preview__viewer").dataset.streamUrl;
+
+    let objectUrl = null;
+
+    const showError = () => {
+      loading.hidden = true;
+      error.hidden = false;
+      frame.hidden = true;
+    };
+
+    const loadDocument = async () => {
+      if (!streamUrl) {
+        showError();
+        return;
+      }
+
+      try {
+        const response = await fetch(streamUrl, {
+          method: "GET",
+          credentials: "same-origin",
+          cache: "no-store",
+          headers: {
+            Accept: "application/pdf,application/octet-stream"
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            `Document stream returned HTTP ${response.status}.`
+          );
+        }
+
+        const blob = await response.blob();
+
+        if (!blob.size) {
+          throw new Error("The document stream is empty.");
+        }
+
+        objectUrl = URL.createObjectURL(blob);
+
+        frame.src = objectUrl;
+        frame.hidden = false;
+        loading.hidden = true;
+      } catch (previewError) {
+        console.error(
+          "Secure document preview failed:",
+          previewError
+        );
+
+        showError();
+      }
+    };
+
+    window.addEventListener("beforeunload", () => {
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    });
+
+    loadDocument();
+  })();
+</script>
+{% endblock %}

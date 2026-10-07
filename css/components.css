@@ -1,0 +1,33 @@
+/* =========================================================
+   DENNIS NDWIGAH NJERU · COMPONENT REFINEMENTS
+   Public Portfolio
+
+   Optional. Load after styles.css (and responsive.css).
+   Contains only refinements that match the current design
+   (obsidian / forest green / champagne gold).
+   ========================================================= */
+
+/* Contact links: animated gold underline on hover.
+   Screen and hover-capable devices only, so it never
+   interferes with the print stylesheet or touch screens. */
+@media screen and (hover: hover) {
+  .contact-links a {
+    position: relative;
+  }
+
+  .contact-links a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 100%;
+    bottom: 2px;
+    height: 1px;
+    background: #d9bf88;
+    transition: right var(--ease);
+  }
+
+  .contact-links a:hover::after,
+  .contact-links a:focus-visible::after {
+    right: 0;
+  }
+}

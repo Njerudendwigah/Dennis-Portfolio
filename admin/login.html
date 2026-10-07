@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Admin Login | Dennis Ndwigah</title>
+
+    <meta
+        name="description"
+        content="Secure administration portal for Dennis Ndwigah's professional portfolio."
+    >
+
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body class="admin-login-page">
+
+    <main class="login-container">
+
+        <section class="login-brand">
+            <div class="brand-mark">DN</div>
+
+            <div>
+                <h1>Dennis Ndwigah</h1>
+                <p>Portfolio Administration</p>
+            </div>
+        </section>
+
+        <section class="login-card">
+
+            <div class="login-header">
+                <span class="eyebrow">ADMIN PORTAL</span>
+
+                <h2>Welcome back</h2>
+
+                <p>
+                    Sign in to manage your professional portfolio,
+                    experience, projects and credentials.
+                </p>
+            </div>
+
+            <form id="loginForm" class="login-form">
+
+                <div class="form-group">
+                    <label for="email">Email address</label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="your@email.com"
+                        autocomplete="email"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <div class="password-label-row">
+                        <label for="password">Password</label>
+
+                        <button
+                            type="button"
+                            id="togglePassword"
+                            class="password-toggle"
+                        >
+                            Show
+                        </button>
+                    </div>
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required
+                    >
+                </div>
+
+                <div class="login-options">
+
+                    <label class="remember-option">
+                        <input
+                            type="checkbox"
+                            id="rememberMe"
+                            name="rememberMe"
+                        >
+
+                        <span>Remember me</span>
+                    </label>
+
+                    <a href="#" class="forgot-password">
+                        Forgot password?
+                    </a>
+
+                </div>
+
+                <button type="submit" class="login-button">
+                    <span>Sign in</span>
+                </button>
+
+                <div
+                    id="loginMessage"
+                    class="login-message"
+                    aria-live="polite"
+                ></div>
+
+            </form>
+
+        </section>
+
+        <footer class="login-footer">
+            <p>
+                © <span id="currentYear"></span>
+                Dennis Ndwigah. All rights reserved.
+            </p>
+
+            <a href="../index.html">
+                ← Back to portfolio
+            </a>
+        </footer>
+
+    </main>
+
+    <script src="js/auth.js"></script>
+
+</body>
+</html>

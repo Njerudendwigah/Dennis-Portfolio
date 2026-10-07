@@ -1,0 +1,1312 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en-GB">
+
+<head>
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
+  <meta
+    name="description"
+    content="Secure referee information available through an approved employer access request."
+  >
+
+  <meta
+    name="theme-color"
+    content="#0f1f1d"
+  >
+
+  <meta
+    name="robots"
+    content="noindex, nofollow, noarchive"
+  >
+
+  <title>
+    Referee details | Dennis Ndwigah Njeru
+  </title>
+
+  <link
+    rel="icon"
+    href="{% static 'images/favicon.png' %}"
+    type="image/png"
+  >
+
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  >
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  >
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <style>
+    :root {
+      --rail: #0f1f1d;
+      --rail-ink: #b4c6c2;
+      --glow: #3fd0b0;
+
+      --bg: #f3f5f4;
+      --surface: #ffffff;
+      --surface-soft: #f8faf9;
+
+      --ink: #121c1b;
+      --muted: #5b6967;
+
+      --line: #e0e6e4;
+      --line-strong: #cbd6d3;
+
+      --accent: #0f7a69;
+      --accent-dark: #0b5e51;
+      --accent-soft: #e3f3ef;
+
+      --ok: #1b7a42;
+      --ok-bg: #e4f4ea;
+
+      --warn: #8a5a00;
+      --warn-bg: #fdf0d2;
+
+      --bad: #b3261e;
+      --bad-bg: #fbe8e6;
+
+      --radius: 9px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+
+      margin: 0;
+
+      background: var(--bg);
+      color: var(--ink);
+
+      font:
+        14px/1.5
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+      font-feature-settings: "tnum", "cv11";
+
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    button,
+    a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--glow);
+      outline-offset: 3px;
+    }
+
+    /* =========================================================
+       TOP BAR
+       ========================================================= */
+
+    .topbar {
+      min-height: 62px;
+
+      display: flex;
+
+      align-items: center;
+      justify-content: space-between;
+
+      gap: 16px;
+
+      padding:
+        0
+        clamp(16px, 4vw, 30px);
+
+      background: var(--rail);
+      color: #fff;
+    }
+
+    .brand {
+      color: #fff;
+
+      font-size: 18px;
+      font-weight: 700;
+
+      letter-spacing: -.04em;
+
+      text-decoration: none;
+    }
+
+    .brand:hover {
+      text-decoration: none;
+    }
+
+    .brand i {
+      color: var(--glow);
+      font-style: normal;
+    }
+
+    .top-actions {
+      display: flex;
+
+      align-items: center;
+
+      gap: 16px;
+    }
+
+    .secure-badge {
+      display: inline-flex;
+
+      align-items: center;
+
+      gap: 7px;
+
+      color: #d8e9e5;
+
+      font-size: 11px;
+      font-weight: 600;
+
+      white-space: nowrap;
+    }
+
+    .secure-dot {
+      width: 7px;
+      height: 7px;
+
+      border-radius: 50%;
+
+      background: var(--glow);
+    }
+
+    .back-link {
+      display: inline-flex;
+
+      min-height: 38px;
+
+      align-items: center;
+
+      color: var(--rail-ink);
+
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .back-link:hover,
+    .back-link:focus-visible {
+      color: #fff;
+
+      text-decoration: none;
+    }
+
+    /* =========================================================
+       PAGE
+       ========================================================= */
+
+    .page {
+      width:
+        min(
+          1040px,
+          calc(100% - 36px)
+        );
+
+      margin: 0 auto;
+
+      padding:
+        clamp(26px, 5vw, 40px)
+        0
+        56px;
+    }
+
+    .page-head {
+      display: flex;
+
+      align-items: flex-start;
+      justify-content: space-between;
+
+      gap: 24px;
+
+      margin-bottom: 20px;
+    }
+
+    .page-head h1 {
+      margin: 0;
+
+      color: var(--ink);
+
+      font-size:
+        clamp(
+          27px,
+          4vw,
+          34px
+        );
+
+      line-height: 1.15;
+
+      font-weight: 650;
+
+      letter-spacing: -.035em;
+    }
+
+    .page-head p {
+      max-width: 680px;
+
+      margin:
+        7px
+        0
+        0;
+
+      color: var(--muted);
+
+      font-size: 13px;
+
+      line-height: 1.65;
+    }
+
+    .expiry {
+      flex: 0 0 auto;
+
+      min-width: 190px;
+
+      padding:
+        11px
+        13px;
+
+      border:
+        1px solid
+        var(--line);
+
+      border-radius: 8px;
+
+      background: var(--surface);
+
+      text-align: right;
+    }
+
+    .expiry-label {
+      display: block;
+
+      color: var(--muted);
+
+      font-size: 10px;
+      font-weight: 500;
+    }
+
+    .expiry-value {
+      display: block;
+
+      margin-top: 3px;
+
+      color: var(--ink);
+
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    /* =========================================================
+       CONTENT
+       ========================================================= */
+
+    .content {
+      display: grid;
+
+      grid-template-columns:
+        minmax(0, 1.45fr)
+        minmax(290px, .75fr);
+
+      gap: 18px;
+
+      align-items: start;
+    }
+
+    .section {
+      overflow: hidden;
+
+      border:
+        1px solid
+        var(--line);
+
+      border-radius: var(--radius);
+
+      background: var(--surface);
+    }
+
+    .section + .section {
+      margin-top: 18px;
+    }
+
+    .section-head {
+      padding:
+        16px
+        20px;
+
+      border-bottom:
+        1px solid
+        var(--line);
+    }
+
+    .section-head h2 {
+      margin: 0;
+
+      color: var(--ink);
+
+      font-size: 14px;
+
+      font-weight: 650;
+
+      letter-spacing: -.01em;
+    }
+
+    .section-head p {
+      margin:
+        4px
+        0
+        0;
+
+      color: var(--muted);
+
+      font-size: 11px;
+
+      line-height: 1.55;
+    }
+
+    /* =========================================================
+       REFEREE DETAILS
+       ========================================================= */
+
+    .details {
+      margin: 0;
+
+      padding:
+        2px
+        20px
+        5px;
+    }
+
+    .detail-row {
+      display: grid;
+
+      grid-template-columns:
+        150px
+        minmax(0, 1fr);
+
+      gap: 20px;
+
+      align-items: start;
+
+      padding:
+        14px
+        0;
+
+      border-bottom:
+        1px solid
+        var(--line);
+    }
+
+    .detail-row:last-child {
+      border-bottom: 0;
+    }
+
+    .detail-label {
+      color: var(--muted);
+
+      font-size: 11px;
+
+      font-weight: 500;
+    }
+
+    .detail-value {
+      min-width: 0;
+
+      color: var(--ink);
+
+      font-size: 12px;
+
+      font-weight: 600;
+
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .detail-value a {
+      color: var(--accent);
+
+      font-weight: 600;
+
+      overflow-wrap: anywhere;
+    }
+
+    .notes {
+      margin:
+        0
+        20px
+        20px;
+
+      padding-top: 15px;
+
+      border-top:
+        1px solid
+        var(--line);
+    }
+
+    .note-box {
+      margin-top: 7px;
+
+      padding:
+        11px
+        12px;
+
+      border:
+        1px solid
+        var(--line);
+
+      border-radius: 8px;
+
+      background: var(--surface-soft);
+
+      color: var(--muted);
+
+      font-size: 11.5px;
+
+      line-height: 1.65;
+
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    /* =========================================================
+       STATUS
+       ========================================================= */
+
+    .status-badge {
+      display: inline-flex;
+
+      min-height: 25px;
+
+      align-items: center;
+
+      gap: 6px;
+
+      margin-bottom: 12px;
+
+      padding:
+        0
+        9px;
+
+      border-radius: 999px;
+
+      background: var(--ok-bg);
+
+      color: var(--ok);
+
+      font-size: 11px;
+
+      font-weight: 600;
+
+      white-space: nowrap;
+    }
+
+    .status-badge::before {
+      content: "";
+
+      width: 6px;
+      height: 6px;
+
+      border-radius: 50%;
+
+      background: currentColor;
+    }
+
+    .side-body {
+      padding:
+        16px
+        20px
+        20px;
+    }
+
+    /* =========================================================
+       ACCESS SUMMARY
+       ========================================================= */
+
+    .summary-grid {
+      display: grid;
+
+      gap: 0;
+    }
+
+    .summary-item {
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 3px;
+
+      padding:
+        11px
+        0;
+
+      border-bottom:
+        1px solid
+        var(--line);
+    }
+
+    .summary-item:last-child {
+      border-bottom: 0;
+    }
+
+    .summary-label {
+      color: var(--muted);
+
+      font-size: 10px;
+
+      font-weight: 500;
+    }
+
+    .summary-value {
+      color: var(--ink);
+
+      font-size: 11px;
+
+      font-weight: 600;
+
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    /* =========================================================
+       SECURITY
+       ========================================================= */
+
+    .security {
+      padding:
+        12px
+        13px;
+
+      border:
+        1px solid
+        var(--line);
+
+      border-radius: 8px;
+
+      background: var(--surface-soft);
+
+      color: var(--muted);
+
+      font-size: 11.5px;
+
+      line-height: 1.65;
+    }
+
+    .security strong {
+      display: block;
+
+      margin-bottom: 3px;
+
+      color: var(--ink);
+
+      font-size: 12px;
+
+      font-weight: 650;
+    }
+
+    /* =========================================================
+       ACTIONS
+       ========================================================= */
+
+    .actions {
+      display: flex;
+
+      flex-wrap: wrap;
+
+      gap: 8px;
+
+      margin-top: 14px;
+    }
+
+    .btn {
+      display: inline-flex;
+
+      min-height: 36px;
+
+      align-items: center;
+      justify-content: center;
+
+      padding:
+        0
+        12px;
+
+      border:
+        1px solid
+        var(--line);
+
+      border-radius: 8px;
+
+      background: var(--surface);
+
+      color: var(--ink);
+
+      font-size: 11.5px;
+
+      font-weight: 600;
+
+      white-space: nowrap;
+
+      text-decoration: none;
+    }
+
+    .btn:hover,
+    .btn:focus-visible {
+      background: var(--surface-soft);
+
+      border-color:
+        var(--line-strong);
+
+      text-decoration: none;
+    }
+
+    .btn.primary {
+      border-color:
+        var(--accent);
+
+      background: var(--accent);
+
+      color: #fff;
+    }
+
+    .btn.primary:hover,
+    .btn.primary:focus-visible {
+      border-color:
+        var(--accent-dark);
+
+      background: var(--accent-dark);
+    }
+
+    /* =========================================================
+       FOOTER
+       ========================================================= */
+
+    .footer-note {
+      margin:
+        18px
+        0
+        0;
+
+      color: var(--muted);
+
+      font-size: 10.5px;
+
+      line-height: 1.6;
+
+      text-align: center;
+    }
+
+    /* =========================================================
+       TABLET
+       ========================================================= */
+
+    @media (max-width: 800px) {
+
+      .content {
+        grid-template-columns: 1fr;
+      }
+
+      .page-head {
+        align-items: stretch;
+      }
+
+      .expiry {
+        min-width: 170px;
+
+        text-align: left;
+      }
+
+    }
+
+    /* =========================================================
+       MOBILE
+       ========================================================= */
+
+    @media (max-width: 600px) {
+
+      .topbar {
+        min-height: 58px;
+
+        padding:
+          0
+          14px;
+      }
+
+      .top-actions {
+        gap: 10px;
+      }
+
+      .secure-badge {
+        display: none;
+      }
+
+      .back-link {
+        font-size: 11px;
+      }
+
+      .page {
+        width:
+          calc(100% - 24px);
+
+        padding:
+          22px
+          0
+          40px;
+      }
+
+      .page-head {
+        flex-direction: column;
+
+        gap: 12px;
+
+        margin-bottom: 16px;
+      }
+
+      .page-head h1 {
+        font-size: 27px;
+      }
+
+      .page-head p {
+        font-size: 12px;
+      }
+
+      .expiry {
+        width: 100%;
+
+        min-width: 0;
+
+        padding:
+          10px
+          12px;
+
+        text-align: left;
+      }
+
+      .section-head {
+        padding:
+          15px
+          16px;
+      }
+
+      .details {
+        padding:
+          0
+          16px
+          4px;
+      }
+
+      .detail-row {
+        grid-template-columns: 1fr;
+
+        gap: 4px;
+
+        padding:
+          12px
+          0;
+      }
+
+      .notes {
+        margin:
+          0
+          16px
+          16px;
+      }
+
+      .side-body {
+        padding:
+          15px
+          16px
+          17px;
+      }
+
+      .actions {
+        flex-direction: column;
+
+        align-items: stretch;
+      }
+
+      .btn {
+        width: 100%;
+      }
+
+    }
+
+    /* =========================================================
+       SMALL PHONES
+       ========================================================= */
+
+    @media (max-width: 420px) {
+
+      .page {
+        width:
+          calc(100% - 20px);
+      }
+
+      .brand {
+        font-size: 17px;
+      }
+
+      .page-head h1 {
+        font-size: 24px;
+      }
+
+      .section-head h2 {
+        font-size: 13px;
+      }
+
+      .detail-value {
+        font-size: 11.5px;
+      }
+
+      .security {
+        font-size: 11px;
+      }
+
+    }
+
+    /* =========================================================
+       REDUCED MOTION
+       ========================================================= */
+
+    @media (prefers-reduced-motion: reduce) {
+
+      html {
+        scroll-behavior: auto;
+      }
+
+      * {
+        transition: none !important;
+      }
+
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="topbar">
+
+    <a
+      class="brand"
+      href="/"
+      aria-label="Dennis Ndwigah Njeru portfolio home"
+    >
+      DN<i>.</i>
+    </a>
+
+    <div class="top-actions">
+
+      <span class="secure-badge">
+
+        <span
+          class="secure-dot"
+          aria-hidden="true"
+        ></span>
+
+        Secure referee record
+
+      </span>
+
+      <a
+        class="back-link"
+        href="{% url 'employer_portal:portal' token=grant.token %}"
+      >
+        Back to portal
+      </a>
+
+    </div>
+
+  </header>
+
+  <main class="page">
+
+    <header class="page-head">
+
+      <div>
+
+        <h1>
+          Referee details
+        </h1>
+
+        <p>
+          This record has been specifically released for the approved employer
+          access request associated with this portal session.
+        </p>
+
+      </div>
+
+      <div
+        class="expiry"
+        aria-label="Portal access expiry"
+      >
+
+        <span class="expiry-label">
+          Portal access expires
+        </span>
+
+        <span class="expiry-value">
+
+          {% if grant.expires_at %}
+
+            {{ grant.expires_at|date:"j F Y, H:i" }}
+
+          {% else %}
+
+            No fixed expiry
+
+          {% endif %}
+
+        </span>
+
+      </div>
+
+    </header>
+
+    <div class="content">
+
+      <!-- =======================================================
+           PROFESSIONAL CONTACT
+           ======================================================= -->
+
+      <section
+        class="section"
+        aria-labelledby="contact-heading"
+      >
+
+        <header class="section-head">
+
+          <h2 id="contact-heading">
+            Professional contact
+          </h2>
+
+          <p>
+            Use these details for professional reference purposes.
+          </p>
+
+        </header>
+
+        <div class="details">
+
+          <div class="detail-row">
+
+            <div class="detail-label">
+              Name
+            </div>
+
+            <div class="detail-value">
+              {{ referee.name }}
+            </div>
+
+          </div>
+
+          <div class="detail-row">
+
+            <div class="detail-label">
+              Job title
+            </div>
+
+            <div class="detail-value">
+              {{ referee.job_title }}
+            </div>
+
+          </div>
+
+          <div class="detail-row">
+
+            <div class="detail-label">
+              Organisation
+            </div>
+
+            <div class="detail-value">
+              {{ referee.organisation }}
+            </div>
+
+          </div>
+
+          {% if referee.relationship %}
+
+            <div class="detail-row">
+
+              <div class="detail-label">
+                Relationship
+              </div>
+
+              <div class="detail-value">
+                {{ referee.relationship }}
+              </div>
+
+            </div>
+
+          {% endif %}
+
+          {% if referee.email %}
+
+            <div class="detail-row">
+
+              <div class="detail-label">
+                Email
+              </div>
+
+              <div class="detail-value">
+
+                <a
+                  href="mailto:{{ referee.email }}"
+                >
+                  {{ referee.email }}
+                </a>
+
+              </div>
+
+            </div>
+
+          {% endif %}
+
+          {% if referee.phone %}
+
+            <div class="detail-row">
+
+              <div class="detail-label">
+                Phone
+              </div>
+
+              <div class="detail-value">
+
+                <a
+                  href="tel:{{ referee.phone }}"
+                >
+                  {{ referee.phone }}
+                </a>
+
+              </div>
+
+            </div>
+
+          {% endif %}
+
+        </div>
+
+        {% if referee.notes %}
+
+          <div class="notes">
+
+            <div class="detail-label">
+              Additional information
+            </div>
+
+            <div class="note-box">
+              {{ referee.notes }}
+            </div>
+
+          </div>
+
+        {% endif %}
+
+      </section>
+
+      <!-- =======================================================
+           ACCESS VERIFICATION
+           ======================================================= -->
+
+      <aside>
+
+        <section
+          class="section"
+          aria-labelledby="verification-heading"
+        >
+
+          <header class="section-head">
+
+            <h2 id="verification-heading">
+              Access verification
+            </h2>
+
+            <p>
+              This record is tied to your approved portal access.
+            </p>
+
+          </header>
+
+          <div class="side-body">
+
+            <span class="status-badge">
+              {{ access_request.get_status_display }}
+            </span>
+
+            <div class="summary-grid">
+
+              <div class="summary-item">
+
+                <span class="summary-label">
+                  Employer or organisation
+                </span>
+
+                <span class="summary-value">
+                  {{ access_request.requester_company|default:"Approved employer" }}
+                </span>
+
+              </div>
+
+              <div class="summary-item">
+
+                <span class="summary-label">
+                  Access holder
+                </span>
+
+                <span class="summary-value">
+                  {{ access_request.requester_name }}
+                </span>
+
+              </div>
+
+              <div class="summary-item">
+
+                <span class="summary-label">
+                  Work email
+                </span>
+
+                <span class="summary-value">
+                  {{ access_request.requester_email }}
+                </span>
+
+              </div>
+
+              <div class="summary-item">
+
+                <span class="summary-label">
+                  Request reference
+                </span>
+
+                <span class="summary-value">
+                  {{ access_request.request_id }}
+                </span>
+
+              </div>
+
+              <div class="summary-item">
+
+                <span class="summary-label">
+                  Access expiry
+                </span>
+
+                <span class="summary-value">
+
+                  {% if grant.expires_at %}
+
+                    {{ grant.expires_at|date:"j F Y, H:i" }}
+
+                  {% else %}
+
+                    No fixed expiry
+
+                  {% endif %}
+
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+        <section
+          class="section"
+          aria-labelledby="privacy-heading"
+        >
+
+          <header class="section-head">
+
+            <h2 id="privacy-heading">
+              Privacy and audit
+            </h2>
+
+            <p>
+              Controlled access for professional evaluation.
+            </p>
+
+          </header>
+
+          <div class="side-body">
+
+            <div class="security">
+
+              <strong>
+                Private record
+              </strong>
+
+              This referee information was released only for the approved
+              access request. Portal and referee activity is recorded for
+              access control and audit purposes.
+
+            </div>
+
+            <div class="actions">
+
+              <a
+                class="btn primary"
+                href="{% url 'employer_portal:portal' token=grant.token %}"
+              >
+                Return to portal
+              </a>
+
+              <a
+                class="btn"
+                href="/"
+              >
+                View public portfolio
+              </a>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </aside>
+
+    </div>
+
+    <p class="footer-note">
+      Keep this information confidential and use it only for the professional
+      purpose for which access was approved.
+    </p>
+
+  </main>
+
+</body>
+</html>

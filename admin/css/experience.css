@@ -1,0 +1,365 @@
+/* =========================================================
+   EXPERIENCE MANAGEMENT - MVP CSS
+   ========================================================= */
+
+.experience-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 0 0 18px;
+    padding: 14px 16px;
+    border: 1px solid #dbe4e4;
+    border-radius: 12px;
+    background: #ffffff;
+}
+
+.experience-toolbar > div {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.experience-toolbar strong {
+    color: #102a2a;
+    font-size: 20px;
+}
+
+.experience-list {
+    display: grid;
+    gap: 14px;
+}
+
+.experience-admin-card {
+    padding: 20px;
+    border: 1px solid #e5eded;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 6px 20px rgba(15, 42, 42, 0.035);
+}
+
+.experience-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.experience-number {
+    color: #0f766e;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .1em;
+}
+
+.experience-statuses {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    min-height: 22px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: #f1f5f5;
+    color: #64748b;
+    font-size: 9px;
+    font-weight: 750;
+}
+
+.status-pill.current {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-pill.featured {
+    background: #ecfeff;
+    color: #0f766e;
+}
+
+.status-pill.visible {
+    background: #f0fdf4;
+    color: #166534;
+}
+
+.status-pill.hidden {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+.experience-card-content h3 {
+    margin: 0 0 4px;
+    color: #102a2a;
+    font-size: 15px;
+    line-height: 1.35;
+}
+
+.experience-company {
+    margin: 0 0 4px;
+    color: #0f766e;
+    font-size: 11px;
+    font-weight: 750;
+}
+
+.experience-meta {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 10px;
+}
+
+.experience-description {
+    margin: 12px 0 0;
+    color: #64748b;
+    font-size: 12px;
+    line-height: 1.65;
+}
+
+.achievement-preview {
+    display: grid;
+    gap: 4px;
+    margin-top: 12px;
+    color: #64748b;
+    font-size: 11px;
+    line-height: 1.55;
+}
+
+.achievement-preview small {
+    color: #0f766e;
+    font-weight: 750;
+}
+
+.experience-card-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 13px;
+    border-top: 1px solid #edf2f2;
+}
+
+.experience-editor {
+    margin-top: 18px;
+}
+
+.experience-editor form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 7px;
+    color: #334155;
+    font-size: 10px;
+    font-weight: 750;
+}
+
+.form-group label span {
+    color: #0f766e;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    border: 1px solid #dbe4e4;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #102a2a;
+    padding: 11px 12px;
+    outline: none;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+    line-height: 1.55;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: #0f766e;
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, .09);
+}
+
+.form-group small {
+    margin-top: 6px;
+    color: #94a3b8;
+    font-size: 9px;
+    line-height: 1.5;
+}
+
+.option-panel {
+    padding: 12px;
+    border: 1px solid #edf2f2;
+    border-radius: 10px;
+    background: #f8fbfb;
+}
+
+.checkbox-row {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start;
+    gap: 9px;
+    margin: 3px 0 8px;
+    color: #475569 !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    cursor: pointer;
+}
+
+.checkbox-row input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: #0f766e;
+}
+
+.current-role-preview {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 7px;
+    margin-top: 7px;
+    color: #94a3b8;
+    font-size: 9px;
+}
+
+.save-message {
+    min-height: 20px;
+    margin-right: auto;
+    color: #0f766e;
+    font-size: 10px;
+    font-weight: 700;
+    opacity: 0;
+    transition: opacity 160ms ease;
+}
+
+.save-message.show {
+    opacity: 1;
+}
+
+.save-message.error {
+    color: #b91c1c;
+}
+
+.empty-state {
+    padding: 45px 20px;
+    text-align: center;
+    border: 1px dashed #cbd5e1;
+    border-radius: 12px;
+    background: #fafcfc;
+}
+
+.empty-state-icon {
+    margin: 0 auto 12px;
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    background: #ccfbf1;
+    color: #0f766e;
+    font-weight: 800;
+}
+
+.empty-state h3 {
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.empty-state p {
+    color: #64748b;
+    font-size: 11px;
+}
+
+@media (max-width: 700px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .experience-toolbar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .experience-card-actions button {
+        flex: 1;
+    }
+
+    .form-actions {
+        flex-wrap: wrap;
+    }
+
+    .save-message {
+        width: 100%;
+        flex-basis: 100%;
+        margin-bottom: 3px;
+    }
+}
+
+
+/* Experience summary metrics */
+.experience-summary-stats {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    min-width: 0;
+}
+
+.experience-stat {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+}
+
+.experience-stat strong {
+    color: #102a2a;
+    font-size: 20px;
+    line-height: 1;
+}
+
+.experience-stat span {
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 650;
+}
+
+.experience-stat.secondary strong {
+    color: #0f766e;
+    font-size: 16px;
+}
+
+.experience-stat-divider {
+    width: 1px;
+    height: 24px;
+    background: #dbe4e4;
+}
+
+@media (max-width: 700px) {
+    .experience-summary-stats {
+        flex-wrap: wrap;
+        gap: 12px 16px;
+    }
+
+    .experience-stat-divider {
+        display: none;
+    }
+}

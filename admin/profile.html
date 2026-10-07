@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Profile | Dennis Ndwigah Portfolio Admin</title>
+
+    <meta name="description" content="Manage Dennis Ndwigah professional portfolio profile.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap"
+        rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body class="admin-dashboard-page">
+
+<div class="admin-app">
+
+    <!-- Mobile overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+
+    <!-- =========================================
+         SIDEBAR
+         ========================================= -->
+
+    <aside class="admin-sidebar" id="adminSidebar">
+
+        <div class="sidebar-header">
+
+            <a href="dashboard.html" class="admin-logo">
+                <span class="brand-mark">DN</span>
+
+                <span class="brand-text">
+                    <strong>DN Portfolio</strong>
+                    <small>Admin console</small>
+                </span>
+            </a>
+
+            <button
+                type="button"
+                class="mobile-close"
+                id="closeSidebar"
+                aria-label="Close navigation"
+            >
+                <i data-lucide="x" aria-hidden="true"></i>
+            </button>
+
+        </div>
+
+
+        <nav class="admin-navigation" aria-label="Admin navigation">
+
+            <div class="nav-section">
+                <span class="nav-section-title">Workspace</span>
+
+                <a href="dashboard.html" class="nav-link">
+                    <span class="nav-icon"><i data-lucide="layout-dashboard" aria-hidden="true"></i></span>
+                    <span>Dashboard</span>
+                </a>
+
+                <a href="profile.html" class="nav-link active" aria-current="page">
+                    <span class="nav-icon"><i data-lucide="user-round" aria-hidden="true"></i></span>
+                    <span>Profile</span>
+                </a>
+
+                <a href="experience.html" class="nav-link">
+                    <span class="nav-icon"><i data-lucide="briefcase" aria-hidden="true"></i></span>
+                    <span>Experience</span>
+                </a>
+
+                <a href="projects.html" class="nav-link">
+                    <span class="nav-icon"><i data-lucide="folder-kanban" aria-hidden="true"></i></span>
+                    <span>Projects</span>
+                </a>
+
+                <a href="skills.html" class="nav-link">
+                    <span class="nav-icon"><i data-lucide="sparkles" aria-hidden="true"></i></span>
+                    <span>Skills</span>
+                </a>
+            </div>
+
+
+            <div class="nav-section">
+                <span class="nav-section-title">Credentials</span>
+
+                <a href="certifications.html" class="nav-link">
+                    <span class="nav-icon"><i data-lucide="award" aria-hidden="true"></i></span>
+                    <span>Certifications</span>
+                </a>
+
+                <a href="documents.html" class="nav-link">
+                    <span class="nav-icon"><i data-lucide="file-text" aria-hidden="true"></i></span>
+                    <span>Documents</span>
+                    <span class="nav-badge">0</span>
+                </a>
+            </div>
+
+
+            <div class="nav-section">
+                <span class="nav-section-title">System</span>
+
+                <a href="settings.html" class="nav-link">
+                    <span class="nav-icon"><i data-lucide="settings-2" aria-hidden="true"></i></span>
+                    <span>Settings</span>
+                </a>
+
+                <a href="employer-access.html" class="nav-link">
+                    <span class="nav-icon"><i data-lucide="shield-check" aria-hidden="true"></i></span>
+                    <span>Employer Access</span>
+                </a>
+            </div>
+
+        </nav>
+
+
+        <div class="sidebar-footer">
+
+            <div class="admin-user">
+                <div class="user-avatar" aria-hidden="true">DN</div>
+
+                <div class="user-details">
+                    <strong>Dennis Ndwigah</strong>
+                    <span>Administrator</span>
+                </div>
+            </div>
+
+            <button type="button" class="logout-button" id="logoutButton">
+                <i data-lucide="log-out" aria-hidden="true"></i>
+                <span>Sign out</span>
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =========================================
+         MAIN
+         ========================================= -->
+
+    <main class="admin-main">
+
+        <header class="admin-topbar">
+
+            <button
+                type="button"
+                class="menu-button"
+                id="openSidebar"
+                aria-label="Open navigation"
+            >
+                <i data-lucide="menu" aria-hidden="true"></i>
+            </button>
+
+            <div class="topbar-title">
+                <span>Profile</span>
+            </div>
+
+            <div class="topbar-actions">
+                <a href="../index.html" class="view-site-button" target="_blank" rel="noopener">
+                    <i data-lucide="external-link" aria-hidden="true"></i><span>View site</span>
+                </a>
+            </div>
+
+        </header>
+
+
+        <div class="admin-content">
+
+            <!-- Page heading -->
+
+            <section class="page-heading compact">
+
+                <div>
+                    <span class="eyebrow">Professional profile</span>
+
+                    <h1>Profile information</h1>
+
+                    <p>
+                        Manage the professional information shown
+                        on your public portfolio.
+                    </p>
+                </div>
+
+            </section>
+
+
+            <!-- =================================
+                 PROFILE FORM
+                 ================================= -->
+
+            <form id="profileForm" class="profile-management" novalidate>
+
+
+                <!-- Basic information -->
+
+                <section class="dashboard-card">
+
+                    <div class="card-header">
+                        <h2>Basic information</h2>
+                    </div>
+
+
+                    <div class="profile-photo-section">
+
+                        <div class="profile-photo">
+                            <span>DN</span>
+                        </div>
+
+                        <div>
+                            <h3>Profile photo</h3>
+
+                            <p>Add a professional headshot for your portfolio.</p>
+
+                            <button type="button" class="secondary-button small" id="photoButton">
+                                <i data-lucide="image-plus" aria-hidden="true"></i>
+                                <span>Choose photo</span>
+                            </button>
+
+                            <input type="file" id="profilePhoto" accept="image/*" hidden>
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-grid">
+
+                        <div class="form-group">
+                            <label for="fullName">Full name</label>
+
+                            <input
+                                type="text"
+                                id="fullName"
+                                name="fullName"
+                                value="Dennis Ndwigah Njeru"
+                                autocomplete="name"
+                                required
+                            >
+                        </div>
+
+
+                        <div class="form-group">
+                            <label for="location">Location</label>
+
+                            <input
+                                type="text"
+                                id="location"
+                                name="location"
+                                value="Nairobi, Kenya"
+                                autocomplete="address-level2"
+                            >
+                        </div>
+
+
+                        <div class="form-group full-width">
+                            <label for="headline">Professional headline</label>
+
+                            <input
+                                type="text"
+                                id="headline"
+                                name="headline"
+                                value="Supply Chain &amp; Operations Professional | Warehouse &amp; Distribution | Logistics | Transport | Fulfillment"
+                                maxlength="180"
+                            >
+
+                            <small>
+                                Keep this focused on the roles you want recruiters to find you for.
+                            </small>
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- Contact -->
+
+                <section class="dashboard-card">
+
+                    <div class="card-header">
+                        <h2>Contact information</h2>
+                    </div>
+
+
+                    <div class="form-grid">
+
+                        <div class="form-group">
+                            <label for="email">Professional email</label>
+
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                value="dennisndwigah.dn.dn@gmail.com"
+                                autocomplete="email"
+                            >
+                        </div>
+
+
+                        <div class="form-group">
+                            <label for="phone">Phone</label>
+
+                            <input
+                                type="tel"
+                                id="phone"
+                                name="phone"
+                                value="+254 792 840 130"
+                                autocomplete="tel"
+                            >
+                        </div>
+
+
+                        <div class="form-group full-width">
+                            <label for="linkedin">LinkedIn profile</label>
+
+                            <input
+                                type="url"
+                                id="linkedin"
+                                name="linkedin"
+                                value="https://linkedin.com/in/njerudendwigah"
+                            >
+
+                            <small>Shown in the contact section of your public website.</small>
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- About -->
+
+                <section class="dashboard-card">
+
+                    <div class="card-header">
+                        <h2>Professional summary</h2>
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="summary">About me</label>
+
+                        <textarea
+                            id="summary"
+                            name="summary"
+                            rows="9"
+                        >Supply Chain and Operations professional with 6+ years of hands-on experience across FMCG, e-commerce, freight forwarding, and 3PL environments in Kenya. Experienced in warehouse and distribution operations, fleet and transport coordination, inventory control, fulfillment, supplier and 3PL management, and performance improvement.
+
+I have managed high-volume operations, led teams, worked with operational KPIs, and built practical systems to improve service levels, cost efficiency, inventory accuracy, and delivery performance.
+
+My experience spans rural supply chains, urban fulfillment hubs, freight forwarding, warehouse management, and developing distribution networks.</textarea>
+
+                        <small>This section appears on the public portfolio.</small>
+
+                    </div>
+
+                </section>
+
+
+                <!-- Professional focus -->
+
+                <section class="dashboard-card">
+
+                    <div class="card-header">
+                        <h2>Professional focus</h2>
+                    </div>
+
+
+                    <div class="form-grid">
+
+                        <div class="form-group full-width">
+
+                            <label for="targetRoles">Target roles</label>
+
+                            <input
+                                type="text"
+                                id="targetRoles"
+                                name="targetRoles"
+                                value="Supply Chain Manager, Logistics Manager, Operations Manager, Warehouse Manager, Distribution Manager, Fulfillment Manager, Transport Manager"
+                            >
+
+                            <div class="target-role-preview" id="targetRolePreview" aria-live="polite"></div>
+
+                            <small class="form-help">
+                                Separate roles with commas. Example: Supply Chain Manager,
+                                Logistics Manager, Operations Manager.
+                            </small>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="availability">Availability</label>
+
+                            <select id="availability" name="availability">
+                                <option value="open" selected>Open to opportunities</option>
+                                <option value="selective">Open to selected opportunities</option>
+                                <option value="not-looking">Not currently looking</option>
+                            </select>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="employment">Preferred employment</label>
+
+                            <select id="employment" name="employment">
+                                <option value="full-time" selected>Full-time</option>
+                                <option value="contract">Contract</option>
+                                <option value="consulting">Consulting</option>
+                                <option value="all">Open to all</option>
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- Save bar -->
+
+                <div class="form-actions">
+
+                    <span class="save-message" id="saveMessage" role="status" aria-live="polite"></span>
+
+                    <button type="button" class="secondary-button" id="resetProfile">
+                        <i data-lucide="rotate-ccw" aria-hidden="true"></i>
+                        <span>Reset</span>
+                    </button>
+
+                    <button type="submit" class="primary-button">
+                        <i data-lucide="check" aria-hidden="true"></i>
+                        <span>Save profile</span>
+                    </button>
+
+                </div>
+
+            </form>
+
+
+            <footer class="admin-footer">
+
+                <span>
+                    &copy; <span id="currentYear"></span>
+                    Dennis Ndwigah
+                </span>
+
+                <span>Administrator access only</span>
+
+            </footer>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="js/profile.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+
+        const yearEl = document.getElementById("currentYear");
+        if (yearEl && !yearEl.textContent) {
+            yearEl.textContent = new Date().getFullYear();
+        }
+
+        if (!window.lucide) return;
+
+        const render = () => window.lucide.createIcons({ attrs: { "stroke-width": 1.8 } });
+        render();
+
+        /* profile.js builds role chips after load: draw any icons it adds */
+        const preview = document.getElementById("targetRolePreview");
+        if (preview) {
+            new MutationObserver(render).observe(preview, { childList: true, subtree: true });
+        }
+    });
+</script>
+
+</body>
+</html>

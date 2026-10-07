@@ -1,0 +1,1229 @@
+{% extends "admin/base.html" %}
+{% load i18n unfold tz %}
+
+{% block title %}
+    {% if subtitle %}{{ subtitle }} | {% endif %}
+    {{ title }} | {{ site_title|default:_("Django site admin") }}
+{% endblock %}
+
+{% block branding %}
+    {% include "unfold/helpers/site_branding.html" %}
+{% endblock %}
+
+
+{# STYLES - head-injected to avoid FOUC and satisfy strict CSP. #}
+{% block extrastyle %}
+<style>
+/* ------------------------------------------------------------------
+   TOKENS
+   ------------------------------------------------------------------ */
+.epd-root {
+    --epd-primary: var(--color-primary-500, #6366f1);
+    --epd-primary-strong: var(--color-primary-600, #4f46e5);
+    --epd-fuchsia: #ec4899;
+    --epd-cyan: #06b6d4;
+    --epd-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --epd-radius: 1rem;
+    --epd-surface: rgba(255, 255, 255, 0.72);
+    --epd-surface-solid: #ffffff;
+    --epd-border: rgba(15, 23, 42, 0.08);
+    --epd-shadow-1: 0 1px 2px rgba(2, 6, 23, 0.04);
+    --epd-shadow-2: 0 12px 32px -12px rgba(2, 6, 23, 0.12);
+    isolation: isolate;
+    position: relative;
+    overflow-x: clip;
+}
+
+html.dark .epd-root,
+[data-theme="dark"] .epd-root {
+    --epd-surface: rgba(11, 13, 18, 0.78);
+    --epd-surface-solid: #0b0d12;
+    --epd-border: rgba(255, 255, 255, 0.08);
+    --epd-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --epd-shadow-2: 0 24px 48px -20px rgba(0, 0, 0, 0.7);
+}
+
+/* AMBIENT BACKGROUND (rgba fallback) */
+.epd-root::before {
+    content: "";
+    position: absolute;
+    inset: -2rem -1rem auto -1rem;
+    height: 420px;
+    z-index: -1;
+    pointer-events: none;
+    filter: blur(2px);
+    background:
+        radial-gradient(60% 60% at 15% 0%, rgba(99, 102, 241, 0.12), transparent 70%),
+        radial-gradient(50% 50% at 85% 10%, rgba(236, 72, 153, 0.10), transparent 70%),
+        radial-gradient(40% 40% at 50% 0%, rgba(6, 182, 212, 0.08), transparent 70%);
+}
+@supports (background: color-mix(in oklab, red, blue)) {
+    .epd-root::before {
+        background:
+            radial-gradient(60% 60% at 15% 0%, color-mix(in oklab, var(--epd-primary) 12%, transparent), transparent 70%),
+            radial-gradient(50% 50% at 85% 10%, color-mix(in oklab, var(--epd-fuchsia) 10%, transparent), transparent 70%),
+            radial-gradient(40% 40% at 50% 0%, color-mix(in oklab, var(--epd-cyan) 8%, transparent), transparent 70%);
+    }
+}
+
+.epd-root::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+        linear-gradient(to right, rgba(120, 120, 130, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(120, 120, 130, 0.05) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(80% 60% at 50% 0%, #000 30%, transparent 100%);
+    -webkit-mask-image: radial-gradient(80% 60% at 50% 0%, #000 30%, transparent 100%);
+    opacity: .5;
+}
+
+/* CARDS */
+.epd-card {
+    position: relative;
+    border-radius: var(--epd-radius);
+    background: var(--epd-surface);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    backdrop-filter: blur(14px) saturate(140%);
+    border: 1px solid var(--epd-border);
+    box-shadow:
+        0 1px 0 0 rgba(255, 255, 255, 0.6) inset,
+        var(--epd-shadow-1),
+        var(--epd-shadow-2);
+    transition: box-shadow .5s var(--epd-ease), transform .5s var(--epd-ease), border-color .5s var(--epd-ease);
+}
+html.dark .epd-card,
+[data-theme="dark"] .epd-card {
+    box-shadow:
+        0 1px 0 0 rgba(255, 255, 255, 0.04) inset,
+        var(--epd-shadow-1),
+        var(--epd-shadow-2);
+}
+.epd-card--interactive:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 1px 0 0 rgba(255, 255, 255, 0.6) inset,
+        0 18px 40px -16px color-mix(in oklab, var(--epd-primary) 35%, transparent);
+}
+html.dark .epd-card--interactive:hover,
+[data-theme="dark"] .epd-card--interactive:hover {
+    box-shadow:
+        0 1px 0 0 rgba(255, 255, 255, 0.06) inset,
+        0 24px 56px -20px color-mix(in oklab, var(--epd-primary) 45%, transparent);
+}
+.epd-card--interactive:hover { border-color: var(--epd-primary); }
+
+@supports (mask-composite: exclude) {
+    .epd-card--interactive:hover { border-color: transparent; }
+    .epd-card--interactive:hover::before {
+        content: "";
+        position: absolute;
+        inset: -1px;
+        border-radius: inherit;
+        padding: 1px;
+        background: linear-gradient(135deg,
+            color-mix(in oklab, var(--epd-primary) 70%, transparent),
+            color-mix(in oklab, var(--epd-fuchsia) 55%, transparent) 40%,
+            color-mix(in oklab, var(--epd-cyan) 55%, transparent) 80%,
+            transparent);
+        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+                mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+                mask-composite: exclude;
+        pointer-events: none;
+        opacity: 0;
+        animation: epdRing .6s var(--epd-ease) forwards;
+    }
+}
+@keyframes epdRing { to { opacity: 1; } }
+
+/* KPI ACCENT BAR */
+.epd-kpi-bar {
+    position: absolute;
+    inset-inline-start: 0;
+    top: 12%;
+    bottom: 12%;
+    width: 3px;
+    border-radius: 999px;
+    background: linear-gradient(180deg,
+        color-mix(in oklab, var(--epd-primary) 90%, transparent),
+        color-mix(in oklab, var(--epd-fuchsia) 80%, transparent));
+    opacity: 0;
+    transform: scaleY(.4);
+    transform-origin: center;
+    transition: opacity .5s var(--epd-ease), transform .5s var(--epd-ease);
+}
+.epd-card--interactive:hover .epd-kpi-bar { opacity: 1; transform: scaleY(1); }
+
+/* CTA SHINE */
+.epd-cta {
+    position: relative;
+    overflow: hidden;
+    background-image: linear-gradient(135deg, var(--epd-primary-strong), var(--epd-primary) 55%, #8b5cf6);
+    box-shadow:
+        0 1px 0 0 rgba(255, 255, 255, 0.3) inset,
+        0 8px 24px -8px color-mix(in oklab, var(--epd-primary) 60%, transparent);
+}
+.epd-cta::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.35) 50%, transparent 70%);
+    transform: translateX(-120%);
+    transition: transform .9s var(--epd-ease);
+}
+.epd-cta:hover::after { transform: translateX(120%); }
+
+/* NUMERALS, ICON FONT, SKELETON */
+.epd-num { font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.material-symbols-outlined { font-variation-settings: 'wght' 400, 'opsz' 24; font-display: block; }
+
+.epd-skeleton {
+    position: relative;
+    overflow: hidden;
+    background: rgba(120, 120, 130, 0.10);
+    border-radius: .5rem;
+    color: transparent !important;
+}
+.epd-skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+    transform: translateX(-100%);
+    animation: epdShimmer 1.4s infinite;
+}
+@keyframes epdShimmer { to { transform: translateX(100%); } }
+
+/* MOTION */
+@keyframes epdRise {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.epd-rise { animation: epdRise .6s var(--epd-ease) both; }
+.epd-rise[data-delay="1"] { animation-delay: .05s; }
+.epd-rise[data-delay="2"] { animation-delay: .10s; }
+.epd-rise[data-delay="3"] { animation-delay: .15s; }
+.epd-rise[data-delay="4"] { animation-delay: .20s; }
+.epd-rise[data-delay="5"] { animation-delay: .25s; }
+
+@keyframes epdPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: .35; transform: scale(1.35); }
+}
+.epd-pulse-dot { animation: epdPulse 2.4s ease-in-out infinite; }
+
+/* COMMAND PALETTE */
+.epd-cmdk {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: grid;
+    place-items: start center;
+    padding-top: 12vh;
+}
+.epd-cmdk[hidden] { display: none; }
+.epd-cmdk__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.45);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+}
+.epd-cmdk__panel {
+    position: relative;
+    width: min(560px, calc(100vw - 2rem));
+    border-radius: var(--epd-radius);
+    background: var(--epd-surface-solid);
+    border: 1px solid var(--epd-border);
+    box-shadow: 0 24px 48px -12px rgba(2, 6, 23, 0.35);
+    overflow: hidden;
+    animation: epdRise .3s var(--epd-ease) both;
+}
+.epd-cmdk__panel input {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    font-size: 1rem;
+    background: transparent;
+    border: 0;
+    outline: none;
+    color: inherit;
+    border-bottom: 1px solid var(--epd-border);
+}
+.epd-cmdk__list {
+    max-height: 340px;
+    overflow-y: auto;
+    padding: .5rem;
+}
+.epd-cmdk__item {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: .65rem .75rem;
+    border-radius: .65rem;
+    cursor: pointer;
+    font-size: .875rem;
+}
+.epd-cmdk__item[aria-selected="true"],
+.epd-cmdk__item:hover {
+    background: color-mix(in oklab, var(--epd-primary) 12%, transparent);
+}
+
+/* TOASTS */
+.epd-toast {
+    padding: .7rem 1rem;
+    border-radius: .75rem;
+    background: var(--epd-surface-solid);
+    border: 1px solid var(--epd-border);
+    box-shadow: 0 12px 24px -8px rgba(2, 6, 23, 0.25);
+    font-size: .8125rem;
+    font-weight: 500;
+    animation: epdRise .3s var(--epd-ease) both;
+}
+
+/* HIGH CONTRAST */
+@media (prefers-contrast: more) {
+    .epd-root { --epd-border: rgba(0, 0, 0, 0.35); }
+    html.dark .epd-root,
+    [data-theme="dark"] .epd-root { --epd-border: rgba(255, 255, 255, 0.35); }
+    .epd-card { box-shadow: none; }
+    .text-base-500, .text-base-400 { color: inherit !important; opacity: .85; }
+}
+
+/* PRINT */
+@media print {
+    .epd-root::before, .epd-root::after { display: none !important; }
+    .epd-card { box-shadow: none !important; border: 1px solid #ccc !important; background: #fff !important; backdrop-filter: none !important; }
+    .epd-no-print,
+    [data-copy],
+    #epd-activity-filter,
+    #epd-toasts,
+    .epd-cmdk { display: none !important; }
+    .epd-rise { animation: none !important; }
+}
+
+/* REDUCED MOTION */
+@media (prefers-reduced-motion: reduce) {
+    .epd-root *, .epd-root *::before, .epd-root *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+</style>
+{% endblock %}
+
+
+{# SCRIPTS - live refresh, copy-to-clipboard, command palette, toasts. #}
+{% block extrahead %}
+<script defer>
+(function () {
+    'use strict';
+
+    function toast(msg) {
+        var host = document.getElementById('epd-toasts');
+        if (!host) return;
+        var el = document.createElement('div');
+        el.className = 'epd-toast';
+        el.textContent = msg;
+        host.appendChild(el);
+        setTimeout(function () { el.remove(); }, 2400);
+    }
+    window.epdToast = toast;
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        document.addEventListener('click', function (e) {
+            var btn = e.target.closest('[data-copy]');
+            if (!btn) return;
+            e.preventDefault();
+            var text = btn.getAttribute('data-copy');
+            (navigator.clipboard && navigator.clipboard.writeText(text).then(function () {
+                toast('{{ _("Copied")|escapejs }}');
+            })) || (function () {
+                var t = document.createElement('textarea');
+                t.value = text; document.body.appendChild(t); t.select();
+                try { document.execCommand('copy'); toast('{{ _("Copied")|escapejs }}'); } catch (_) {}
+                t.remove();
+            })();
+        });
+
+        var t0 = Date.now();
+        var tick = function () {
+            var s = Math.floor((Date.now() - t0) / 1000);
+            var label = s < 60 ? s + 's' : Math.floor(s / 60) + 'm';
+            document.querySelectorAll('[data-since-load]').forEach(function (el) {
+                el.textContent = label;
+            });
+        };
+        tick();
+        setInterval(tick, 1000);
+
+        var cmdk   = document.getElementById('epd-cmdk');
+        var input  = document.getElementById('epd-cmdk-input');
+        var list   = document.getElementById('epd-cmdk-list');
+        if (!cmdk || !input || !list) return;
+
+        var items = [
+            { label: '{{ _("Staff dashboard")|escapejs }}',     icon: 'dashboard',         href: "{% url 'employer_portal:staff_dashboard' %}",                     keys: 'staff dashboard overview' },
+            { label: '{{ _("Access requests")|escapejs }}',     icon: 'inbox',             href: "{% url 'admin:employer_portal_accessrequest_changelist' %}",        keys: 'requests employer access' },
+            { label: '{{ _("Access grants")|escapejs }}',       icon: 'key',               href: "{% url 'admin:employer_portal_accessgrant_changelist' %}",          keys: 'grants permissions' },
+            { label: '{{ _("Documents")|escapejs }}',           icon: 'description',       href: "{% url 'admin:employer_portal_document_changelist' %}",             keys: 'files portfolio' },
+            { label: '{{ _("Referees")|escapejs }}',            icon: 'supervisor_account',href: "{% url 'admin:employer_portal_referee_changelist' %}",              keys: 'references contacts' },
+            { label: '{{ _("Employers")|escapejs }}',           icon: 'apartment',         href: "{% url 'admin:employer_portal_employer_changelist' %}",             keys: 'companies' },
+            { label: '{{ _("Access logs")|escapejs }}',         icon: 'history',           href: "{% url 'admin:employer_portal_accesslog_changelist' %}",            keys: 'activity audit' }
+        ];
+        var filtered = items.slice();
+        var cursor = 0;
+
+        function render() {
+            list.innerHTML = '';
+            filtered.forEach(function (it, i) {
+                var li = document.createElement('li');
+                li.className = 'epd-cmdk__item';
+                li.setAttribute('role', 'option');
+                li.setAttribute('aria-selected', i === cursor ? 'true' : 'false');
+                li.dataset.href = it.href;
+                li.innerHTML = '<span class="material-symbols-outlined text-[18px] leading-none" aria-hidden="true">' + it.icon + '</span><span>' + it.label + '</span>';
+                list.appendChild(li);
+            });
+        }
+        function open()  { cmdk.hidden = false; input.value = ''; filtered = items.slice(); cursor = 0; render(); input.focus(); }
+        function close() { cmdk.hidden = true; }
+
+        document.addEventListener('keydown', function (e) {
+            if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); open(); }
+            if (cmdk.hidden) return;
+            if (e.key === 'Escape') { close(); }
+            if (e.key === 'ArrowDown') { e.preventDefault(); cursor = Math.min(cursor + 1, filtered.length - 1); render(); }
+            if (e.key === 'ArrowUp')   { e.preventDefault(); cursor = Math.max(cursor - 1, 0); render(); }
+            if (e.key === 'Enter' && filtered[cursor]) { window.location.href = filtered[cursor].href; }
+        });
+        input.addEventListener('input', function () {
+            var q = input.value.trim().toLowerCase();
+            filtered = items.filter(function (it) {
+                return !q || (it.label + ' ' + it.keys).toLowerCase().indexOf(q) !== -1;
+            });
+            cursor = 0; render();
+        });
+        list.addEventListener('click', function (e) {
+            var it = e.target.closest('.epd-cmdk__item');
+            if (it) window.location.href = it.dataset.href;
+        });
+        cmdk.addEventListener('click', function (e) {
+            if (e.target.hasAttribute('data-cmdk-close')) close();
+        });
+
+        if (window.htmx && document.getElementById('epd-activity-region')) {
+            window.htmx.process(document.getElementById('epd-activity-region'));
+        }
+    });
+})();
+</script>
+{% endblock %}
+
+
+{% block content %}
+<div class="epd-root space-y-8">
+
+    <!-- PAGE HEADER -->
+    <header class="epd-rise flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+
+        <div class="min-w-0">
+
+            <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-base-200/70 bg-white/70 px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-base-500 shadow-sm backdrop-blur dark:border-base-700/70 dark:bg-base-900/60">
+                <span class="relative flex h-1.5 w-1.5">
+                    <span class="epd-pulse-dot absolute inline-flex h-full w-full rounded-full bg-emerald-500"></span>
+                    <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                </span>
+                {% translate "Employer Access Portal" %}
+                <span class="text-base-300 dark:text-base-600" aria-hidden="true">·</span>
+                <span class="text-[10px] text-base-400">
+                    {% translate "updated" %} <span data-since-load>0s</span> {% translate "ago" %}
+                </span>
+            </div>
+
+            <h1 class="text-3xl font-semibold tracking-tight text-font-important-light dark:text-font-important-dark">
+                {% translate "Dashboard" %}
+                <span class="ms-2 bg-gradient-to-r from-primary-500 via-fuchsia-500 to-cyan-500 bg-clip-text text-transparent" aria-hidden="true">·</span>
+            </h1>
+
+            <p class="mt-2 max-w-2xl text-sm leading-relaxed text-base-500">
+                {% translate "Manage employer access requests, active grants, portfolio documents, referees and access activity from one place." %}
+            </p>
+
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 epd-no-print">
+
+            <a
+                href="{% url 'employer_portal:staff_dashboard' %}"
+                class="epd-cta group inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-white transition
+                       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2
+                       dark:focus-visible:ring-offset-base-900"
+            >
+                <span class="material-symbols-outlined text-[18px] leading-none" aria-hidden="true">dashboard</span>
+                <span class="relative z-10">{% translate "Staff dashboard" %}</span>
+                <span class="material-symbols-outlined relative z-10 text-[16px] leading-none transition group-hover:translate-x-0.5" aria-hidden="true">arrow_forward</span>
+            </a>
+
+            <a
+                href="{% url 'admin:employer_portal_accessrequest_changelist' %}"
+                class="group inline-flex items-center gap-2 rounded-full border border-base-200 bg-white/80 px-4 py-2 text-sm font-medium text-base-700 shadow-sm backdrop-blur transition
+                       hover:border-base-300 hover:bg-white
+                       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2
+                       dark:border-base-700 dark:bg-base-900/70 dark:text-base-200 dark:hover:bg-base-800 dark:focus-visible:ring-offset-base-900"
+            >
+                <span class="material-symbols-outlined text-[18px] leading-none" aria-hidden="true">inbox</span>
+                {% translate "Requests" %}
+                {% if pending_requests_count %}
+                    <span class="ms-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary-600 px-1.5 text-[10px] font-semibold tabular-nums text-white">
+                        {{ pending_requests_count }}
+                    </span>
+                {% endif %}
+            </a>
+
+            <button
+                type="button"
+                class="hidden items-center gap-2 rounded-full border border-base-200 bg-white/80 px-3 py-2 text-xs font-medium text-base-500 shadow-sm backdrop-blur transition hover:bg-white sm:inline-flex dark:border-base-700 dark:bg-base-900/70 dark:text-base-300"
+                onclick="(function(e){var ev=new KeyboardEvent('keydown',{key:'k',metaKey:true});document.dispatchEvent(ev);})(event)"
+                aria-label="{% translate 'Open command palette' %}"
+                title="⌘K"
+            >
+                <span class="material-symbols-outlined text-[16px] leading-none" aria-hidden="true">search</span>
+                <kbd class="rounded border border-base-200 px-1.5 py-0.5 font-mono text-[10px] dark:border-base-700">⌘K</kbd>
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- KPI GRID -->
+    <section aria-label="{% translate 'Key metrics' %}" class="epd-rise" data-delay="1">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+
+            {% for kpi in kpis %}
+
+                <a
+                    href="{{ kpi.href }}"
+                    class="epd-card epd-card--interactive group relative flex flex-col justify-between overflow-hidden p-5 ps-6
+                           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2
+                           dark:focus-visible:ring-offset-base-900"
+                    {% if kpi.hint %}title="{{ kpi.hint }}"{% endif %}
+                >
+                    <span class="epd-kpi-bar" aria-hidden="true"></span>
+
+                    <div class="flex items-start justify-between gap-4">
+
+                        <div class="min-w-0">
+
+                            <div class="text-[11px] font-semibold uppercase tracking-wider text-base-500">
+                                {{ kpi.title }}
+                            </div>
+
+                            <div class="epd-num mt-3 flex items-baseline gap-2 text-4xl font-semibold text-font-important-light dark:text-font-important-dark">
+                                <span>{{ kpi.value }}</span>
+                                {% if kpi.delta %}
+                                    <span class="text-xs font-medium {% if kpi.delta_direction == 'down' %}text-rose-600 dark:text-rose-400{% else %}text-emerald-600 dark:text-emerald-400{% endif %}">
+                                        {% if kpi.delta_direction == 'down' %}↓{% else %}↑{% endif %} {{ kpi.delta }}
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            {% if kpi.sparkline %}
+                                <div class="mt-2 h-6" aria-hidden="true">{{ kpi.sparkline|safe }}</div>
+                            {% endif %}
+
+                        </div>
+
+                        <div class="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-50 to-primary-100 text-primary-600 transition
+                                    group-hover:from-primary-100 group-hover:to-primary-200
+                                    dark:from-primary-500/10 dark:to-primary-500/5 dark:text-primary-400 dark:group-hover:from-primary-500/20 dark:group-hover:to-primary-500/10">
+                            <span class="material-symbols-outlined text-[22px] leading-none" aria-hidden="true">
+                                {{ kpi.icon }}
+                            </span>
+                        </div>
+
+                    </div>
+
+                    <div class="mt-5 flex items-end justify-between gap-3">
+
+                        <p class="text-xs leading-relaxed text-base-500" title="{{ kpi.hint }}">
+                            {{ kpi.hint }}
+                        </p>
+
+                        <span class="inline-flex shrink-0 items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-primary-600 opacity-0 transition -translate-x-1
+                                     group-hover:translate-x-0 group-hover:opacity-100
+                                     dark:text-primary-400">
+                            {% translate "Open" %}
+                            <span class="material-symbols-outlined text-[14px] leading-none" aria-hidden="true">north_east</span>
+                        </span>
+
+                    </div>
+
+                </a>
+
+            {% empty %}
+
+                <div class="epd-card col-span-full p-10 text-center">
+                    <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-base-100 to-base-200 text-base-400 dark:from-base-800 dark:to-base-900">
+                        <span class="material-symbols-outlined text-[26px] leading-none" aria-hidden="true">insights</span>
+                    </div>
+                    <h3 class="mt-5 text-sm font-semibold text-font-important-light dark:text-font-important-dark">
+                        {% translate "No dashboard metrics yet" %}
+                    </h3>
+                    <p class="mt-1 text-xs text-base-500">
+                        {% translate "Metrics will appear once there is activity in the portal." %}
+                    </p>
+                </div>
+
+            {% endfor %}
+
+        </div>
+    </section>
+
+
+    <!-- MAIN DASHBOARD GRID -->
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
+
+        <!-- RECENT REQUESTS -->
+        <section class="epd-rise xl:col-span-2" data-delay="2" aria-labelledby="recent-requests-heading">
+
+            <div class="epd-card overflow-hidden">
+
+                <div class="flex items-center justify-between gap-4 border-b border-base-200/60 px-6 py-5 dark:border-base-700/60">
+
+                    <div class="min-w-0">
+
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[18px] text-primary-500" aria-hidden="true">inbox</span>
+                            <h2 id="recent-requests-heading" class="text-base font-semibold text-font-important-light dark:text-font-important-dark">
+                                {% translate "Recent access requests" %}
+                            </h2>
+                            {% if pending_requests_count %}
+                                <span class="inline-flex h-5 items-center rounded-full bg-primary-50 px-2 text-[10px] font-semibold tabular-nums text-primary-700 dark:bg-primary-500/15 dark:text-primary-300">
+                                    {{ pending_requests_count }}
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <p class="mt-1 text-xs text-base-500">
+                            {% translate "Latest employer requests requiring attention or review." %}
+                        </p>
+
+                    </div>
+
+                    <a
+                        href="{% url 'admin:employer_portal_accessrequest_changelist' %}"
+                        class="group inline-flex shrink-0 items-center gap-1 rounded-full border border-base-200 bg-white/60 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-base-600 transition
+                               hover:border-primary-300 hover:text-primary-600
+                               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500
+                               dark:border-base-700 dark:bg-base-900/60 dark:text-base-300 dark:hover:border-primary-700 dark:hover:text-primary-400"
+                    >
+                        {% translate "View all" %}
+                        <span class="material-symbols-outlined text-[14px] leading-none transition group-hover:translate-x-0.5" aria-hidden="true">arrow_forward</span>
+                    </a>
+
+                </div>
+
+                {% if recent_requests %}
+
+                    <ul role="list" class="divide-y divide-base-200/60 dark:divide-base-700/60">
+
+                        {% for access_request in recent_requests %}
+
+                            <li class="group/row relative">
+                                <a
+                                    href="{{ access_request.url }}"
+                                    class="group relative block px-6 py-4 transition
+                                           hover:bg-gradient-to-r hover:from-primary-50/60 hover:to-transparent
+                                           focus-visible:outline-none focus-visible:bg-primary-50/60 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500
+                                           dark:hover:from-primary-500/5 dark:focus-visible:bg-primary-500/5"
+                                >
+                                    <span class="pointer-events-none absolute inset-y-0 start-0 w-0.5 bg-gradient-to-b from-primary-500 to-fuchsia-500 opacity-0 transition group-hover:opacity-100" aria-hidden="true"></span>
+
+                                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+                                        <div class="flex min-w-0 items-center gap-3">
+
+                                            <div class="hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-base-100 to-base-200 text-xs font-semibold uppercase text-base-600 shadow-inner sm:flex dark:from-base-800 dark:to-base-900 dark:text-base-300" aria-hidden="true">
+                                                {{ access_request.name|default:"?"|slice:":2" }}
+                                            </div>
+
+                                            <div class="min-w-0">
+
+                                                <div class="truncate font-medium text-font-important-light dark:text-font-important-dark" title="{{ access_request.name }}">
+                                                    {{ access_request.name|default:"—" }}
+                                                </div>
+
+                                                <div class="mt-0.5 flex items-center gap-2 truncate text-xs text-base-500" title="{{ access_request.company }}">
+                                                    <span class="material-symbols-outlined text-[14px] leading-none" aria-hidden="true">apartment</span>
+                                                    {{ access_request.company|default:"—" }}
+                                                </div>
+
+                                                <div class="mt-1.5 flex items-center gap-1.5 text-[11px] text-base-400">
+                                                    <span class="material-symbols-outlined text-[13px] leading-none" aria-hidden="true">schedule</span>
+                                                    <time datetime="{{ access_request.created_at|date:'c' }}"
+                                                          title="{{ access_request.created_at|date:'d M Y, H:i' }}">
+                                                        {% blocktranslate with time=access_request.created_at|timesince %}{{ time }} ago{% endblocktranslate %}
+                                                    </time>
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                        <div class="flex shrink-0 items-center gap-3">
+
+                                            <span class="inline-flex items-center gap-1.5 rounded-full border border-transparent px-2.5 py-1 text-[11px] font-medium {{ access_request.status_class }}">
+                                                {{ access_request.status }}
+                                            </span>
+
+                                            <span class="material-symbols-outlined text-base-300 transition group-hover:translate-x-0.5 group-hover:text-primary-500 dark:text-base-600" aria-hidden="true">
+                                                chevron_right
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+
+                                </a>
+
+                                {% if access_request.assigned_to == request.user %}
+                                    <span class="absolute end-3 top-3 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400">
+                                        {% translate "Assigned to you" %}
+                                    </span>
+                                {% elif access_request.can_assign %}
+                                    <a
+                                        href="{{ access_request.url }}?assign_me=1"
+                                        class="epd-no-print absolute end-3 top-3 hidden rounded-full border border-base-200 bg-white/90 px-2 py-0.5 text-[10px] font-medium text-base-600 shadow-sm group-hover/row:inline-block hover:border-primary-300 hover:text-primary-600 dark:border-base-700 dark:bg-base-900/90 dark:text-base-300"
+                                    >
+                                        {% translate "Assign to me" %}
+                                    </a>
+                                {% endif %}
+                            </li>
+
+                        {% endfor %}
+
+                    </ul>
+
+                {% else %}
+
+                    <div class="px-6 py-14 text-center">
+
+                        <div class="relative mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-base-100 to-base-200 text-base-400 shadow-inner dark:from-base-800 dark:to-base-900">
+                            <span class="material-symbols-outlined text-[28px] leading-none" aria-hidden="true">inbox</span>
+                        </div>
+
+                        <h3 class="mt-5 text-sm font-semibold text-font-important-light dark:text-font-important-dark">
+                            {% translate "No access requests yet" %}
+                        </h3>
+
+                        <p class="mx-auto mt-1 max-w-xs text-xs leading-relaxed text-base-500">
+                            {% translate "New employer requests will appear here as soon as they are submitted." %}
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+
+        <!-- EXPIRING ACCESS -->
+        <section class="epd-rise" data-delay="3" aria-labelledby="expiring-access-heading">
+
+            <div class="epd-card overflow-hidden">
+
+                <div class="border-b border-base-200/60 px-6 py-5 dark:border-base-700/60">
+
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[18px] text-orange-500" aria-hidden="true">schedule</span>
+                        <h2 id="expiring-access-heading" class="text-base font-semibold text-font-important-light dark:text-font-important-dark">
+                            {% translate "Expiring access" %}
+                        </h2>
+                    </div>
+
+                    <p class="mt-1 text-xs text-base-500">
+                        {% translate "Active employer grants approaching expiry." %}
+                    </p>
+
+                </div>
+
+                {% if expiring_soon %}
+
+                    <ul role="list" class="divide-y divide-base-200/60 dark:divide-base-700/60">
+
+                        {% for grant in expiring_soon %}
+
+                            <li class="group relative px-6 py-4 transition hover:bg-orange-50/40 dark:hover:bg-orange-500/5">
+
+                                <span class="pointer-events-none absolute inset-y-0 start-0 w-0.5 bg-gradient-to-b from-orange-500 to-amber-500 opacity-0 transition group-hover:opacity-100" aria-hidden="true"></span>
+
+                                <div class="flex items-start gap-3">
+
+                                    <div class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-50 to-amber-100 text-orange-600 shadow-sm dark:from-orange-500/15 dark:to-amber-500/10 dark:text-orange-400">
+                                        <span class="material-symbols-outlined text-[18px] leading-none" aria-hidden="true">schedule</span>
+                                    </div>
+
+                                    <div class="min-w-0 flex-1">
+
+                                        <div class="truncate font-medium text-font-important-light dark:text-font-important-dark" title="{{ grant.name }}">
+                                            {{ grant.name|default:"—" }}
+                                        </div>
+
+                                        <div class="mt-0.5 truncate text-xs text-base-500" title="{{ grant.company }}">
+                                            {{ grant.company|default:"—" }}
+                                        </div>
+
+                                        <div class="mt-2 inline-flex items-center gap-1.5 rounded-full bg-orange-50 px-2 py-0.5 text-[11px] font-medium text-orange-700 dark:bg-orange-500/10 dark:text-orange-300">
+                                            <span class="h-1 w-1 rounded-full bg-orange-500" aria-hidden="true"></span>
+                                            <time datetime="{{ grant.expires_at|date:'c' }}"
+                                                  title="{{ grant.expires_at|date:'d M Y, H:i' }}">
+                                                {% blocktranslate with time=grant.expires_at|timeuntil %}Expires in {{ time }}{% endblocktranslate %}
+                                            </time>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </li>
+
+                        {% endfor %}
+
+                    </ul>
+
+                {% else %}
+
+                    <div class="px-6 py-14 text-center">
+
+                        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-50 to-green-100 text-emerald-600 shadow-sm dark:from-emerald-500/15 dark:to-green-500/10 dark:text-emerald-400">
+                            <span class="material-symbols-outlined text-[28px] leading-none" aria-hidden="true">verified</span>
+                        </div>
+
+                        <h3 class="mt-5 text-sm font-semibold text-font-important-light dark:text-font-important-dark">
+                            {% translate "No urgent expiries" %}
+                        </h3>
+
+                        <p class="mx-auto mt-1 max-w-xs text-xs leading-relaxed text-base-500">
+                            {% translate "No active grants are expiring within the review window." %}
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <!-- RECENT ACTIVITY -->
+    <section class="epd-rise" data-delay="4" aria-labelledby="recent-activity-heading">
+
+        <div class="epd-card overflow-hidden">
+
+            <div class="flex flex-col gap-3 border-b border-base-200/60 px-6 py-5 lg:flex-row lg:items-center lg:justify-between dark:border-base-700/60">
+
+                <div class="min-w-0">
+
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[18px] text-cyan-500" aria-hidden="true">history</span>
+                        <h2 id="recent-activity-heading" class="text-base font-semibold text-font-important-light dark:text-font-important-dark">
+                            {% translate "Recent activity" %}
+                        </h2>
+                        {% if activity_total %}
+                            <span class="inline-flex h-5 items-center rounded-full bg-base-100 px-2 text-[10px] font-semibold tabular-nums text-base-600 dark:bg-base-800 dark:text-base-300">
+                                {{ activity_total }}
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <p class="mt-1 text-xs text-base-500">
+                        {% translate "Latest employer portal and document access events." %}
+                    </p>
+
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2 epd-no-print">
+
+                    <a
+                        href="?format=csv{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}"
+                        class="group inline-flex items-center gap-1.5 rounded-full border border-base-200 bg-white/60 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-base-600 transition
+                               hover:border-primary-300 hover:text-primary-600
+                               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500
+                               dark:border-base-700 dark:bg-base-900/60 dark:text-base-300 dark:hover:border-primary-700 dark:hover:text-primary-400"
+                        download
+                    >
+                        <span class="material-symbols-outlined text-[14px] leading-none" aria-hidden="true">download</span>
+                        {% translate "Export CSV" %}
+                    </a>
+
+                    <a
+                        href="{% url 'admin:employer_portal_accesslog_changelist' %}"
+                        class="group inline-flex items-center gap-1 rounded-full border border-base-200 bg-white/60 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-base-600 transition
+                               hover:border-primary-300 hover:text-primary-600
+                               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500
+                               dark:border-base-700 dark:bg-base-900/60 dark:text-base-300 dark:hover:border-primary-700 dark:hover:text-primary-400"
+                    >
+                        {% translate "View logs" %}
+                        <span class="material-symbols-outlined text-[14px] leading-none transition group-hover:translate-x-0.5" aria-hidden="true">arrow_forward</span>
+                    </a>
+
+                </div>
+
+            </div>
+
+            <!-- FILTER / SEARCH BAR -->
+            <form
+                id="epd-activity-filter"
+                method="get"
+                action=""
+                class="epd-no-print flex flex-wrap items-center gap-2 border-b border-base-200/60 bg-base-50/40 px-6 py-3 dark:border-base-700/60 dark:bg-base-800/30"
+                role="search"
+                aria-label="{% translate 'Filter activity' %}"
+            >
+                <label class="relative flex items-center">
+                    <span class="material-symbols-outlined pointer-events-none absolute start-2.5 text-[16px] text-base-400" aria-hidden="true">search</span>
+                    <input
+                        type="search"
+                        name="q"
+                        value="{{ request.GET.q|default:'' }}"
+                        placeholder="{% translate 'Search event or employer…' %}"
+                        class="h-9 w-56 rounded-full border border-base-200 bg-white ps-8 pe-3 text-xs text-base-700 placeholder:text-base-400 focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-base-700 dark:bg-base-900 dark:text-base-200"
+                    >
+                </label>
+
+                <label class="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-base-500">
+                    {% translate "From" %}
+                    <input
+                        type="date"
+                        name="from"
+                        value="{{ request.GET.from|default:'' }}"
+                        class="h-9 rounded-full border border-base-200 bg-white px-3 text-xs text-base-700 focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-base-700 dark:bg-base-900 dark:text-base-200"
+                    >
+                </label>
+
+                <label class="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-base-500">
+                    {% translate "To" %}
+                    <input
+                        type="date"
+                        name="to"
+                        value="{{ request.GET.to|default:'' }}"
+                        class="h-9 rounded-full border border-base-200 bg-white px-3 text-xs text-base-700 focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-base-700 dark:bg-base-900 dark:text-base-200"
+                    >
+                </label>
+
+                <button
+                    type="submit"
+                    class="inline-flex h-9 items-center gap-1 rounded-full bg-primary-600 px-3 text-[11px] font-semibold uppercase tracking-wider text-white transition hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-base-900"
+                >
+                    {% translate "Apply" %}
+                </button>
+
+                {% if request.GET.q or request.GET.from or request.GET.to %}
+                    <a
+                        href="?"
+                        class="inline-flex h-9 items-center rounded-full px-3 text-[11px] font-medium uppercase tracking-wider text-base-500 transition hover:text-base-700 dark:hover:text-base-300"
+                    >
+                        {% translate "Clear" %}
+                    </a>
+                {% endif %}
+            </form>
+
+            <div
+                id="epd-activity-region"
+                aria-live="polite"
+                aria-busy="false"
+                {% if htmx_enabled %}hx-get="{{ request.path }}?section=activity&format=partial{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}" hx-trigger="every 30s" hx-swap="innerHTML"{% endif %}
+            >
+                {% if recent_activity %}
+
+                    <!-- Desktop table -->
+                    <div class="hidden overflow-x-auto md:block">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-base-50/60 text-[11px] uppercase tracking-wider text-base-500 dark:bg-base-800/40">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 font-semibold">
+                                        <a href="?sort=event&dir={% if request.GET.sort == 'event' and request.GET.dir != 'desc' %}desc{% else %}asc{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+                                           class="inline-flex items-center gap-1 hover:text-base-700 dark:hover:text-base-200">
+                                            {% translate "Event" %}
+                                            {% if request.GET.sort == 'event' %}
+                                                <span class="material-symbols-outlined text-[12px]" aria-hidden="true">{% if request.GET.dir == 'desc' %}arrow_downward{% else %}arrow_upward{% endif %}</span>
+                                            {% endif %}
+                                        </a>
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 font-semibold">
+                                        <a href="?sort=who&dir={% if request.GET.sort == 'who' and request.GET.dir != 'desc' %}desc{% else %}asc{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+                                           class="inline-flex items-center gap-1 hover:text-base-700 dark:hover:text-base-200">
+                                            {% translate "Employer / Request" %}
+                                            {% if request.GET.sort == 'who' %}
+                                                <span class="material-symbols-outlined text-[12px]" aria-hidden="true">{% if request.GET.dir == 'desc' %}arrow_downward{% else %}arrow_upward{% endif %}</span>
+                                            {% endif %}
+                                        </a>
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 font-semibold">{% translate "IP address" %}</th>
+                                    <th scope="col" class="px-6 py-3 font-semibold">
+                                        <a href="?sort=created_at&dir={% if request.GET.sort == 'created_at' and request.GET.dir != 'desc' %}desc{% else %}asc{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+                                           class="inline-flex items-center gap-1 hover:text-base-700 dark:hover:text-base-200">
+                                            {% translate "Date" %}
+                                            {% if request.GET.sort == 'created_at' or not request.GET.sort %}
+                                                <span class="material-symbols-outlined text-[12px]" aria-hidden="true">{% if request.GET.dir == 'asc' %}arrow_upward{% else %}arrow_downward{% endif %}</span>
+                                            {% endif %}
+                                        </a>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-base-200/60 dark:divide-base-700/60">
+                                {% for activity in recent_activity %}
+                                    <tr class="group transition hover:bg-gradient-to-r hover:from-primary-50/40 hover:to-transparent dark:hover:from-primary-500/5">
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center gap-2">
+                                                <span class="h-1.5 w-1.5 rounded-full bg-primary-500/60" aria-hidden="true"></span>
+                                                <span class="font-medium text-font-important-light dark:text-font-important-dark">
+                                                    {{ activity.event }}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 text-base-500">
+                                            {{ activity.who|default:"—" }}
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            {% if activity.ip %}
+                                                <button
+                                                    type="button"
+                                                    data-copy="{{ activity.ip }}"
+                                                    class="group/copy inline-flex items-center gap-1.5 rounded-md bg-base-100 px-2 py-0.5 font-mono text-[11px] text-base-600 transition hover:bg-base-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:bg-base-800 dark:text-base-300 dark:hover:bg-base-700"
+                                                    aria-label="{% blocktranslate with ip=activity.ip %}Copy IP address {{ ip }}{% endblocktranslate %}"
+                                                    title="{% translate 'Click to copy' %}"
+                                                >
+                                                    {{ activity.ip }}
+                                                    <span class="material-symbols-outlined text-[12px] opacity-0 transition group-hover/copy:opacity-100" aria-hidden="true">content_copy</span>
+                                                </button>
+                                            {% else %}
+                                                <span class="text-base-400">—</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="px-6 py-4 text-xs whitespace-nowrap text-base-500">
+                                            <time datetime="{{ activity.created_at|date:'c' }}"
+                                                  title="{{ activity.created_at|date:'d M Y, H:i' }}">
+                                                {% blocktranslate with time=activity.created_at|timesince %}{{ time }} ago{% endblocktranslate %}
+                                            </time>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Mobile stacked -->
+                    <ul role="list" class="divide-y divide-base-200/60 md:hidden dark:divide-base-700/60">
+                        {% for activity in recent_activity %}
+                            <li class="px-6 py-4">
+                                <div class="flex items-start justify-between gap-3">
+                                    <span class="font-medium text-font-important-light dark:text-font-important-dark">
+                                        {{ activity.event }}
+                                    </span>
+                                    <time class="shrink-0 text-[11px] text-base-500 whitespace-nowrap"
+                                          datetime="{{ activity.created_at|date:'c' }}"
+                                          title="{{ activity.created_at|date:'d M Y, H:i' }}">
+                                        {% blocktranslate with time=activity.created_at|timesince %}{{ time }} ago{% endblocktranslate %}
+                                    </time>
+                                </div>
+                                <div class="mt-2 text-sm text-base-500">
+                                    {{ activity.who|default:"—" }}
+                                </div>
+                                {% if activity.ip %}
+                                    <div class="mt-2">
+                                        <button
+                                            type="button"
+                                            data-copy="{{ activity.ip }}"
+                                            class="inline-flex items-center gap-1.5 rounded-md bg-base-100 px-2 py-0.5 font-mono text-[11px] text-base-600 dark:bg-base-800 dark:text-base-300"
+                                        >
+                                            IP: {{ activity.ip }}
+                                            <span class="material-symbols-outlined text-[12px]" aria-hidden="true">content_copy</span>
+                                        </button>
+                                    </div>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+
+                {% else %}
+
+                    <div class="px-6 py-14 text-center">
+
+                        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-base-100 to-base-200 text-base-400 shadow-inner dark:from-base-800 dark:to-base-900">
+                            <span class="material-symbols-outlined text-[28px] leading-none" aria-hidden="true">history</span>
+                        </div>
+
+                        <h3 class="mt-5 text-sm font-semibold text-font-important-light dark:text-font-important-dark">
+                            {% if request.GET.q or request.GET.from or request.GET.to %}
+                                {% translate "No matching activity" %}
+                            {% else %}
+                                {% translate "No recent activity" %}
+                            {% endif %}
+                        </h3>
+
+                        <p class="mx-auto mt-1 max-w-sm text-xs leading-relaxed text-base-500">
+                            {% if request.GET.q or request.GET.from or request.GET.to %}
+                                {% translate "Try adjusting your filters or clearing them to see all events." %}
+                            {% else %}
+                                {% translate "Portal activity will appear here once employers interact with the system." %}
+                            {% endif %}
+                        </p>
+
+                    </div>
+
+                {% endif %}
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- QUICK LINKS -->
+    <section class="epd-rise" data-delay="5" aria-labelledby="portfolio-mgmt-heading">
+
+        <div class="epd-card overflow-hidden">
+
+            <div class="border-b border-base-200/60 px-6 py-5 dark:border-base-700/60">
+
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[18px] text-fuchsia-500" aria-hidden="true">folder_managed</span>
+                    <h2 id="portfolio-mgmt-heading" class="text-base font-semibold text-font-important-light dark:text-font-important-dark">
+                        {% translate "Portfolio management" %}
+                    </h2>
+                </div>
+
+                <p class="mt-1 text-xs text-base-500">
+                    {% translate "Common administration areas." %}
+                </p>
+
+            </div>
+
+            <div class="grid grid-cols-1 gap-px bg-base-200/60 sm:grid-cols-2 lg:grid-cols-4 dark:bg-base-700/60">
+
+                <!-- DOCUMENTS -->
+                <a
+                    href="{% url 'admin:employer_portal_document_changelist' %}"
+                    class="group relative flex items-center gap-3 bg-white/60 px-6 py-5 backdrop-blur transition
+                           hover:bg-white
+                           focus-visible:outline-none focus-visible:bg-white focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500
+                           dark:bg-base-900/40 dark:hover:bg-base-800/60 dark:focus-visible:bg-base-800/60"
+                >
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-50 to-primary-100 text-primary-600 transition group-hover:scale-105 dark:from-primary-500/15 dark:to-primary-500/5 dark:text-primary-400" aria-hidden="true">
+                        <span class="material-symbols-outlined text-[20px] leading-none">description</span>
+                    </span>
+                    <div class="min-w-0">
+                        <div class="text-sm font-medium text-font-important-light dark:text-font-important-dark">
+                            {% translate "Documents" %}
+                        </div>
+                        <div class="mt-0.5 truncate text-xs text-base-500">
+                            {% blocktranslate count n=documents_count|default:0 %}{{ n }} active document{% plural %}{{ n }} active documents{% endblocktranslate %}
+                        </div>
+                    </div>
+                </a>
+
+                <!-- REFEREES -->
+                <a
+                    href="{% url 'admin:employer_portal_referee_changelist' %}"
+                    class="group relative flex items-center gap-3 bg-white/60 px-6 py-5 backdrop-blur transition
+                           hover:bg-white
+                           focus-visible:outline-none focus-visible:bg-white focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500
+                           dark:bg-base-900/40 dark:hover:bg-base-800/60 dark:focus-visible:bg-base-800/60"
+                >
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-fuchsia-50 to-pink-100 text-fuchsia-600 transition group-hover:scale-105 dark:from-fuchsia-500/15 dark:to-pink-500/5 dark:text-fuchsia-400" aria-hidden="true">
+                        <span class="material-symbols-outlined text-[20px] leading-none">supervisor_account</span>
+                    </span>
+                    <div class="min-w-0">
+                        <div class="text-sm font-medium text-font-important-light dark:text-font-important-dark">
+                            {% translate "Referees" %}
+                        </div>
+                        <div class="mt-0.5 truncate text-xs text-base-500">
+                            {% translate "Manage reference contacts" %}
+                        </div>
+                    </div>
+                </a>
+
+                <!-- EMPLOYERS -->
+                <a
+                    href="{% url 'admin:employer_portal_employer_changelist' %}"
+                    class="group relative flex items-center gap-3 bg-white/60 px-6 py-5 backdrop-blur transition
+                           hover:bg-white
+                           focus-visible:outline-none focus-visible:bg-white focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500
+                           dark:bg-base-900/40 dark:hover:bg-base-800/60 dark:focus-visible:bg-base-800/60"
+                >
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-50 to-sky-100 text-cyan-600 transition group-hover:scale-105 dark:from-cyan-500/15 dark:to-sky-500/5 dark:text-cyan-400" aria-hidden="true">
+                        <span class="material-symbols-outlined text-[20px] leading-none">apartment</span>
+                    </span>
+                    <div class="min-w-0">
+                        <div class="text-sm font-medium text-font-important-light dark:text-font-important-dark">
+                            {% translate "Employers" %}
+                        </div>
+                        <div class="mt-0.5 truncate text-xs text-base-500">
+                            {% translate "Employer records" %}
+                        </div>
+                    </div>
+                </a>
+
+                <!-- ACCESS GRANTS -->
+                <a
+                    href="{% url 'admin:employer_portal_accessgrant_changelist' %}"
+                    class="group relative flex items-center gap-3 bg-white/60 px-6 py-5 backdrop-blur transition
+                           hover:bg-white
+                           focus-visible:outline-none focus-visible:bg-white focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500
+                           dark:bg-base-900/40 dark:hover:bg-base-800/60 dark:focus-visible:bg-base-800/60"
+                >
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-50 to-orange-100 text-amber-600 transition group-hover:scale-105 dark:from-amber-500/15 dark:to-orange-500/5 dark:text-amber-400" aria-hidden="true">
+                        <span class="material-symbols-outlined text-[20px] leading-none">key</span>
+                    </span>
+                    <div class="min-w-0">
+                        <div class="text-sm font-medium text-font-important-light dark:text-font-important-dark">
+                            {% translate "Access grants" %}
+                        </div>
+                        <div class="mt-0.5 truncate text-xs text-base-500">
+                            {% translate "Active employer permissions" %}
+                        </div>
+                    </div>
+                </a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<!-- COMMAND PALETTE -->
+<div id="epd-cmdk" class="epd-cmdk epd-no-print" hidden role="dialog" aria-modal="true" aria-label="{% translate 'Command palette' %}">
+    <div class="epd-cmdk__backdrop" data-cmdk-close></div>
+    <div class="epd-cmdk__panel" role="document">
+        <input
+            id="epd-cmdk-input"
+            type="text"
+            placeholder="{% translate 'Jump to… (↑↓ to navigate, ↵ to open)' %}"
+            autocomplete="off"
+            spellcheck="false"
+            aria-label="{% translate 'Search destinations' %}"
+        >
+        <ul id="epd-cmdk-list" class="epd-cmdk__list" role="listbox"></ul>
+    </div>
+</div>
+
+
+<!-- TOASTS -->
+<div id="epd-toasts" class="epd-no-print fixed bottom-4 end-4 z-[9999] flex flex-col gap-2" role="status" aria-live="polite" aria-atomic="true"></div>
+
+{% endblock %}

@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Certifications | Dennis Ndwigah Portfolio Admin</title>
+
+    <meta
+        name="description"
+        content="Manage Dennis Ndwigah professional certifications."
+    >
+
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body class="admin-dashboard-page">
+
+<div class="admin-app">
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <aside class="admin-sidebar" id="adminSidebar">
+
+        <div class="sidebar-header">
+
+            <a href="dashboard.html" class="admin-logo">
+                <span class="brand-mark">DN</span>
+
+                <span class="brand-text">
+                    <strong>DN Portfolio</strong>
+                    <small>Admin console</small>
+                </span>
+            </a>
+
+            <button
+                type="button"
+                class="mobile-close"
+                id="closeSidebar"
+                aria-label="Close navigation"
+            >
+                <i data-lucide="x"></i>
+            </button>
+
+        </div>
+
+        <nav class="admin-navigation">
+
+            <div class="nav-section">
+
+                <span class="nav-section-title">
+                    Workspace
+                </span>
+
+                <a href="dashboard.html" class="nav-link">
+                    <span class="nav-icon">
+                        <i data-lucide="layout-dashboard"></i>
+                    </span>
+                    <span>Dashboard</span>
+                </a>
+
+                <a href="profile.html" class="nav-link">
+                    <span class="nav-icon">
+                        <i data-lucide="user-round"></i>
+                    </span>
+                    <span>Profile</span>
+                </a>
+
+                <a href="experience.html" class="nav-link">
+                    <span class="nav-icon">
+                        <i data-lucide="briefcase-business"></i>
+                    </span>
+                    <span>Experience</span>
+                </a>
+
+                <a href="projects.html" class="nav-link">
+                    <span class="nav-icon">
+                        <i data-lucide="folder-kanban"></i>
+                    </span>
+                    <span>Projects</span>
+                </a>
+
+                <a href="skills.html" class="nav-link">
+                    <span class="nav-icon">
+                        <i data-lucide="sparkles"></i>
+                    </span>
+                    <span>Skills</span>
+                </a>
+
+            </div>
+
+            <div class="nav-section">
+
+                <span class="nav-section-title">
+                    Credentials
+                </span>
+
+                <a
+                    href="certifications.html"
+                    class="nav-link active"
+                    aria-current="page"
+                >
+                    <span class="nav-icon">
+                        <i data-lucide="award"></i>
+                    </span>
+                    <span>Certifications</span>
+                </a>
+
+                <a href="documents.html" class="nav-link">
+
+                    <span class="nav-icon">
+                        <i data-lucide="file-text"></i>
+                    </span>
+
+                    <span>Documents</span>
+
+                    <span
+                        class="nav-badge"
+                        id="documentCount"
+                        aria-label="Document count"
+                    >
+                        0
+                    </span>
+
+                </a>
+
+            </div>
+
+            <div class="nav-section">
+
+                <span class="nav-section-title">
+                    System
+                </span>
+
+                <a href="settings.html" class="nav-link">
+
+                    <span class="nav-icon">
+                        <i data-lucide="settings-2"></i>
+                    </span>
+
+                    <span>Settings</span>
+
+                </a>
+
+                <a href="employer-access.html" class="nav-link">
+
+                    <span class="nav-icon">
+                        <i data-lucide="shield-check"></i>
+                    </span>
+
+                    <span>Employer Access</span>
+
+                </a>
+
+            </div>
+
+        </nav>
+
+        <div class="sidebar-footer">
+
+            <div class="admin-user">
+
+                <div class="user-avatar">
+                    DN
+                </div>
+
+                <div class="user-details">
+
+                    <strong>
+                        Dennis Ndwigah
+                    </strong>
+
+                    <span>
+                        Administrator
+                    </span>
+
+                </div>
+
+            </div>
+
+            <button
+                type="button"
+                class="logout-button"
+                id="logoutButton"
+            >
+                <i data-lucide="log-out"></i>
+                <span>Sign out</span>
+            </button>
+
+        </div>
+
+    </aside>
+
+    <main
+        class="admin-main"
+        id="mainContent"
+        tabindex="-1"
+    >
+
+        <header class="admin-topbar">
+
+            <button
+                type="button"
+                class="menu-button"
+                id="openSidebar"
+                aria-label="Open navigation"
+            >
+                <i data-lucide="menu"></i>
+            </button>
+
+            <div class="topbar-title">
+                Certifications
+            </div>
+
+            <div class="topbar-actions">
+
+                <a
+                    href="../index.html"
+                    class="view-site-button"
+                    target="_blank"
+                    rel="noopener"
+                >
+                    <i data-lucide="external-link"></i>
+                    <span>View site</span>
+                </a>
+
+            </div>
+
+        </header>
+
+        <div class="admin-content">
+
+            <section class="page-heading">
+
+                <div>
+
+                    <span class="eyebrow">
+                        CREDENTIALS
+                    </span>
+
+                    <h1>
+                        Certifications
+                    </h1>
+
+                    <p>
+                        Manage professional certifications and
+                        credentials displayed on your portfolio.
+                    </p>
+
+                </div>
+
+            </section>
+
+            <section class="dashboard-card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h2>
+                            Professional certifications
+                        </h2>
+
+                        <p>
+                            Add certifications, verify credential details
+                            and control their public visibility.
+                        </p>
+
+                    </div>
+
+                    <button
+                        type="button"
+                        class="primary-button"
+                        id="addCertificationButton"
+                    >
+                        <i data-lucide="plus"></i>
+                        <span>Add certification</span>
+                    </button>
+
+                </div>
+
+            </section>
+
+            <section
+                id="certificationList"
+                class="certification-admin-list"
+                aria-live="polite"
+            ></section>
+
+        </div>
+
+        <footer class="admin-footer">
+
+            <span>
+                © <span id="currentYear"></span>
+                Dennis Ndwigah
+            </span>
+
+            <span>
+                Portfolio Administration
+            </span>
+
+        </footer>
+
+    </main>
+
+</div>
+
+<div
+    class="admin-modal hidden"
+    id="certificationModal"
+    aria-hidden="true"
+>
+
+    <div class="admin-modal-content">
+
+        <div class="admin-modal-header">
+
+            <div>
+
+                <h2 id="modalTitle">
+                    Add Certification
+                </h2>
+
+                <p>
+                    Add the certification details and visibility settings.
+                </p>
+
+            </div>
+
+            <button
+                type="button"
+                class="modal-close"
+                id="closeCertificationModal"
+                aria-label="Close"
+            >
+                <i data-lucide="x"></i>
+            </button>
+
+        </div>
+
+        <form id="certificationForm">
+
+            <input
+                type="hidden"
+                id="certificationId"
+            >
+
+            <div class="form-grid">
+
+                <div class="form-group">
+
+                    <label for="certificationName">
+                        Certification name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="certificationName"
+                        required
+                    >
+
+                </div>
+
+                <div class="form-group">
+
+                    <label for="certificationOrganization">
+                        Issuing organization
+                    </label>
+
+                    <input
+                        type="text"
+                        id="certificationOrganization"
+                        required
+                    >
+
+                </div>
+
+                <div class="form-group">
+
+                    <label for="certificationDate">
+                        Issue date
+                    </label>
+
+                    <input
+                        type="month"
+                        id="certificationDate"
+                    >
+
+                </div>
+
+                <div class="form-group">
+
+                    <label for="certificationExpiry">
+                        Expiry date
+                    </label>
+
+                    <input
+                        type="month"
+                        id="certificationExpiry"
+                    >
+
+                </div>
+
+                <div class="form-group">
+
+                    <label for="certificationCredentialId">
+                        Credential ID
+                    </label>
+
+                    <input
+                        type="text"
+                        id="certificationCredentialId"
+                    >
+
+                </div>
+
+                <div class="form-group">
+
+                    <label for="certificationUrl">
+                        Verification URL
+                    </label>
+
+                    <input
+                        type="url"
+                        id="certificationUrl"
+                        placeholder="https://"
+                    >
+
+                </div>
+
+                <div class="form-group full-width">
+
+                    <label for="certificationDescription">
+                        Description
+                    </label>
+
+                    <textarea
+                        id="certificationDescription"
+                        rows="4"
+                    ></textarea>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label for="certificationVisibility">
+                        Visibility
+                    </label>
+
+                    <select id="certificationVisibility">
+
+                        <option value="public">
+                            Public
+                        </option>
+
+                        <option value="hidden">
+                            Hidden
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="form-group checkbox-group">
+
+                    <label>
+
+                        <input
+                            type="checkbox"
+                            id="certificationFeatured"
+                        >
+
+                        <span>
+                            Feature on portfolio
+                        </span>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+            <div class="admin-form-actions">
+
+                <button
+                    type="button"
+                    class="admin-secondary-btn"
+                    id="cancelCertification"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    class="primary-button"
+                >
+                    <i data-lucide="save"></i>
+                    <span>Save certification</span>
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="js/admin.js"></script>
+<script src="js/certifications.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        if (window.lucide) {
+            lucide.createIcons({
+                attrs: {
+                    "stroke-width": 1.8
+                }
+            });
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,66 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <meta name="referrer" content="same-origin">
+
+  <title>{% block title %}Employer access{% endblock %} · Dennis Ndwigah Njeru</title>
+
+  <link
+    rel="stylesheet"
+    href="{% static 'employer_portal/portal.css' %}"
+  >
+
+  {% block head %}{% endblock %}
+</head>
+
+<body class="{% block body_class %}page-public{% endblock %}">
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="masthead">
+    <div class="wrap masthead__inner">
+      <a
+        class="brand"
+        href="{% url 'employer_portal:request_access' %}"
+        aria-label="Dennis Ndwigah Njeru employer access portal"
+      >
+        <span class="brand__mark" aria-hidden="true">DN</span>
+
+        <span class="brand__text">
+          <span class="brand__name">Dennis Ndwigah Njeru</span>
+          <span class="brand__sub">Employer access portal</span>
+        </span>
+      </a>
+
+      {% block masthead_aside %}{% endblock %}
+    </div>
+  </header>
+
+  <main id="main" class="wrap wrap--main">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-foot">
+    <div class="wrap site-foot__inner">
+      <p>
+        Access is limited to the resources approved for your request and
+        expires automatically.
+      </p>
+
+      <p class="site-foot__meta">
+        All times are shown in the site’s local time zone.
+      </p>
+    </div>
+  </footer>
+
+  <script
+    src="{% static 'employer_portal/portal.js' %}"
+    defer
+  ></script>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

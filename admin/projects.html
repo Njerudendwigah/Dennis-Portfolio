@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="Projects management for Dennis Ndwigah Portfolio Admin."
+    >
+
+    <title>Projects | Dennis Ndwigah Portfolio Admin</title>
+
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/projects.css">
+</head>
+
+<body class="admin-dashboard-page">
+
+<div class="admin-app">
+
+    <!-- =========================================
+         SIDEBAR OVERLAY
+         ========================================= -->
+
+    <div
+        class="sidebar-overlay"
+        id="sidebarOverlay"
+        aria-hidden="true"
+    ></div>
+
+
+    <!-- =========================================
+         SIDEBAR
+         ========================================= -->
+
+    <aside
+        class="admin-sidebar"
+        id="adminSidebar"
+        aria-label="Admin navigation"
+    >
+
+        <div class="sidebar-header">
+
+            <a
+                href="dashboard.html"
+                class="admin-logo"
+            >
+                <span class="brand-mark">DN</span>
+
+                <span class="brand-text">
+                    <strong>Dennis</strong>
+                    <small>Portfolio Admin</small>
+                </span>
+            </a>
+
+            <button
+                type="button"
+                class="mobile-close"
+                id="closeSidebar"
+                aria-label="Close navigation"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <!-- =====================================
+             NAVIGATION
+             ===================================== -->
+
+        <nav class="admin-navigation">
+
+            <div class="nav-section">
+
+                <span class="nav-section-title">
+                    Workspace
+                </span>
+
+                <a
+                    href="dashboard.html"
+                    class="nav-link"
+                >
+                    <span class="nav-icon">⌂</span>
+                    <span>Dashboard</span>
+                </a>
+
+                <a
+                    href="profile.html"
+                    class="nav-link"
+                >
+                    <span class="nav-icon">◯</span>
+                    <span>Profile</span>
+                </a>
+
+                <a
+                    href="experience.html"
+                    class="nav-link"
+                >
+                    <span class="nav-icon">▣</span>
+                    <span>Experience</span>
+                </a>
+
+                <a
+                    href="projects.html"
+                    class="nav-link active"
+                    aria-current="page"
+                >
+                    <span class="nav-icon">◆</span>
+                    <span>Projects</span>
+                </a>
+
+                <a
+                    href="skills.html"
+                    class="nav-link"
+                >
+                    <span class="nav-icon">◇</span>
+                    <span>Skills</span>
+                </a>
+
+            </div>
+
+
+            <div class="nav-section">
+
+                <span class="nav-section-title">
+                    Credentials
+                </span>
+
+                <a
+                    href="certifications.html"
+                    class="nav-link"
+                >
+                    <span class="nav-icon">✓</span>
+                    <span>Certifications</span>
+                </a>
+
+                <a
+                    href="documents.html"
+                    class="nav-link"
+                >
+                    <span class="nav-icon">▤</span>
+                    <span>Documents</span>
+                </a>
+
+                <a
+                    href="employer-access.html"
+                    class="nav-link"
+                >
+                    <span class="nav-icon">↗</span>
+                    <span>Employer Access</span>
+                </a>
+
+            </div>
+
+
+            <div class="nav-section">
+
+                <span class="nav-section-title">
+                    System
+                </span>
+
+                <a
+                    href="settings.html"
+                    class="nav-link"
+                >
+                    <span class="nav-icon">⚙</span>
+                    <span>Settings</span>
+                </a>
+
+                <a
+                    href="../index.html"
+                    class="nav-link"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <span class="nav-icon">↗</span>
+                    <span>View Website</span>
+                </a>
+
+            </div>
+
+        </nav>
+
+
+        <!-- =====================================
+             SIDEBAR FOOTER
+             ===================================== -->
+
+        <div class="sidebar-footer">
+
+            <div class="admin-user">
+
+                <div class="user-avatar">
+                    DN
+                </div>
+
+                <div class="user-details">
+                    <strong>Dennis Ndwigah</strong>
+                    <span>Administrator</span>
+                </div>
+
+            </div>
+
+            <button
+                type="button"
+                class="logout-button"
+                id="logoutButton"
+            >
+                Sign out
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =========================================
+         MAIN CONTENT
+         ========================================= -->
+
+    <main class="admin-main">
+
+
+        <!-- =====================================
+             TOP BAR
+             ===================================== -->
+
+        <header class="admin-topbar">
+
+            <button
+                type="button"
+                class="menu-button"
+                id="openSidebar"
+                aria-label="Open navigation"
+            >
+                ☰
+            </button>
+
+            <div class="topbar-title">
+                Projects Management
+            </div>
+
+            <div class="topbar-actions">
+
+                <a
+                    href="../index.html"
+                    class="view-site-button"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    View site ↗
+                </a>
+
+                <div
+                    class="topbar-avatar"
+                    aria-label="Dennis Ndwigah"
+                >
+                    DN
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- =====================================
+             CONTENT
+             ===================================== -->
+
+        <div class="admin-content">
+
+
+            <!-- =================================
+                 PAGE HEADER
+                 ================================= -->
+
+            <section class="page-heading">
+
+                <div>
+
+                    <span class="eyebrow">
+                        CASE STUDIES & RESULTS
+                    </span>
+
+                    <h1>
+                        Projects
+                    </h1>
+
+                    <p>
+                        Manage the projects and operational
+                        case studies displayed on your public
+                        portfolio.
+                    </p>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="primary-button"
+                    id="addProjectButton"
+                >
+                    + Add project
+                </button>
+
+            </section>
+
+
+            <!-- =================================
+                 PROJECT SUMMARY
+                 ================================= -->
+
+            <section class="projects-toolbar">
+
+                <div class="project-summary-stats">
+
+                    <div class="project-stat">
+
+                        <strong id="projectCount">
+                            0
+                        </strong>
+
+                        <span>
+                            Projects
+                        </span>
+
+                    </div>
+
+
+                    <div class="project-stat-divider"></div>
+
+
+                    <div class="project-stat secondary">
+
+                        <strong id="featuredProjectCount">
+                            0
+                        </strong>
+
+                        <span>
+                            Featured
+                        </span>
+
+                    </div>
+
+
+                    <div class="project-stat secondary">
+
+                        <strong id="publicProjectCount">
+                            0
+                        </strong>
+
+                        <span>
+                            Public
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="secondary-button"
+                    id="resetProjects"
+                >
+                    Restore default data
+                </button>
+
+            </section>
+
+
+            <!-- =================================
+                 PROJECT LIST
+                 ================================= -->
+
+            <section class="admin-card">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            PORTFOLIO WORK
+                        </span>
+
+                        <h2>
+                            Your projects
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="projectList"
+                    class="project-list"
+                    aria-live="polite"
+                ></div>
+
+            </section>
+
+
+            <!-- =================================
+                 PROJECT EDITOR
+                 ================================= -->
+
+            <section
+                class="admin-card projects-editor"
+                id="projectEditor"
+            >
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            EDITOR
+                        </span>
+
+                        <h2 id="editorTitle">
+                            Add a project
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <form
+                    id="projectForm"
+                    novalidate
+                >
+
+                    <!-- Hidden record ID -->
+
+                    <input
+                        type="hidden"
+                        id="projectId"
+                    >
+
+
+                    <!-- =================================
+                         BASIC INFORMATION
+                         ================================= -->
+
+                    <div class="form-grid">
+
+                        <div class="form-group">
+
+                            <label for="projectTitle">
+                                Project title
+                                <span>*</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                id="projectTitle"
+                                name="title"
+                                maxlength="150"
+                                required
+                                autocomplete="off"
+                                placeholder="e.g. Warehouse Capacity Optimization"
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="organization">
+                                Organization / Client
+                                <span>*</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                id="organization"
+                                name="organization"
+                                maxlength="140"
+                                required
+                                autocomplete="organization"
+                                placeholder="e.g. iProcure Ltd"
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="category">
+                                Category
+                                <span>*</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                id="category"
+                                name="category"
+                                maxlength="80"
+                                required
+                                placeholder="e.g. Supply Chain & Operations"
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="period">
+                                Period
+                            </label>
+
+                            <input
+                                type="text"
+                                id="period"
+                                name="period"
+                                maxlength="60"
+                                placeholder="e.g. 2023"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================
+                         PUBLISHING
+                         ================================= -->
+
+                    <div class="form-grid">
+
+                        <div class="form-group option-panel">
+
+                            <label>
+                                Publishing
+                            </label>
+
+
+                            <label class="checkbox-row">
+
+                                <input
+                                    type="checkbox"
+                                    id="visible"
+                                    name="visible"
+                                    checked
+                                >
+
+                                <span>
+                                    Show on public website
+                                </span>
+
+                            </label>
+
+
+                            <label class="checkbox-row">
+
+                                <input
+                                    type="checkbox"
+                                    id="featured"
+                                    name="featured"
+                                >
+
+                                <span>
+                                    Mark as featured
+                                </span>
+
+                            </label>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="skills">
+                                Skills / Tools
+                            </label>
+
+                            <input
+                                type="text"
+                                id="skills"
+                                name="skills"
+                                maxlength="500"
+                                placeholder="Supply Chain, Excel, WMS, Fleet"
+                            >
+
+                            <small>
+                                Separate skills with commas.
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================
+                         SUMMARY
+                         ================================= -->
+
+                    <div class="form-group">
+
+                        <label for="summary">
+                            Project summary
+                            <span>*</span>
+                        </label>
+
+                        <textarea
+                            id="summary"
+                            name="summary"
+                            maxlength="800"
+                            required
+                            placeholder="What was this project about?"
+                        ></textarea>
+
+                        <small>
+                            Keep this concise and recruiter-friendly.
+                        </small>
+
+                    </div>
+
+
+                    <!-- =================================
+                         CHALLENGE / APPROACH
+                         ================================= -->
+
+                    <div class="form-grid">
+
+                        <div class="form-group">
+
+                            <label for="challenge">
+                                Challenge
+                            </label>
+
+                            <textarea
+                                id="challenge"
+                                name="challenge"
+                                maxlength="1000"
+                                placeholder="What problem needed to be solved?"
+                            ></textarea>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="approach">
+                                Approach
+                            </label>
+
+                            <textarea
+                                id="approach"
+                                name="approach"
+                                maxlength="1000"
+                                placeholder="What did you do?"
+                            ></textarea>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================
+                         RESULTS
+                         ================================= -->
+
+                    <div class="form-group">
+
+                        <label for="results">
+                            Results
+                            <span>*</span>
+                        </label>
+
+                        <textarea
+                            id="results"
+                            name="results"
+                            maxlength="1000"
+                            required
+                            placeholder="What changed? Quantify the result where possible."
+                        ></textarea>
+
+                        <small>
+                            Use measurable outcomes where possible,
+                            such as cost savings, OTIF, accuracy,
+                            utilization, GMV or turnaround time.
+                        </small>
+
+                    </div>
+
+
+                    <!-- =================================
+                         LINKS / IMAGE
+                         ================================= -->
+
+                    <div class="form-grid">
+
+                        <div class="form-group">
+
+                            <label for="projectLink">
+                                Project / Evidence Link
+                            </label>
+
+                            <input
+                                type="url"
+                                id="projectLink"
+                                name="link"
+                                maxlength="500"
+                                inputmode="url"
+                                placeholder="https://example.com"
+                            >
+
+                            <small>
+                                Optional. Use a public evidence,
+                                project or documentation link.
+                            </small>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="projectImage">
+                                Image Path / URL
+                            </label>
+
+                            <input
+                                type="text"
+                                id="projectImage"
+                                name="image"
+                                maxlength="500"
+                                placeholder="assets/projects/project-name.jpg"
+                            >
+
+                            <small>
+                                Optional project image.
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================
+                         FORM ACTIONS
+                         ================================= -->
+
+                    <div class="form-actions">
+
+                        <span
+                            class="save-message"
+                            id="projectMessage"
+                            role="status"
+                            aria-live="polite"
+                        ></span>
+
+
+                        <button
+                            type="button"
+                            class="secondary-button"
+                            id="cancelEdit"
+                        >
+                            Clear
+                        </button>
+
+
+                        <button
+                            type="submit"
+                            class="primary-button"
+                        >
+                            Save project
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </section>
+
+
+            <!-- =================================
+                 FOOTER
+                 ================================= -->
+
+            <footer class="admin-footer">
+
+                <span>
+                    ©
+                    <span id="currentYear"></span>
+                    Dennis Ndwigah
+                </span>
+
+                <span>
+                    Portfolio Administration
+                </span>
+
+            </footer>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<!-- =========================================
+     PAGE JAVASCRIPT
+     ========================================= -->
+
+<script src="js/projects.js"></script>
+
+</body>
+</html>

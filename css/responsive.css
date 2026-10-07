@@ -1,0 +1,28 @@
+/* =========================================================
+   DENNIS NDWIGAH NJERU · RESPONSIVE ADDITIONS
+   Public Portfolio
+
+   styles.css already contains the full responsive layout
+   (mobile menu at 900px, hero, results, timeline, footer).
+   This file only adds small touch refinements that do not
+   exist there, and it is safe to load after styles.css.
+   ========================================================= */
+
+/* Larger tap area for the "show more achievements" toggles */
+@media (max-width: 760px) {
+  .experience-more summary {
+    padding: 9px 0;
+  }
+
+  .experience-more li {
+    margin-bottom: 7px;
+  }
+}
+
+/* Long email addresses must never overflow the screen */
+@media (max-width: 480px) {
+  .contact-links a,
+  .contact-links span {
+    overflow-wrap: anywhere;
+  }
+}
