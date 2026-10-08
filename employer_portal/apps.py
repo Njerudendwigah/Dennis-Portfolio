@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import sys
 from pathlib import Path
 
 from django.apps import AppConfig
@@ -77,7 +78,7 @@ def _check_private_documents_root(app_configs, **kwargs):
 
 
 def _check_email_configuration(app_configs, **kwargs):
-    if settings.DEBUG:
+    if settings.DEBUG or "test" in sys.argv:
         return []
 
     errors = []
@@ -163,7 +164,7 @@ class EmployerPortalConfig(AppConfig):
 
         type(self)._ready_has_run = True
 
-        from . import signals  # noqa: F401
+        from . import signals
 
         register(_check_private_documents_root)
         register(_check_email_configuration)
