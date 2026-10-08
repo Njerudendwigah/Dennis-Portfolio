@@ -1,28 +1,32 @@
-"""
-Database models for the employer access portal.
+﻿"""Database models for the employer access portal.
 
 The portal is designed around controlled access to professional documents and
 referee information. Private documents are stored outside the public static
 asset directories and are intended to be served only through authenticated,
 authorised Django views.
 """
-
 from __future__ import annotations
-
+import mimetypes
 import uuid
 from pathlib import Path
 from typing import Any
-
+import boto3
+from botocore.config import Config
+from botocore.exceptions import ClientError
 from django.conf import settings
-from django.core.files.storage import FileSystemStorage
+from django.core.files.storage import FileSystemStorage, Storage
 from django.db import models, transaction
 from django.utils import timezone
+from django.utils.deconstruct import deconstructible
 
 
 # ---------------------------------------------------------------------------
+
+
 # PRIVATE DOCUMENT STORAGE
-# ---------------------------------------------------------------------------
 
+
+# ---------------------------------------------------------------------------
 ALLOWED_DOCUMENT_EXTENSIONS = frozenset(
     {
         ".pdf", ".doc", ".docx", ".odt", ".rtf", ".txt",
@@ -31,21 +35,116 @@ ALLOWED_DOCUMENT_EXTENSIONS = frozenset(
 )
 
 
-class PrivateDocumentStorage(FileSystemStorage):
-    """Filesystem storage for private documents that refuses to build URLs."""
+@deconstructible
+class PrivateDocumentStorage(Storage):
+    """
+    Private document storage.
+    Development uses the local filesystem. Production uses the private
+    Supabase S3-compatible bucket.
+    Documents never expose a direct storage URL. All access continues to
+    flow through the authorised Django portal views.
+    """
 
     def __init__(self, *args, **kwargs) -> None:
-        kwargs.setdefault("location", settings.PRIVATE_DOCUMENTS_ROOT)
-        kwargs.setdefault("base_url", None)
         super().__init__(*args, **kwargs)
+        self._local = bool(settings.DEBUG)
+        if self._local:
+            self._backend = FileSystemStorage(
+                location=settings.PRIVATE_DOCUMENTS_ROOT,
+                base_url=None,
+            )
+        else:
+            self._backend = None
+        self._client = None
 
-    def url(self, name: str) -> str:  # pragma: no cover
+    def _get_client(self):
+        if self._local:
+            return None
+        if self._client is None:
+            self._client = boto3.client(
+                "s3",
+                endpoint_url=settings.AWS_S3_ENDPOINT_URL,
+                region_name=settings.AWS_S3_REGION_NAME,
+                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                config=Config(
+                    s3={
+                        "addressing_style": settings.AWS_S3_ADDRESSING_STYLE,
+                    }
+                ),
+            )
+        return self._client
+
+    def _open(self, name: str, mode: str = "rb"):
+        if self._local:
+            return self._backend.open(name, mode)
+        if "r" not in mode:
+            raise ValueError(
+                "PrivateDocumentStorage only supports read mode for opening "
+                "remote documents."
+            )
+        response = self._get_client().get_object(
+            Bucket=settings.PRIVATE_DOCUMENTS_BUCKET,
+            Key=name,
+        )
+        return response["Body"]
+
+    def _save(self, name: str, content):
+        if self._local:
+            return self._backend.save(name, content)
+        content_type = (
+            getattr(content, "content_type", None)
+            or mimetypes.guess_type(name)[0]
+            or "application/octet-stream"
+        )
+        self._get_client().upload_fileobj(
+            content,
+            settings.PRIVATE_DOCUMENTS_BUCKET,
+            name,
+            ExtraArgs={"ContentType": content_type},
+        )
+        return name
+
+    def exists(self, name: str) -> bool:
+        if self._local:
+            return self._backend.exists(name)
+        try:
+            self._get_client().head_object(
+                Bucket=settings.PRIVATE_DOCUMENTS_BUCKET,
+                Key=name,
+            )
+            return True
+        except ClientError as exc:
+            error_code = str(
+                exc.response.get("Error", {}).get("Code", "")
+            )
+            if error_code in {"404", "NoSuchKey", "NotFound"}:
+                return False
+            raise
+
+    def delete(self, name: str) -> None:
+        if self._local:
+            self._backend.delete(name)
+            return
+        self._get_client().delete_object(
+            Bucket=settings.PRIVATE_DOCUMENTS_BUCKET,
+            Key=name,
+        )
+
+    def size(self, name: str) -> int:
+        if self._local:
+            return self._backend.size(name)
+        response = self._get_client().head_object(
+            Bucket=settings.PRIVATE_DOCUMENTS_BUCKET,
+            Key=name,
+        )
+        return int(response["ContentLength"])
+
+    def url(self, name: str) -> str:
         raise NotImplementedError(
             "Private documents are not addressable by URL. "
             "Serve them through an authorised Django view."
         )
-
-
 PRIVATE_DOCUMENT_STORAGE = PrivateDocumentStorage()
 
 
@@ -58,14 +157,17 @@ def private_document_upload_path(instance: "Document", filename: str) -> str:
 
 
 # ---------------------------------------------------------------------------
+
+
 # SHARED HELPERS
+
+
 # ---------------------------------------------------------------------------
 
 
 def client_ip(request) -> str | None:
     """
     Return the best-guess client IP for a request, honouring proxies.
-
     The ``X-Forwarded-For`` header is only trusted when the deployment
     explicitly opts in via ``settings.TRUST_X_FORWARDED_FOR``.
     """
@@ -81,11 +183,16 @@ def truncated_user_agent(request, *, limit: int = 512) -> str:
 
 
 # ---------------------------------------------------------------------------
+
+
 # QUERY MANAGERS
+
+
 # ---------------------------------------------------------------------------
 
 
 class EmployerQuerySet(models.QuerySet):
+
     def active(self):
         return self.filter(is_active=True)
 
@@ -94,11 +201,13 @@ class EmployerQuerySet(models.QuerySet):
 
 
 class DocumentQuerySet(models.QuerySet):
+
     def active(self):
         return self.filter(is_active=True)
 
 
 class AccessRequestQuerySet(models.QuerySet):
+
     def pending(self):
         return self.filter(status=AccessRequest.Status.PENDING)
 
@@ -128,6 +237,7 @@ class AccessRequestQuerySet(models.QuerySet):
 
 
 class AccessGrantQuerySet(models.QuerySet):
+
     def active(self):
         now = timezone.now()
         return self.filter(
@@ -146,6 +256,7 @@ class AccessGrantQuerySet(models.QuerySet):
 
 
 class AccessLogQuerySet(models.QuerySet):
+
     def recent(self, limit: int = 10):
         return self.order_by("-created_at")[:limit]
 
@@ -166,7 +277,11 @@ class AccessLogQuerySet(models.QuerySet):
 
 
 # ---------------------------------------------------------------------------
+
+
 # EMPLOYERS
+
+
 # ---------------------------------------------------------------------------
 
 
@@ -182,7 +297,6 @@ class Employer(models.Model):
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
     objects = EmployerQuerySet.as_manager()
 
     class Meta:
@@ -198,25 +312,29 @@ class Employer(models.Model):
 
     def __str__(self) -> str:
         return f"{self.contact_name} — {self.company_name}"
-
     @property
+
     def display_name(self) -> str:
         return f"{self.contact_name} ({self.company_name})"
 
 
 # ---------------------------------------------------------------------------
+
+
 # DOCUMENTS
+
+
 # ---------------------------------------------------------------------------
 
 
 class Document(models.Model):
+
     class DocumentType(models.TextChoices):
         CV = "cv", "CV"
         ACADEMIC = "academic", "Academic Certificate"
         PROFESSIONAL = "professional", "Professional Certificate"
         SUPPORTING = "supporting", "Supporting Document"
         OTHER = "other", "Other"
-
     document_type = models.CharField(max_length=30, choices=DocumentType.choices)
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
@@ -229,7 +347,6 @@ class Document(models.Model):
     is_active = models.BooleanField(default=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
     objects = DocumentQuerySet.as_manager()
 
     class Meta:
@@ -244,7 +361,11 @@ class Document(models.Model):
 
 
 # ---------------------------------------------------------------------------
+
+
 # REFEREES
+
+
 # ---------------------------------------------------------------------------
 
 
@@ -272,22 +393,25 @@ class Referee(models.Model):
 
 
 # ---------------------------------------------------------------------------
+
+
 # ACCESS REQUEST
+
+
 # ---------------------------------------------------------------------------
 
 
 class AccessRequest(models.Model):
+
     class Status(models.TextChoices):
         PENDING = "pending", "Pending"
         APPROVED = "approved", "Approved"
         REJECTED = "rejected", "Rejected"
         EXPIRED = "expired", "Expired"
         REVOKED = "revoked", "Revoked"
-
     # Terminal states cannot be reached out of the normal flow, but staff
     # can reopen or reapprove them. See ``can_transition_to``.
     TERMINAL_STATUSES = frozenset({Status.REJECTED, Status.EXPIRED, Status.REVOKED})
-
     request_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     employer = models.ForeignKey(
         Employer,
@@ -296,7 +420,6 @@ class AccessRequest(models.Model):
         blank=True,
         related_name="access_requests",
     )
-
     requester_name = models.CharField(max_length=150)
     requester_email = models.EmailField()
     requester_company = models.CharField(max_length=200)
@@ -305,14 +428,12 @@ class AccessRequest(models.Model):
     reason = models.TextField(
         help_text="Why the requester needs access to the private material.",
     )
-
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
         default=Status.PENDING,
         db_index=True,
     )
-
     requested_documents = models.ManyToManyField(
         Document,
         through="DocumentAccessRequest",
@@ -325,7 +446,6 @@ class AccessRequest(models.Model):
         blank=True,
         related_name="access_requests",
     )
-
     reviewed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -336,13 +456,10 @@ class AccessRequest(models.Model):
     reviewed_at = models.DateTimeField(null=True, blank=True)
     approved_at = models.DateTimeField(null=True, blank=True)
     expires_at = models.DateTimeField(null=True, blank=True)
-
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.TextField(blank=True)
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
     objects = AccessRequestQuerySet.as_manager()
 
     class Meta:
@@ -356,18 +473,17 @@ class AccessRequest(models.Model):
 
     def __str__(self) -> str:
         return f"{self.requester_name} — {self.requester_company} — {self.status}"
-
     # ------------------------------------------------------------------
     # STATUS
     # ------------------------------------------------------------------
     @property
+
     def is_terminal(self) -> bool:
         return self.status in self.TERMINAL_STATUSES
 
     def can_transition_to(self, new_status: str) -> bool:
         """
         Return whether the request may transition to ``new_status``.
-
         Terminal states (``REJECTED``, ``EXPIRED``, ``REVOKED``) may be
         reopened to ``PENDING`` for re-review, or directly reapproved.
         They cannot be re-rejected, re-revoked, or re-expired.
@@ -381,15 +497,14 @@ class AccessRequest(models.Model):
             self.Status.REVOKED: {self.Status.PENDING, self.Status.APPROVED},
         }
         return new_status in allowed.get(self.status, set())
-
     # ------------------------------------------------------------------
     # LIVE-ACCESS CHECK
     # ------------------------------------------------------------------
     @property
+
     def is_currently_approved(self) -> bool:
         if self.status != self.Status.APPROVED:
             return False
-
         grant = self.__dict__.get("grant")
         if grant is None:
             try:
@@ -397,15 +512,14 @@ class AccessRequest(models.Model):
             except AccessGrant.DoesNotExist:
                 return False
         return grant.is_currently_active
-
     # ------------------------------------------------------------------
     # LAST ACTION
     # ------------------------------------------------------------------
     @property
+
     def last_review_log(self) -> "AccessLog | None":
         """
         Return the most recent review-decision audit row for this request.
-
         Filters to the events that constitute a review action (approve,
         reject, expire, reopen, revoke) so the admin can present a
         "who did what, when" summary without exposing ordinary views.
@@ -416,16 +530,15 @@ class AccessRequest(models.Model):
             .order_by("-created_at")
             .first()
         )
-
     # ------------------------------------------------------------------
     # DOMAIN MUTATIONS
     # ------------------------------------------------------------------
     @transaction.atomic
+
     def mark_approved(self, *, reviewer, expires_at, now=None) -> "AccessGrant":
         """
         Approve the request, mark its requested resources approved, and
         upsert the ``AccessGrant``. Returns the grant.
-
         Works from any non-approved state (pending, rejected, expired,
         revoked) so it doubles as the reapprove path.
         """
@@ -434,7 +547,6 @@ class AccessRequest(models.Model):
             raise ValueError(
                 f"Cannot approve a request in status {self.status!r}."
             )
-
         self.status = self.Status.APPROVED
         self.reviewed_by = reviewer
         self.reviewed_at = now
@@ -446,10 +558,8 @@ class AccessRequest(models.Model):
                 "approved_at", "expires_at", "updated_at",
             ]
         )
-
         self.document_requests.update(approved=True)
         self.referee_requests.update(approved=True)
-
         grant, _ = AccessGrant.objects.update_or_create(
             access_request=self,
             defaults={
@@ -460,68 +570,59 @@ class AccessRequest(models.Model):
             },
         )
         return grant
-
     @transaction.atomic
+
     def mark_rejected(self, *, reviewer, now=None) -> None:
         now = now or timezone.now()
         if not self.can_transition_to(self.Status.REJECTED):
             raise ValueError(f"Cannot reject a request in status {self.status!r}.")
-
         self.status = self.Status.REJECTED
         self.reviewed_by = reviewer
         self.reviewed_at = now
         self.save(update_fields=["status", "reviewed_by", "reviewed_at", "updated_at"])
-
         AccessGrant.objects.filter(access_request=self, is_active=True).update(
             is_active=False, revoked_at=now
         )
-
     @transaction.atomic
+
     def mark_revoked(self, *, reviewer, now=None) -> None:
         now = now or timezone.now()
         if not self.can_transition_to(self.Status.REVOKED):
             raise ValueError(f"Cannot revoke a request in status {self.status!r}.")
-
         self.status = self.Status.REVOKED
         self.reviewed_by = reviewer
         self.reviewed_at = now
         self.save(update_fields=["status", "reviewed_by", "reviewed_at", "updated_at"])
-
         AccessGrant.objects.filter(access_request=self, is_active=True).update(
             is_active=False, revoked_at=now
         )
-
     @transaction.atomic
+
     def mark_expired(self, *, now=None) -> None:
         """Idempotent — used by the automated expiry management command."""
         now = now or timezone.now()
         if self.status != self.Status.APPROVED:
             return
-
         self.status = self.Status.EXPIRED
         self.save(update_fields=["status", "updated_at"])
-
         AccessGrant.objects.filter(access_request=self, is_active=True).update(
             is_active=False, revoked_at=now
         )
-
     @transaction.atomic
+
     def mark_reopened(self, *, reviewer, now=None) -> None:
         """
         Return a terminal request to ``PENDING`` for staff re-review.
-
         Deactivates any lingering grant so no portal access survives the
         reopen. Idempotent for already-pending requests (no-op).
         """
         now = now or timezone.now()
         if self.status == self.Status.PENDING:
             return
-
         if not self.can_transition_to(self.Status.PENDING):
             raise ValueError(
                 f"Cannot reopen a request in status {self.status!r}."
             )
-
         self.status = self.Status.PENDING
         self.reviewed_by = reviewer
         self.reviewed_at = now
@@ -535,14 +636,17 @@ class AccessRequest(models.Model):
                 "approved_at", "expires_at", "updated_at",
             ]
         )
-
         AccessGrant.objects.filter(access_request=self, is_active=True).update(
             is_active=False, revoked_at=now
         )
 
 
 # ---------------------------------------------------------------------------
+
+
 # REQUESTED DOCUMENTS
+
+
 # ---------------------------------------------------------------------------
 
 
@@ -581,7 +685,11 @@ class DocumentAccessRequest(models.Model):
 
 
 # ---------------------------------------------------------------------------
+
+
 # REQUESTED REFEREES
+
+
 # ---------------------------------------------------------------------------
 
 
@@ -620,7 +728,11 @@ class RefereeAccessRequest(models.Model):
 
 
 # ---------------------------------------------------------------------------
+
+
 # ACCESS GRANTS
+
+
 # ---------------------------------------------------------------------------
 
 
@@ -636,7 +748,6 @@ class AccessGrant(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     revoked_at = models.DateTimeField(null=True, blank=True)
-
     objects = AccessGrantQuerySet.as_manager()
 
     class Meta:
@@ -656,25 +767,30 @@ class AccessGrant(models.Model):
 
     def __str__(self) -> str:
         return f"Access grant for {self.access_request}"
-
     @property
+
     def is_currently_active(self) -> bool:
         if not self.is_active or self.revoked_at is not None:
             return False
         now = timezone.now()
         return self.starts_at <= now < self.expires_at
-
     @property
+
     def is_expired(self) -> bool:
         return self.expires_at <= timezone.now()
 
 
 # ---------------------------------------------------------------------------
+
+
 # ACCESS / VISITOR LOGS
+
+
 # ---------------------------------------------------------------------------
 
 
 class AccessLog(models.Model):
+
     class EventType(models.TextChoices):
         # Request lifecycle
         REQUEST_SUBMITTED = "request_submitted", "Access Request Submitted"
@@ -682,23 +798,19 @@ class AccessLog(models.Model):
         REQUEST_REJECTED = "request_rejected", "Access Request Rejected"
         REQUEST_EXPIRED = "request_expired", "Access Request Expired"
         REQUEST_REOPENED = "request_reopened", "Access Request Reopened"
-
         # Portal + resource access
         PORTAL_VIEWED = "portal_viewed", "Employer Portal Viewed"
         DOCUMENT_VIEWED = "document_viewed", "Document Viewed"
         DOCUMENT_DOWNLOADED = "document_downloaded", "Document Downloaded"
         REFEREE_VIEWED = "referee_viewed", "Referee Details Viewed"
-
         # Contact + grant lifecycle
         CONTACT_SUBMITTED = "contact_submitted", "Contact Form Submitted"
         ACCESS_GRANTED = "access_granted", "Access Granted"
         ACCESS_REVOKED = "access_revoked", "Access Revoked"
         ACCESS_EXPIRED = "access_expired", "Access Expired"
-
         # Staff
         LOGIN = "login", "Staff Login"
         LOGOUT = "logout", "Staff Logout"
-
     employer = models.ForeignKey(
         Employer,
         on_delete=models.SET_NULL,
@@ -720,7 +832,6 @@ class AccessLog(models.Model):
     user_agent = models.TextField(blank=True)
     metadata = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
     objects = AccessLogQuerySet.as_manager()
 
     class Meta:
@@ -734,8 +845,8 @@ class AccessLog(models.Model):
 
     def __str__(self) -> str:
         return f"{self.event_type} — {self.created_at:%Y-%m-%d %H:%M}"
-
     @classmethod
+
     def log_from_request(
         cls,
         request,
@@ -751,7 +862,6 @@ class AccessLog(models.Model):
         user = getattr(request, "user", None)
         if user is not None and getattr(user, "is_authenticated", False):
             meta.setdefault("actor", user.get_username())
-
         return cls.objects.create(
             employer=employer or getattr(access_request, "employer", None),
             access_request=access_request,
@@ -762,8 +872,8 @@ class AccessLog(models.Model):
             user_agent=truncated_user_agent(request),
             metadata=meta,
         )
-
     @property
+
     def actor_label(self) -> str:
         if self.access_request_id:
             ar = self.access_request
@@ -774,12 +884,11 @@ class AccessLog(models.Model):
         if self.employer_id:
             return self.employer.company_name
         return "System"
-
     @property
+
     def reviewer_username(self) -> str:
         """
         Return the username of the staff member who performed this action.
-
         Prefers the explicit ``reviewed_by`` / ``revoked_by`` metadata
         keys the admin and staff views write; falls back to the generic
         ``actor`` key, then to an empty string.

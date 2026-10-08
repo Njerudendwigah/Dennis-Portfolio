@@ -2,8 +2,6 @@
 
 Django settings for the Dennis Ndwigah portfolio project.
 
-
-
 This settings module supports:
 
 - Local development with SQLite and console email.
@@ -11,8 +9,6 @@ This settings module supports:
 - A production deployment driven by environment variables.
 
 - A public portfolio plus a private employer document-access portal.
-
-
 
 Alignment notes
 
@@ -25,8 +21,6 @@ Alignment notes
 * ``config.urls`` mounts ``employer_portal.urls`` at ``/employer/``.
 
   Every external portal URL begins with that prefix:
-
-
 
       /employer/login/
 
@@ -50,8 +44,6 @@ Alignment notes
 
       /employer/staff/requests/<uuid>/revoke/
 
-
-
 * ``LOGIN_URL`` points at the portal's own themed login page
 
   (``employer_portal:login``), served by ``StaffAuthenticationForm``.
@@ -70,20 +62,13 @@ Alignment notes
 
 """
 
-
-
 import os
 
 from pathlib import Path
+
 from urllib.parse import unquote, urlparse
 
-
-
 from django.urls import reverse_lazy
-
-
-
-
 
 # ---------------------------------------------------------------------------
 
@@ -91,23 +76,13 @@ from django.urls import reverse_lazy
 
 # ---------------------------------------------------------------------------
 
-
-
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-
-
-
 
 # ---------------------------------------------------------------------------
 
 # ENVIRONMENT HELPERS
 
 # ---------------------------------------------------------------------------
-
-
-
-
 
 def env_bool(name: str, default: bool = False) -> bool:
 
@@ -118,8 +93,6 @@ def env_bool(name: str, default: bool = False) -> bool:
     if value is None:
 
         return default
-
-
 
     return value.strip().lower() in {
 
@@ -132,10 +105,6 @@ def env_bool(name: str, default: bool = False) -> bool:
         "on",
 
     }
-
-
-
-
 
 def env_int(name: str, default: int) -> int:
 
@@ -159,10 +128,6 @@ def env_int(name: str, default: int) -> int:
 
         ) from exc
 
-
-
-
-
 def env_list(name: str, default: str = "") -> list[str]:
 
     """Read a comma-separated environment variable into a clean list."""
@@ -177,23 +142,15 @@ def env_list(name: str, default: str = "") -> list[str]:
 
     ]
 
-
-
-
-
 # ---------------------------------------------------------------------------
 
 # SECURITY
 
 # ---------------------------------------------------------------------------
 
-
-
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 
 DEBUG = env_bool("DJANGO_DEBUG", True)
-
-
 
 if not DEBUG and not SECRET_KEY:
 
@@ -203,8 +160,6 @@ if not DEBUG and not SECRET_KEY:
 
     )
 
-
-
 # Development-only fallback. A real secret is required in production.
 
 SECRET_KEY = SECRET_KEY or (
@@ -213,8 +168,6 @@ SECRET_KEY = SECRET_KEY or (
 
 )
 
-
-
 ALLOWED_HOSTS = env_list(
 
     "DJANGO_ALLOWED_HOSTS",
@@ -222,8 +175,6 @@ ALLOWED_HOSTS = env_list(
     "127.0.0.1,localhost",
 
 )
-
-
 
 if not DEBUG and not ALLOWED_HOSTS:
 
@@ -234,8 +185,6 @@ if not DEBUG and not ALLOWED_HOSTS:
         "DJANGO_DEBUG=False."
 
     )
-
-
 
 # Explicitly trust the local Django origins used during development.
 
@@ -253,8 +202,6 @@ _csrf_default_origins = (
 
 )
 
-
-
 CSRF_TRUSTED_ORIGINS = env_list(
 
     "DJANGO_CSRF_TRUSTED_ORIGINS",
@@ -262,8 +209,6 @@ CSRF_TRUSTED_ORIGINS = env_list(
     _csrf_default_origins,
 
 )
-
-
 
 # The application only trusts X-Forwarded-For when explicitly configured
 
@@ -279,8 +224,6 @@ TRUST_X_FORWARDED_FOR = env_bool(
 
 )
 
-
-
 # Set this only when the reverse proxy terminates TLS and forwards the
 
 # HTTPS scheme using the standard X-Forwarded-Proto header.
@@ -293,8 +236,6 @@ USE_SECURE_PROXY_HEADER = env_bool(
 
 )
 
-
-
 if USE_SECURE_PROXY_HEADER:
 
     SECURE_PROXY_SSL_HEADER = (
@@ -304,8 +245,6 @@ if USE_SECURE_PROXY_HEADER:
         "https",
 
     )
-
-
 
 # In production, an explicit CSRF trusted-origin list is required so that
 
@@ -321,17 +260,11 @@ if not DEBUG and not CSRF_TRUSTED_ORIGINS:
 
     )
 
-
-
-
-
 # ---------------------------------------------------------------------------
 
 # APPLICATIONS
 
 # ---------------------------------------------------------------------------
-
-
 
 INSTALLED_APPS = [
 
@@ -342,8 +275,6 @@ INSTALLED_APPS = [
     "unfold.contrib.filters",
 
     "unfold.contrib.forms",     # themed widgets used by UserAdmin / forms
-
-
 
     "django.contrib.admin",
 
@@ -359,25 +290,17 @@ INSTALLED_APPS = [
 
     "django.contrib.humanize",  # naturaltime / intcomma for templates
 
-
-
     # Portfolio employer-access system.
 
     "employer_portal.apps.EmployerPortalConfig",
 
 ]
 
-
-
-
-
 # ---------------------------------------------------------------------------
 
 # ADMIN THEME (UNFOLD)
 
 # ---------------------------------------------------------------------------
-
-
 
 UNFOLD = {
 
@@ -397,19 +320,13 @@ UNFOLD = {
 
     "SHOW_BACK_BUTTON": True,
 
-
-
     # Dashboard callbacks — see employer_portal/dashboard.py.
 
     "ENVIRONMENT": "employer_portal.dashboard.environment_callback",
 
     "DASHBOARD_CALLBACK": "employer_portal.dashboard.dashboard_callback",
 
-
-
     "COMMAND": {"search_models": True, "show_history": True},
-
-
 
     "COLORS": {
 
@@ -442,8 +359,6 @@ UNFOLD = {
         },
 
     },
-
-
 
     "SIDEBAR": {
 
@@ -647,36 +562,27 @@ UNFOLD = {
 
 }
 
-
-
-
-
 # ---------------------------------------------------------------------------
 
 # MIDDLEWARE
 
 # ---------------------------------------------------------------------------
 
-
-
 MIDDLEWARE = [
 
     "django.middleware.security.SecurityMiddleware",
+
     "whitenoise.middleware.WhiteNoiseMiddleware",
 
     "django.contrib.sessions.middleware.SessionMiddleware",
 
     "django.middleware.common.CommonMiddleware",
 
-
-
     # Must run before CsrfViewMiddleware so the local-only Origin
 
     # normalisation can handle browser contexts that submit Origin: null.
 
     "employer_portal.middleware.LocalDevelopmentOriginMiddleware",
-
-
 
     "django.middleware.csrf.CsrfViewMiddleware",
 
@@ -688,33 +594,21 @@ MIDDLEWARE = [
 
 ]
 
-
-
-
-
 # ---------------------------------------------------------------------------
 
 # URL / APPLICATION SERVER
 
 # ---------------------------------------------------------------------------
 
-
-
 ROOT_URLCONF = "config.urls"
 
 WSGI_APPLICATION = "config.wsgi.application"
-
-
-
-
 
 # ---------------------------------------------------------------------------
 
 # TEMPLATES
 
 # ---------------------------------------------------------------------------
-
-
 
 TEMPLATES = [
 
@@ -744,52 +638,75 @@ TEMPLATES = [
 
 ]
 
-
-
-
-
 # ---------------------------------------------------------------------------
+
 # DATABASE
+
 # ---------------------------------------------------------------------------
 
 DATABASE_URL = os.environ.get("DATABASE_URL", "").strip()
 
 if not DEBUG and not DATABASE_URL:
+
     raise RuntimeError(
+
         "DATABASE_URL must be set when DJANGO_DEBUG=False."
+
     )
 
 if DATABASE_URL:
+
     parsed_database_url = urlparse(DATABASE_URL)
 
     if parsed_database_url.scheme not in {"postgres", "postgresql"}:
+
         raise RuntimeError(
+
             "DATABASE_URL must use the postgres:// or postgresql:// scheme."
+
         )
 
     DATABASES = {
+
         "default": {
+
             "ENGINE": "django.db.backends.postgresql",
+
             "NAME": unquote(parsed_database_url.path.lstrip("/")),
+
             "USER": unquote(parsed_database_url.username or ""),
+
             "PASSWORD": unquote(parsed_database_url.password or ""),
+
             "HOST": parsed_database_url.hostname or "",
+
             "PORT": str(parsed_database_url.port or 5432),
+
             "CONN_MAX_AGE": env_int("DB_CONN_MAX_AGE", 60),
+
             "CONN_HEALTH_CHECKS": True,
+
         }
+
     }
+
 else:
+
     DATABASES = {
+
         "default": {
+
             "ENGINE": "django.db.backends.sqlite3",
+
             "NAME": BASE_DIR / "db.sqlite3",
+
         }
+
     }
 
 if DATABASES["default"].get("CONN_MAX_AGE", 0) < 0:
-    raise RuntimeError("DB_CONN_MAX_AGE cannot be negative.")
 
+    raise RuntimeError("DB_CONN_MAX_AGE cannot be negative.")
 
 # ---------------------------------------------------------------------------
 
@@ -819,25 +736,17 @@ if DATABASES["default"].get("CONN_MAX_AGE", 0) < 0:
 
 # ---------------------------------------------------------------------------
 
-
-
 LOGIN_URL = "/employer/login/"
 
 LOGIN_REDIRECT_URL = "/employer/staff/dashboard/"
 
 LOGOUT_REDIRECT_URL = "/"
 
-
-
-
-
 # ---------------------------------------------------------------------------
 
 # PASSWORD VALIDATION
 
 # ---------------------------------------------------------------------------
-
-
 
 AUTH_PASSWORD_VALIDATORS = [
 
@@ -891,17 +800,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 ]
 
-
-
-
-
 # ---------------------------------------------------------------------------
 
 # INTERNATIONALIZATION
 
 # ---------------------------------------------------------------------------
-
-
 
 LANGUAGE_CODE = "en-gb"
 
@@ -911,21 +814,13 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-
-
-
 # ---------------------------------------------------------------------------
 
 # STATIC FILES
 
 # ---------------------------------------------------------------------------
 
-
-
 STATIC_URL = "/static/"
-
-
 
 # The project-level ``static`` folder holds the employer portal assets at
 
@@ -936,14 +831,16 @@ STATIC_URL = "/static/"
 # own css, js and images folders remain registered alongside it.
 
 STATICFILES_DIRS = [
+
     BASE_DIR / "static",
+
     BASE_DIR / "css",
+
     BASE_DIR / "js",
+
 ]
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
-
-
 
 # Django 4.2+ reads static-file storage exclusively from STORAGES. The
 
@@ -979,23 +876,15 @@ STORAGES = {
 
 }
 
-
-
-
-
 # ---------------------------------------------------------------------------
 
 # MEDIA / PRIVATE DOCUMENT STORAGE
 
 # ---------------------------------------------------------------------------
 
-
-
 MEDIA_URL = "/media/"
 
 MEDIA_ROOT = BASE_DIR / "media"
-
-
 
 # Do not expose this directory through MEDIA_URL. Employer documents are
 
@@ -1006,15 +895,73 @@ MEDIA_ROOT = BASE_DIR / "media"
 # import time — it must be defined before any model module is loaded.
 
 PRIVATE_DOCUMENTS_ROOT = Path(
+
     os.environ.get(
+
         "PRIVATE_DOCUMENTS_ROOT",
+
         str(BASE_DIR / "private" / "documents"),
+
     )
+
 )
 
+# ---------------------------------------------------------------------------
+# PRIVATE DOCUMENT OBJECT STORAGE
+# ---------------------------------------------------------------------------
 
+# Local development continues to use the filesystem. Production uses the
+# private Supabase S3-compatible bucket through employer_portal.models.
+PRIVATE_DOCUMENTS_BUCKET = os.environ.get(
+    "PRIVATE_DOCUMENTS_BUCKET",
+    "",
+).strip()
 
+AWS_S3_ENDPOINT_URL = os.environ.get(
+    "AWS_S3_ENDPOINT_URL",
+    "",
+).strip()
 
+AWS_S3_REGION_NAME = os.environ.get(
+    "AWS_S3_REGION_NAME",
+    "eu-west-1",
+).strip()
+
+AWS_S3_ADDRESSING_STYLE = os.environ.get(
+    "AWS_S3_ADDRESSING_STYLE",
+    "path",
+).strip()
+
+AWS_ACCESS_KEY_ID = os.environ.get(
+    "AWS_ACCESS_KEY_ID",
+    "",
+).strip()
+
+AWS_SECRET_ACCESS_KEY = os.environ.get(
+    "AWS_SECRET_ACCESS_KEY",
+    "",
+)
+
+if not DEBUG:
+    _private_storage_required = {
+        "PRIVATE_DOCUMENTS_BUCKET": PRIVATE_DOCUMENTS_BUCKET,
+        "AWS_S3_ENDPOINT_URL": AWS_S3_ENDPOINT_URL,
+        "AWS_S3_REGION_NAME": AWS_S3_REGION_NAME,
+        "AWS_ACCESS_KEY_ID": AWS_ACCESS_KEY_ID,
+        "AWS_SECRET_ACCESS_KEY": AWS_SECRET_ACCESS_KEY,
+    }
+
+    _private_storage_missing = [
+        name
+        for name, value in _private_storage_required.items()
+        if not value
+    ]
+
+    if _private_storage_missing:
+        raise RuntimeError(
+            "Private document storage is not configured. Missing: "
+            + ", ".join(_private_storage_missing)
+        )
 
 # ---------------------------------------------------------------------------
 
@@ -1022,23 +969,15 @@ PRIVATE_DOCUMENTS_ROOT = Path(
 
 # ---------------------------------------------------------------------------
 
-
-
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 25 * 1024 * 1024
-
-
-
-
 
 # ---------------------------------------------------------------------------
 
 # EMAIL
 
 # ---------------------------------------------------------------------------
-
-
 
 # Development uses console email so submissions can be tested without
 
@@ -1051,8 +990,6 @@ if DEBUG:
 else:
 
     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-
-
 
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "").strip()
 
@@ -1068,8 +1005,6 @@ EMAIL_USE_SSL = env_bool("EMAIL_USE_SSL", False)
 
 EMAIL_TIMEOUT = env_int("EMAIL_TIMEOUT", 20)
 
-
-
 if EMAIL_USE_TLS and EMAIL_USE_SSL:
 
     raise RuntimeError(
@@ -1077,8 +1012,6 @@ if EMAIL_USE_TLS and EMAIL_USE_SSL:
         "EMAIL_USE_TLS and EMAIL_USE_SSL cannot both be enabled."
 
     )
-
-
 
 if not 1 <= EMAIL_PORT <= 65535:
 
@@ -1088,8 +1021,6 @@ if not 1 <= EMAIL_PORT <= 65535:
 
     )
 
-
-
 if EMAIL_TIMEOUT <= 0:
 
     raise RuntimeError(
@@ -1097,8 +1028,6 @@ if EMAIL_TIMEOUT <= 0:
         "EMAIL_TIMEOUT must be greater than zero."
 
     )
-
-
 
 if not DEBUG and not EMAIL_HOST:
 
@@ -1108,8 +1037,6 @@ if not DEBUG and not EMAIL_HOST:
 
     )
 
-
-
 DEFAULT_FROM_EMAIL = os.environ.get(
 
     "DEFAULT_FROM_EMAIL",
@@ -1117,8 +1044,6 @@ DEFAULT_FROM_EMAIL = os.environ.get(
     "Dennis Ndwigah <dennisndwigah.dn.dn@gmail.com>",
 
 )
-
-
 
 SERVER_EMAIL = os.environ.get(
 
@@ -1128,8 +1053,6 @@ SERVER_EMAIL = os.environ.get(
 
 )
 
-
-
 EMPLOYER_NOTIFICATION_EMAIL = os.environ.get(
 
     "EMPLOYER_NOTIFICATION_EMAIL",
@@ -1137,8 +1060,6 @@ EMPLOYER_NOTIFICATION_EMAIL = os.environ.get(
     "dennisndwigah.dn.dn@gmail.com",
 
 )
-
-
 
 # In production, fail fast when employer notifications are not configured.
 
@@ -1154,17 +1075,11 @@ if not DEBUG and not EMPLOYER_NOTIFICATION_EMAIL:
 
     )
 
-
-
-
-
 # ---------------------------------------------------------------------------
 
 # SESSION / COOKIE SECURITY
 
 # ---------------------------------------------------------------------------
-
-
 
 SESSION_COOKIE_HTTPONLY = True
 
@@ -1174,8 +1089,6 @@ SESSION_COOKIE_SECURE = not DEBUG
 
 SESSION_COOKIE_AGE = env_int("DJANGO_SESSION_COOKIE_AGE", 28800)
 
-
-
 if SESSION_COOKIE_AGE <= 0:
 
     raise RuntimeError(
@@ -1183,8 +1096,6 @@ if SESSION_COOKIE_AGE <= 0:
         "DJANGO_SESSION_COOKIE_AGE must be greater than zero."
 
     )
-
-
 
 # Django needs client-side access to the CSRF cookie for the standard
 
@@ -1196,17 +1107,11 @@ CSRF_COOKIE_SAMESITE = "Lax"
 
 CSRF_COOKIE_SECURE = not DEBUG
 
-
-
-
-
 # ---------------------------------------------------------------------------
 
 # PRODUCTION SECURITY HEADERS
 
 # ---------------------------------------------------------------------------
-
-
 
 SECURE_SSL_REDIRECT = env_bool(
 
@@ -1215,8 +1120,6 @@ SECURE_SSL_REDIRECT = env_bool(
     not DEBUG,
 
 )
-
-
 
 SECURE_HSTS_SECONDS = env_int(
 
@@ -1250,8 +1153,6 @@ SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"
 
 X_FRAME_OPTIONS = "DENY"
 
-
-
 if SECURE_HSTS_SECONDS < 0:
 
     raise RuntimeError(
@@ -1259,8 +1160,6 @@ if SECURE_HSTS_SECONDS < 0:
         "DJANGO_HSTS_SECONDS cannot be negative."
 
     )
-
-
 
 if SECURE_HSTS_PRELOAD and SECURE_HSTS_SECONDS < 31536000:
 
@@ -1270,24 +1169,16 @@ if SECURE_HSTS_PRELOAD and SECURE_HSTS_SECONDS < 31536000:
 
     )
 
-
-
 # Proxy headers are trusted only when the deployment explicitly enables
 
 # the corresponding setting above. X-Forwarded-For is handled independently
 
 # by the employer portal through TRUST_X_FORWARDED_FOR.
 
-
-
-
-
 # ---------------------------------------------------------------------------
 
 # DEFAULT PRIMARY KEY
 
 # ---------------------------------------------------------------------------
-
-
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
