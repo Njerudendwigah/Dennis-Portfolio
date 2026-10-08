@@ -61,6 +61,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
 from django.utils import timezone
+from django.utils.html import escape
 
 from django.views.decorators.http import (
 
@@ -487,104 +488,95 @@ def _notify_staff_of_new_request(
         return False, str(exc)[:500]
 
 def _notify_employer_of_approval(
-
     request: HttpRequest,
-
     access_request: AccessRequest,
-
     grant: AccessGrant,
-
 ) -> tuple[bool, str]:
-
-    """Send the employer approval email. Returns (sent, error)."""
+    """Send the employer approval email with a secure portal CTA."""
 
     recipient = (access_request.requester_email or "").strip()
 
     if not recipient:
-
         return False, ""
 
     try:
-
         portal_url = request.build_absolute_uri(
-
             reverse(
-
                 "employer_portal:portal",
-
                 kwargs={"token": grant.token},
-
             )
-
         )
 
+        subject = "Employer access approved — Dennis Ndwigah Njeru"
+
+        plain_message = "\n".join(
+            [
+                f"Hello {access_request.requester_name},",
+                "",
+                "Your request for access to Dennis Ndwigah Njeru's professional documents and referee information has been approved.",
+                "",
+                f"Access period: {grant.starts_at:%d %B %Y, %H:%M} to {grant.expires_at:%d %B %Y, %H:%M}",
+                "",
+                "Open Secure Employer Portal:",
+                portal_url,
+                "",
+                "Please keep this link confidential. Access is limited to the resources approved for your request and expires automatically.",
+                "",
+                f"Request reference: {access_request.request_id}",
+                "",
+                "Regards,",
+                "Dennis Ndwigah Njeru",
+            ]
+        )
+
+        html_message = f"""
+<!doctype html>
+<html lang="en">
+  <body style="margin:0;padding:0;background:#f5f3ee;color:#17191a;font-family:Arial,Helvetica,sans-serif;">
+    <div style="width:100%;padding:32px 16px;">
+      <div style="max-width:640px;margin:0 auto;background:#ffffff;border:1px solid #e3e0d8;border-radius:18px;overflow:hidden;">
+        <div style="padding:28px 32px;background:#111315;color:#ffffff;">
+          <div style="font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#d9bf88;">Employer Access</div>
+          <h1 style="margin:10px 0 0;font-size:28px;line-height:1.2;">Access approved</h1>
+        </div>
+        <div style="padding:32px;">
+          <p style="margin:0 0 16px;font-size:16px;line-height:1.6;">Hello {escape(access_request.requester_name)},</p>
+          <p style="margin:0 0 22px;font-size:15px;line-height:1.7;color:#4f5958;">
+            Your request to review Dennis Ndwigah Njeru's professional information has been approved.
+          </p>
+          <div style="margin:0 0 24px;padding:18px;border:1px solid #d8e5df;border-radius:12px;background:#eef5f1;">
+            <div style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#285447;">Access period</div>
+            <div style="margin-top:6px;font-size:15px;font-weight:700;">{grant.starts_at:%d %B %Y, %H:%M} — {grant.expires_at:%d %B %Y, %H:%M}</div>
+          </div>
+          <div style="text-align:center;margin:28px 0 30px;">
+            <a href="{escape(portal_url)}" style="display:inline-block;padding:14px 24px;border-radius:9px;background:#285447;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;">Open Secure Employer Portal</a>
+          </div>
+          <div style="padding-top:20px;border-top:1px solid #e3e0d8;color:#667070;font-size:13px;line-height:1.7;">
+            <p style="margin:0 0 8px;"><strong>Keep this link confidential.</strong> The portal only exposes resources approved for this request.</p>
+            <p style="margin:0;">Access ends automatically when the grant expires or is revoked.</p>
+          </div>
+          <p style="margin:24px 0 0;color:#667070;font-size:12px;">Request reference: {escape(str(access_request.request_id))}</p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+"""
+
         send_mail(
-
-            subject="Employer access approved — Dennis Ndwigah Njeru",
-
-            message="\n".join(
-
-                [
-
-                    f"Hello {access_request.requester_name},",
-
-                    "",
-
-                    "Your request for access to Dennis Ndwigah Njeru's professional "
-
-                    "documents and referee information has been approved.",
-
-                    "",
-
-                    f"Access period: {grant.starts_at:%d %B %Y, %H:%M} "
-
-                    f"to {grant.expires_at:%d %B %Y, %H:%M}",
-
-                    "",
-
-                    "Secure employer portal:",
-
-                    portal_url,
-
-                    "",
-
-                    "Please keep this link confidential. Access is limited to the "
-
-                    "resources approved for your request and expires automatically.",
-
-                    "",
-
-                    f"Request reference: {access_request.request_id}",
-
-                    "",
-
-                    "Regards,",
-
-                    "Dennis Ndwigah Njeru",
-
-                ]
-
-            ),
-
+            subject=subject,
+            message=plain_message,
             from_email=getattr(settings, "DEFAULT_FROM_EMAIL", None),
-
             recipient_list=[recipient],
-
             fail_silently=False,
-
+            html_message=html_message,
         )
 
         return True, ""
 
     except Exception as exc:
-
         return False, str(exc)[:500]
 
-# ---------------------------------------------------------------------------
-
-# PUBLIC REQUEST FLOW
-
-# ---------------------------------------------------------------------------
 
 @require_http_methods(["GET", "POST"])
 
