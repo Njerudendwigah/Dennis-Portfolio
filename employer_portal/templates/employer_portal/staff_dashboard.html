@@ -1,1436 +1,1021 @@
 {% load static %}
-<!DOCTYPE html>
-<html lang="en-GB">
+<!doctype html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta
-    name="description"
-    content="Private staff dashboard for managing employer access requests and reviewing portal activity."
-  >
-  <meta name="theme-color" content="#0f1f1d" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#0a1211" media="(prefers-color-scheme: dark)">
-  <meta name="robots" content="noindex, nofollow, noarchive">
-  <title>Employer access | Dennis Ndwigah Njeru</title>
-  <link rel="icon" href="{% static 'images/favicon.png' %}" type="image/png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <style>
-    :root {
-      --rail: #0f1f1d;
-      --rail-ink: #b4c6c2;
-      --glow: #3fd0b0;
-      --bg: #f3f5f4;
-      --surface: #fff;
-      --surface-2: #fafcfb;
-      --ink: #121c1b;
-      --muted: #5b6967;
-      --line: #e0e6e4;
-      --accent: #0f7a69;
-      --accent-dark: #0b5e51;
-      --accent-soft: #e3f3ef;
-      --ok: #1b7a42;
-      --ok-bg: #e4f4ea;
-      --bad: #b3261e;
-      --bad-bg: #fbe8e6;
-      --warn: #8a5a00;
-      --warn-bg: #fdf0d2;
-      --info: #2b5b8c;
-      --info-bg: #e5eef7;
-      --radius: 10px;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --rail: #0a1211;
-        --rail-ink: #a8bcb7;
-        --glow: #4fe0bd;
-        --bg: #0d1413;
-        --surface: #161d1b;
-        --surface-2: #1b2320;
-        --ink: #e8efec;
-        --muted: #8a9b96;
-        --line: #27302d;
-        --accent: #4ec6a8;
-        --accent-dark: #3fb494;
-        --accent-soft: #1a2b27;
-        --ok: #6dbf85;
-        --ok-bg: #142b1c;
-        --bad: #ef8880;
-        --bad-bg: #2c1615;
-        --warn: #e2b557;
-        --warn-bg: #2b2113;
-        --info: #7eaadf;
-        --info-bg: #17202c;
-      }
-    }
-
-    * { box-sizing: border-box; }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: var(--bg);
-      color: var(--ink);
-      font: 14px/1.5 Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
-      font-feature-settings: "tnum", "cv11";
-      -webkit-font-smoothing: antialiased;
-    }
-
-    a { color: var(--accent); text-decoration: none; }
-    a:hover { text-decoration: underline; }
-
-    button, input { font: inherit; }
-
-    :focus-visible {
-      outline: 2px solid var(--glow);
-      outline-offset: 2px;
-    }
-
-    [hidden] { display: none !important; }
-
-    .sr {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-      clip: rect(0 0 0 0);
-      white-space: nowrap;
-    }
-
-    .shell {
-      display: grid;
-      grid-template-columns: 236px minmax(0, 1fr);
-      min-height: 100vh;
-    }
-
-    /* ---------- RAIL ---------- */
-
-    .rail {
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      padding: 20px 12px;
-      background: var(--rail);
-      color: var(--rail-ink);
-    }
-
-    .brand {
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-      padding: 0 10px 18px;
-      color: #fff;
-    }
-
-    .brand:hover { text-decoration: none; }
-
-    .brand b {
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: -.04em;
-    }
-
-    .brand b i {
-      color: var(--glow);
-      font-style: normal;
-    }
-
-    .brand span {
-      color: var(--rail-ink);
-      font-size: 12px;
-    }
-
-    .rail h2 {
-      margin: 14px 10px 4px;
-      color: #6f8884;
-      font-size: 12px;
-      line-height: 1.4;
-      font-weight: 500;
-    }
-
-    .rail-link {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      padding: 7px 10px;
-      border-radius: 7px;
-      color: var(--rail-ink);
-      font-weight: 500;
-    }
-
-    .rail-link:hover {
-      background: rgba(255,255,255,.07);
-      color: #fff;
-      text-decoration: none;
-    }
-
-    .rail-link.on {
-      background: rgba(255,255,255,.1);
-      color: #fff;
-      box-shadow: inset 2px 0 0 var(--glow);
-    }
-
-    .rail-badge {
-      min-width: 22px;
-      padding: 0 7px;
-      border-radius: 999px;
-      background: var(--warn-bg);
-      color: var(--warn);
-      font-size: 12px;
-      font-weight: 600;
-      text-align: center;
-    }
-
-    .me {
-      margin-top: auto;
-      padding: 14px 10px 0;
-      border-top: 1px solid rgba(255,255,255,.1);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      font-size: 13px;
-    }
-
-    .me strong {
-      display: block;
-      color: #fff;
-      font-weight: 600;
-    }
-
-    .me small {
-      display: block;
-      color: #6f8884;
-      font-size: 12px;
-    }
-
-    .me a,
-    .logout-btn {
-      color: var(--rail-ink);
-      font-weight: 500;
-    }
-
-    .logout-form { margin: 0; }
-
-    .logout-btn {
-      appearance: none;
-      padding: 0;
-      border: 0;
-      background: none;
-      font: inherit;
-      font-size: 13px;
-      cursor: pointer;
-    }
-
-    .logout-btn:hover {
-      color: #fff;
-      text-decoration: underline;
-    }
-
-    /* ---------- MAIN ---------- */
-
-    .main {
-      width: 100%;
-      max-width: 1180px;
-      padding: 30px 40px 56px;
-    }
-
-    .head {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 22px;
-    }
-
-    h1 {
-      margin: 0;
-      color: var(--ink);
-      font-size: 26px;
-      line-height: 1.2;
-      font-weight: 650;
-      letter-spacing: -.025em;
-    }
-
-    .head p {
-      max-width: 62ch;
-      margin: 4px 0 0;
-      color: var(--muted);
-    }
-
-    .head-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-      align-items: center;
-    }
-
-    .updated {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: var(--surface);
-      border: 1px solid var(--line);
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 500;
-    }
-
-    .updated .dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--ok);
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 25%, transparent);
-    }
-
-    .btn {
-      display: inline-flex;
-      min-height: 36px;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 7px 13px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--surface);
-      color: var(--ink);
-      font-size: 13px;
-      font-weight: 550;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: background .15s, border-color .15s;
-    }
-
-    .btn:hover {
-      background: var(--surface-2);
-      border-color: color-mix(in srgb, var(--line) 60%, var(--ink));
-      text-decoration: none;
-    }
-
-    .btn.primary {
-      border-color: var(--accent);
-      background: var(--accent);
-      color: #fff;
-    }
-
-    .btn.primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
-
-    .btn.danger {
-      border-color: color-mix(in srgb, var(--bad) 40%, var(--line));
-      color: var(--bad);
-    }
-
-    .btn.danger:hover {
-      background: var(--bad-bg);
-      border-color: var(--bad);
-    }
-
-    .btn.ok {
-      border-color: color-mix(in srgb, var(--ok) 40%, var(--line));
-      color: var(--ok);
-    }
-
-    .btn.ok:hover {
-      background: var(--ok-bg);
-      border-color: var(--ok);
-    }
-
-    .btn.small {
-      min-height: 30px;
-      padding: 4px 10px;
-      font-size: 12px;
-    }
-
-    /* ---------- OVERVIEW ---------- */
-
-    .overview {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      background: var(--surface);
-      overflow: hidden;
-      margin-bottom: 18px;
-    }
-
-    .overview-item {
-      display: block;
-      padding: 16px 20px;
-      color: inherit;
-      transition: background .15s;
-    }
-
-    .overview-item:hover {
-      background: var(--surface-2);
-      text-decoration: none;
-    }
-
-    .overview-item + .overview-item {
-      border-left: 1px solid var(--line);
-    }
-
-    .overview-item strong {
-      display: block;
-      font-size: 22px;
-      line-height: 1.1;
-      letter-spacing: -.03em;
-    }
-
-    .overview-item span {
-      display: block;
-      margin-top: 4px;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    /* ---------- TABS ---------- */
-
-    .bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 8px;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .tabs {
-      display: flex;
-      gap: 2px;
-    }
-
-    .tab {
-      appearance: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 14px;
-      margin-bottom: -1px;
-      border: 0;
-      border-bottom: 2px solid transparent;
-      background: none;
-      color: var(--muted);
-      font-weight: 550;
-      cursor: pointer;
-    }
-
-    .tab:hover { color: var(--ink); }
-
-    .tab[aria-selected="true"] {
-      border-bottom-color: var(--accent);
-      color: var(--ink);
-    }
-
-    .tab .n {
-      min-width: 22px;
-      padding: 0 7px;
-      border-radius: 999px;
-      background: color-mix(in srgb, var(--line) 60%, var(--surface));
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 600;
-      text-align: center;
-    }
-
-    .tab .n.alert {
-      background: var(--warn-bg);
-      color: var(--warn);
-    }
-
-    .search {
-      width: 230px;
-      margin-bottom: 8px;
-      padding: 7px 11px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--surface);
-      color: var(--ink);
-      font-size: 13px;
-    }
-
-    .search::placeholder { color: var(--muted); }
-
-    .kbd {
-      display: inline-block;
-      padding: 0 5px;
-      border: 1px solid var(--line);
-      border-bottom-width: 2px;
-      border-radius: 4px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    /* ---------- SHEETS ---------- */
-
-    .sheet {
-      overflow: hidden;
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      background: var(--surface);
-    }
-
-    .row {
-      display: grid;
-      grid-template-columns: 40px minmax(0, 1.35fr) minmax(0, 1fr) auto auto;
-      gap: 20px;
-      align-items: center;
-      padding: 15px 20px;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .row:last-child { border-bottom: 0; }
-    .row:hover { background: var(--surface-2); }
-
-    .grant-row {
-      grid-template-columns: 40px minmax(0, 1.35fr) minmax(0, 1fr) auto auto;
-    }
-
-    .grant-token {
-      max-width: 220px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 12px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .copy-token {
-      appearance: none;
-      padding: 0;
-      border: 0;
-      background: none;
-      cursor: pointer;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .copy-token:hover { color: var(--accent); }
-
-    .avatar {
-      width: 38px;
-      height: 38px;
-      display: grid;
-      place-items: center;
-      border-radius: 50%;
-      background: var(--accent-soft);
-      color: var(--accent-dark);
-      font-weight: 650;
-    }
-
-    .title {
-      color: var(--ink);
-      font-weight: 600;
-    }
-
-    .sub {
-      display: block;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .clamp {
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 2;
-      overflow: hidden;
-    }
-
-    .chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 6px;
-    }
-
-    .chip {
-      padding: 1px 8px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      min-height: 24px;
-      padding: 2px 9px;
-      border-radius: 999px;
-      background: color-mix(in srgb, var(--line) 40%, var(--surface));
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-
-    .badge::before {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: currentColor;
-      content: "";
-    }
-
-    .badge.warn {
-      background: var(--warn-bg);
-      color: var(--warn);
-    }
-
-    .badge.ok {
-      background: var(--ok-bg);
-      color: var(--ok);
-    }
-
-    .badge.bad {
-      background: var(--bad-bg);
-      color: var(--bad);
-    }
-
-    .wait {
-      text-align: right;
-      white-space: nowrap;
-    }
-
-    .actions {
-      display: flex;
-      gap: 8px;
-      justify-content: flex-end;
-      align-items: center;
-    }
-
-    .empty {
-      padding: 48px 20px;
-      text-align: center;
-      color: var(--muted);
-    }
-
-    .empty strong {
-      display: block;
-      margin-bottom: 2px;
-      color: var(--ink);
-      font-size: 15px;
-    }
-
-    .grant-meta {
-      display: grid;
-      gap: 2px;
-    }
-
-    .grant-actions {
-      display: flex;
-      gap: 8px;
-      justify-content: flex-end;
-      flex-wrap: wrap;
-    }
-
-    /* ---------- TIMELINE ---------- */
-
-    .timeline {
-      list-style: none;
-      margin: 0;
-      padding: 8px 20px;
-    }
-
-    .timeline li {
-      position: relative;
-      display: grid;
-      grid-template-columns: 110px minmax(0, 1fr) auto;
-      gap: 16px;
-      align-items: center;
-      padding: 13px 0 13px 26px;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .timeline li:last-child { border-bottom: 0; }
-
-    .timeline li::before {
-      position: absolute;
-      left: 4px;
-      top: 50%;
-      width: 9px;
-      height: 9px;
-      margin-top: -4px;
-      border-radius: 50%;
-      background: var(--info);
-      box-shadow: 0 0 0 4px var(--info-bg);
-      content: "";
-    }
-
-    .timeline li.ok::before {
-      background: var(--ok);
-      box-shadow: 0 0 0 4px var(--ok-bg);
-    }
-
-    .timeline li.bad::before {
-      background: var(--bad);
-      box-shadow: 0 0 0 4px var(--bad-bg);
-    }
-
-    .timeline li.warn::before {
-      background: var(--warn);
-      box-shadow: 0 0 0 4px var(--warn-bg);
-    }
-
-    .resource-tag {
-      display: inline-flex;
-      align-items: center;
-      min-height: 24px;
-      padding: 1px 8px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      color: var(--muted);
-      font-size: 12px;
-      white-space: nowrap;
-    }
-
-    .foot {
-      margin-top: 18px;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    /* ---------- TOAST ---------- */
-
-    .toast-host {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 100;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      pointer-events: none;
-    }
-
-    .toast {
-      padding: 10px 14px;
-      border-radius: 8px;
-      background: var(--ink);
-      color: var(--bg);
-      font-size: 13px;
-      font-weight: 500;
-      box-shadow: 0 10px 24px -8px rgba(0,0,0,.35);
-      animation: toastIn .2s ease-out both;
-      pointer-events: auto;
-    }
-
-    .toast.err { background: var(--bad); color: #fff; }
-
-    @keyframes toastIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ---------- RESPONSIVE ---------- */
-
-    @media (max-width: 900px) {
-      .shell { grid-template-columns: 1fr; }
-
-      .rail {
-        position: static;
-        height: auto;
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-items: center;
-        padding: 12px;
-      }
-
-      .brand { padding: 0 10px 0 4px; }
-      .rail h2 { display: none; }
-      .me { margin: 0 0 0 auto; padding: 0; border: 0; }
-      .me small { display: none; }
-
-      .main { padding: 22px 16px 40px; }
-
-      .row {
-        grid-template-columns: 1fr;
-        gap: 10px;
-      }
-
-      .row .avatar { display: none; }
-      .wait { text-align: left; }
-      .actions { justify-content: flex-start; }
-
-      .timeline li {
-        grid-template-columns: 1fr;
-        gap: 4px;
-      }
-    }
-
-    @media (max-width: 680px) {
-      .head {
-        flex-direction: column;
-      }
-
-      .head-actions {
-        width: 100%;
-        justify-content: flex-start;
-      }
-
-      .overview {
-        grid-template-columns: 1fr;
-      }
-
-      .overview-item + .overview-item {
-        border-left: 0;
-        border-top: 1px solid var(--line);
-      }
-
-      .bar {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 0;
-      }
-
-      .tabs { overflow-x: auto; }
-
-      .search {
-        width: 100%;
-        margin: 8px 0;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      html { scroll-behavior: auto; }
-      *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
-    }
-  </style>
-</head>
-
-<body>
-<div class="shell">
-  <aside class="rail" aria-label="Staff navigation">
-    <a class="brand" href="/" aria-label="Portfolio home">
-      <b>DN<i>.</i></b>
-      <span>Staff</span>
-    </a>
-
-    <h2>Review</h2>
-    <a class="rail-link on" href="{% url 'employer_portal:staff_dashboard' %}" aria-current="page">
-      <span>Employer access</span>
-      {% if pending_requests %}<span class="rail-badge">{{ pending_requests|length }}</span>{% endif %}
-    </a>
-
-    <h2>Records</h2>
-    <a class="rail-link" href="{% url 'admin:employer_portal_document_changelist' %}">Documents</a>
-    <a class="rail-link" href="{% url 'admin:employer_portal_referee_changelist' %}">Referees</a>
-    <a class="rail-link" href="{% url 'admin:employer_portal_employer_changelist' %}">Employers</a>
-    <a class="rail-link" href="{% url 'admin:employer_portal_accesslog_changelist' %}">Audit log</a>
-
-    <h2>Site</h2>
-    <a class="rail-link" href="{% url 'admin:index' %}">Django admin</a>
-    <a class="rail-link" href="/">Public portfolio</a>
-
-    <div class="me">
-      <div>
-        <strong>{{ request.user.get_username }}</strong>
-        <small>Staff access</small>
-      </div>
-      <form method="post" action="{% url 'employer_portal:logout' %}" class="logout-form">
-        {% csrf_token %}
-        <button type="submit" class="logout-btn">Sign out</button>
-      </form>
-    </div>
-  </aside>
-
-  <main class="main">
-    <header class="head">
-      <div>
-        <h1>Employer access</h1>
-        <p>Review incoming employer requests and inspect portal activity from one protected workspace.</p>
-      </div>
-
-      <div class="head-actions">
-        <span class="updated" title="This page reloads to refresh data">
-          <span class="dot" aria-hidden="true"></span>
-          <span>Updated <span data-since-load>0s</span> ago</span>
-        </span>
-        <button type="button" class="btn" onclick="location.reload()" title="Reload the dashboard">
-          Refresh
-        </button>
-        <a class="btn" href="{% url 'admin:index' %}">Open Django admin</a>
-      </div>
-    </header>
-
-    <section class="overview" aria-label="Dashboard summary">
-      <a class="overview-item" href="#pending" data-tab-link="pending">
-        <strong>{{ pending_requests|length }}</strong>
-        <span>Pending employer requests</span>
-      </a>
-      <a class="overview-item" href="#active" data-tab-link="active">
-        <strong>{{ active_grants|length }}</strong>
-        <span>Active employer access grants</span>
-      </a>
-      <a class="overview-item" href="#activity" data-tab-link="activity">
-        <strong>{{ recent_logs|length }}</strong>
-        <span>Recent audit entries shown</span>
-      </a>
-    </section>
-
-    <div class="bar">
-      <div
-        class="tabs"
-        role="tablist"
-        aria-label="Employer access sections"
-        data-default-tab="{% if not pending_requests and active_grants %}active{% else %}pending{% endif %}"
-      >
-        <button
-          class="tab"
-          type="button"
-          role="tab"
-          id="t-pending"
-          aria-controls="p-pending"
-          aria-selected="{% if pending_requests or not active_grants %}true{% else %}false{% endif %}"
-        >
-          Pending
-          <span class="n{% if pending_requests %} alert{% endif %}">{{ pending_requests|length }}</span>
-        </button>
-
-        <button
-          class="tab"
-          type="button"
-          role="tab"
-          id="t-active"
-          aria-controls="p-active"
-          aria-selected="{% if not pending_requests and active_grants %}true{% else %}false{% endif %}"
-        >
-          Active access
-          <span class="n">{{ active_grants|length }}</span>
-        </button>
-
-        <button
-          class="tab"
-          type="button"
-          role="tab"
-          id="t-activity"
-          aria-controls="p-activity"
-          aria-selected="false"
-        >
-          Activity
-          <span class="n">{{ recent_logs|length }}</span>
-        </button>
-      </div>
-
-      <label class="sr" for="q">Filter the current list</label>
-      <input
-        class="search"
-        id="q"
-        type="search"
-        placeholder="Filter this list   ( / )"
-        autocomplete="off"
-      >
-    </div>
-
-    <section class="sheet" id="p-pending" role="tabpanel" aria-labelledby="t-pending">
-      {% if pending_requests %}
-        {% for access_request in pending_requests %}
-          <article class="row" data-filter-row>
-            <div class="avatar" aria-hidden="true">
-              {{ access_request.requester_name|default:"?"|slice:":1"|upper }}
-            </div>
-
-            <div>
-              <div class="title">
-                {% if access_request.requester_company %}
-                  {{ access_request.requester_company }}
-                {% elif access_request.employer %}
-                  {{ access_request.employer.company_name }}
-                {% else %}
-                  Employer request
-                {% endif %}
-              </div>
-              <span class="sub">
-                {{ access_request.requester_name }}{% if access_request.requester_job_title %}, {{ access_request.requester_job_title }}{% endif %}
-              </span>
-              {% if access_request.requester_email %}
-                <span class="sub">{{ access_request.requester_email }}{% if access_request.requester_phone %}, {{ access_request.requester_phone }}{% endif %}</span>
-              {% endif %}
-            </div>
-
-            <div>
-              {% if access_request.reason %}
-                <span class="sub clamp" title="{{ access_request.reason }}">{{ access_request.reason }}</span>
-              {% else %}
-                <span class="sub">No reason given.</span>
-              {% endif %}
-              <div class="chips">
-                <span class="chip">
-                  {{ access_request.document_requests.count }} doc{{ access_request.document_requests.count|pluralize }}
-                </span>
-                <span class="chip">
-                  {{ access_request.referee_requests.count }} referee{{ access_request.referee_requests.count|pluralize }}
-                </span>
-                <span class="chip">ID {{ access_request.request_id|truncatechars:14 }}</span>
-              </div>
-            </div>
-
-            <div class="wait">
-              <span class="badge warn">{{ access_request.get_status_display }}</span>
-              <span class="sub">
-                <time datetime="{{ access_request.created_at|date:'c' }}"
-                      data-relative="{{ access_request.created_at|date:'c' }}"
-                      title="{{ access_request.created_at|date:'j M Y, H:i' }}">
-                  {{ access_request.created_at|timesince }} ago
-                </time>
-              </span>
-            </div>
-
-            <div class="actions">
-              <form method="post"
-                    action="{% url 'employer_portal:approve_request' request_id=access_request.request_id %}"
-                    class="inline-action"
-                    data-confirm="Approve access for {{ access_request.requester_name|escape }}?">
-                {% csrf_token %}
-                <button type="submit" class="btn ok small">Approve</button>
-              </form>
-              <form method="post"
-                    action="{% url 'employer_portal:reject_request' request_id=access_request.request_id %}"
-                    class="inline-action"
-                    data-confirm="Reject this request from {{ access_request.requester_name|escape }}?">
-                {% csrf_token %}
-                <button type="submit" class="btn danger small">Reject</button>
-              </form>
-              <a class="btn small" href="{% url 'employer_portal:staff_request_detail' request_id=access_request.request_id %}">Review</a>
-            </div>
-          </article>
-        {% endfor %}
-      {% else %}
-        <div class="empty">
-          <strong>No pending employer requests</strong>
-          New requests will appear here as soon as an employer submits one.
-        </div>
-      {% endif %}
-    </section>
-
-    <section class="sheet" id="p-active" role="tabpanel" aria-labelledby="t-active" hidden>
-      {% if active_grants %}
-        {% for grant in active_grants %}
-          <article class="row grant-row" data-filter-row>
-            <div class="avatar" aria-hidden="true">
-              {{ grant.access_request.requester_name|default:"?"|slice:":1"|upper }}
-            </div>
-
-            <div>
-              <div class="title">
-                {% if grant.access_request.requester_company %}
-                  {{ grant.access_request.requester_company }}
-                {% elif grant.access_request.employer %}
-                  {{ grant.access_request.employer.company_name }}
-                {% else %}
-                  Employer access
-                {% endif %}
-              </div>
-              <span class="sub">
-                {{ grant.access_request.requester_name }}{% if grant.access_request.requester_job_title %}, {{ grant.access_request.requester_job_title }}{% endif %}
-              </span>
-            </div>
-
-            <div class="grant-meta">
-              <span class="sub"><strong>Started:</strong> {{ grant.starts_at|date:"j M Y, H:i" }}</span>
-              <span class="sub"><strong>Expires:</strong> {{ grant.expires_at|date:"j M Y, H:i" }}</span>
-              <span class="grant-token" title="{{ grant.token }}">
-                {{ grant.token }}
-                <button
-                  type="button"
-                  class="copy-token"
-                  data-copy="{{ grant.token }}"
-                  aria-label="Copy grant token"
-                  title="Copy token"
-                >Copy</button>
-              </span>
-            </div>
-
-            <div class="wait">
-              <span class="badge ok">Active</span>
-              <span class="sub">
-                <time datetime="{{ grant.expires_at|date:'c' }}"
-                      data-relative="{{ grant.expires_at|date:'c' }}"
-                      data-relative-mode="until"
-                      title="{{ grant.expires_at|date:'j M Y, H:i' }}">
-                  {{ grant.expires_at|timeuntil }} left
-                </time>
-              </span>
-            </div>
-
-            <div class="grant-actions">
-              <a
-                class="btn primary small"
-                href="{% url 'employer_portal:portal' token=grant.token %}"
-                target="_blank"
-                rel="noopener noreferrer"
-                referrerpolicy="no-referrer"
-              >
-                Open portal
-              </a>
-              <a
-                class="btn small"
-                href="{% url 'employer_portal:staff_request_detail' request_id=grant.access_request.request_id %}"
-              >
-                View
-              </a>
-              <form method="post"
-                    action="{% url 'employer_portal:revoke_access' request_id=grant.access_request.request_id %}"
-                    class="inline-action"
-                    data-confirm="Revoke access for {{ grant.access_request.requester_name|escape }}? This immediately ends their portal session.">
-                {% csrf_token %}
-                <button type="submit" class="btn danger small">Revoke</button>
-              </form>
-            </div>
-          </article>
-        {% endfor %}
-      {% else %}
-        <div class="empty">
-          <strong>No active employer access grants</strong>
-          Approved requests with live portal access will appear here.
-        </div>
-      {% endif %}
-    </section>
-
-    <section class="sheet" id="p-activity" role="tabpanel" aria-labelledby="t-activity" hidden>
-      {% if recent_logs %}
-        <ol class="timeline">
-          {% for log in recent_logs %}
-            <li class="{% if 'approved' in log.event_type %}ok{% elif 'reject' in log.event_type or 'revoke' in log.event_type or 'denied' in log.event_type %}bad{% elif 'submit' in log.event_type %}warn{% endif %}" data-filter-row>
-              <time
-                datetime="{{ log.created_at|date:'c' }}"
-                data-relative="{{ log.created_at|date:'c' }}"
-                title="{{ log.created_at|date:'j M Y, H:i' }}"
-              >
-                <span class="title">{{ log.created_at|timesince }} ago</span>
-                <span class="sub">{{ log.created_at|date:"j M, H:i" }}</span>
-              </time>
-
-              <div>
-                <span class="title">{{ log.get_event_type_display }}</span>
-                <span class="sub">
-                  {% if log.employer %}
-                    {{ log.employer.company_name }}
-                  {% elif log.access_request and log.access_request.requester_company %}
-                    {{ log.access_request.requester_company }}
-                  {% elif log.resource_identifier %}
-                    {{ log.resource_identifier }}
-                  {% else %}
-                    System event
-                  {% endif %}
-                </span>
-              </div>
-
-              {% if log.resource_type %}
-                <span class="resource-tag" title="{{ log.resource_identifier }}">{{ log.resource_type }}</span>
-              {% endif %}
-            </li>
-          {% endfor %}
-        </ol>
-      {% else %}
-        <div class="empty">
-          <strong>No activity recorded yet</strong>
-          Requests, reviews and portal actions will appear in this timeline.
-        </div>
-      {% endif %}
-    </section>
-
-    <p class="foot">
-      Employer access actions are recorded in the audit log.
-      <a href="{% url 'admin:employer_portal_accesslog_changelist' %}">Open the full audit log</a>
-    </p>
-  </main>
-</div>
-
-<div class="toast-host" id="toast-host" aria-live="polite" aria-atomic="true"></div>
-
-<script>
-(function () {
-  'use strict';
-
-  /* =========================================================
-     TABS
-     ========================================================= */
-  var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
-  var search = document.getElementById('q');
-  var tabList = document.querySelector('.tabs');
-  var STORAGE_KEY = 'epd.lastTab';
-  var defaultTabName = tabList ? tabList.getAttribute('data-default-tab') : 'pending';
-
-  function tabByName(name) {
-    return document.getElementById('t-' + name);
-  }
-
-  function activate(tab, updateHash, keepFilter) {
-    if (!tab) return;
-
-    tabs.forEach(function (item) {
-      var active = item === tab;
-      item.setAttribute('aria-selected', String(active));
-      var panel = document.getElementById(item.getAttribute('aria-controls'));
-      if (panel) panel.hidden = !active;
-      item.tabIndex = active ? 0 : -1;
-    });
-
-    if (!keepFilter) {
-      search.value = '';
-      filter();
-    }
-
-    var name = tab.id.slice(2);
-    try { localStorage.setItem(STORAGE_KEY, name); } catch (_) {}
-
-    if (updateHash) {
-      history.replaceState(null, '', '#' + name);
-    }
-  }
-
-  function filter() {
-    var term = search.value.trim().toLowerCase();
-    var visiblePanel = document.querySelector('.sheet:not([hidden])');
-    if (!visiblePanel) return;
-
-    visiblePanel.querySelectorAll('[data-filter-row]').forEach(function (row) {
-      var matches = !term || row.textContent.toLowerCase().indexOf(term) !== -1;
-      row.hidden = !matches;
-    });
-  }
-
-  tabs.forEach(function (tab, index) {
-    tab.tabIndex = index === 0 ? 0 : -1;
-
-    tab.addEventListener('click', function () {
-      activate(tab, true);
-    });
-
-    tab.addEventListener('keydown', function (event) {
-      var key = event.key;
-      if (key === 'Home') {
-        event.preventDefault();
-        tabs[0].focus();
-        activate(tabs[0], true);
-        return;
-      }
-      if (key === 'End') {
-        event.preventDefault();
-        tabs[tabs.length - 1].focus();
-        activate(tabs[tabs.length - 1], true);
-        return;
-      }
-      if (key !== 'ArrowRight' && key !== 'ArrowLeft') return;
-      event.preventDefault();
-
-      var currentIndex = tabs.indexOf(tab);
-      var nextIndex = key === 'ArrowRight'
-        ? (currentIndex + 1) % tabs.length
-        : (currentIndex - 1 + tabs.length) % tabs.length;
-
-      tabs[nextIndex].focus();
-      activate(tabs[nextIndex], true);
-    });
-  });
-
-  search.addEventListener('input', filter);
-
-  /* Overview cards → switch tab */
-  document.querySelectorAll('[data-tab-link]').forEach(function (link) {
-    link.addEventListener('click', function (event) {
-      event.preventDefault();
-      activate(tabByName(link.getAttribute('data-tab-link')), true);
-      search.focus();
-    });
-  });
-
-  /* Initial tab: hash → localStorage → data-default-tab */
-  var initialTab =
-    (location.hash && tabByName(location.hash.slice(1))) ||
-    (function () {
-      try {
-        var stored = localStorage.getItem(STORAGE_KEY);
-        return stored ? tabByName(stored) : null;
-      } catch (_) { return null; }
-    })() ||
-    tabByName(defaultTabName) ||
-    tabs[0];
-
-  activate(initialTab && tabs.indexOf(initialTab) !== -1 ? initialTab : tabs[0], false);
-
-  /* =========================================================
-     KEYBOARD SHORTCUTS
-     ========================================================= */
-  document.addEventListener('keydown', function (event) {
-    var tag = (event.target.tagName || '').toLowerCase();
-    var typing = tag === 'input' || tag === 'textarea' || event.target.isContentEditable;
-
-    /* "/" focuses the filter — ignored while typing */
-    if (event.key === '/' && !typing) {
-      event.preventDefault();
-      search.focus();
-      search.select();
-      return;
-    }
-
-    /* Escape clears the filter */
-    if (event.key === 'Escape' && event.target === search && search.value) {
-      search.value = '';
-      filter();
-    }
-  });
-
-  /* =========================================================
-     RELATIVE TIMES
-     ========================================================= */
-  function relTime(iso, mode) {
-    var s = Math.floor((new Date(iso).getTime() - Date.now()) / 1000);
-    var past = s <= 0;
-    var abs = Math.abs(s);
-
-    if (abs < 60) return past ? abs + 's ago' : 'in ' + abs + 's';
-    if (abs < 3600) return Math.floor(abs / 60) + (past ? 'm ago' : 'm');
-    if (abs < 86400) return Math.floor(abs / 3600) + (past ? 'h ago' : 'h');
-    if (abs < 2592000) return Math.floor(abs / 86400) + (past ? 'd ago' : 'd');
-    if (abs < 31536000) return Math.floor(abs / 2592000) + (past ? 'mo ago' : 'mo');
-    return Math.floor(abs / 31536000) + (past ? 'y ago' : 'y');
-  }
-
-  function refreshRelativeTimes() {
-    document.querySelectorAll('[data-relative]').forEach(function (el) {
-      var iso = el.getAttribute('data-relative');
-      var mode = el.getAttribute('data-relative-mode');
-      if (!iso) return;
-
-      if (mode === 'until') {
-        el.textContent = relTime(iso).replace(/^in /, '') + ' left';
-      } else {
-        var t = relTime(iso);
-        el.textContent = t.indexOf('in ') === 0 ? t.replace('in ', 'in ') : t;
-      }
-    });
-  }
-
-  /* =========================================================
-     LAST-UPDATED TICKER
-     ========================================================= */
-  var t0 = Date.now();
-  function refreshSinceLoad() {
-    var s = Math.floor((Date.now() - t0) / 1000);
-    var label = s < 60 ? s + 's' : Math.floor(s / 60) + 'm';
-    document.querySelectorAll('[data-since-load]').forEach(function (el) {
-      el.textContent = label;
-    });
-  }
-  refreshSinceLoad();
-
-  setInterval(function () {
-    refreshSinceLoad();
-    refreshRelativeTimes();
-  }, 15000);
-  refreshRelativeTimes();
-
-  /* =========================================================
-     TOASTS
-     ========================================================= */
-  var toastHost = document.getElementById('toast-host');
-  function toast(msg, isError) {
-    if (!toastHost) return;
-    var el = document.createElement('div');
-    el.className = 'toast' + (isError ? ' err' : '');
-    el.textContent = msg;
-    toastHost.appendChild(el);
-    setTimeout(function () { el.remove(); }, 2600);
-  }
-
-  /* =========================================================
-     COPY-TO-CLIPBOARD
-     ========================================================= */
-  document.addEventListener('click', function (event) {
-    var btn = event.target.closest('[data-copy]');
-    if (!btn) return;
-    event.preventDefault();
-
-    var text = btn.getAttribute('data-copy');
-    function done() { toast('Copied'); }
-    function fail() { toast('Copy failed', true); }
-
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(done, function () {
-        fallbackCopy(text) ? done() : fail();
-      });
-    } else {
-      fallbackCopy(text) ? done() : fail();
-    }
-  });
-
-  function fallbackCopy(text) {
-    try {
-      var ta = document.createElement('textarea');
-      ta.value = text;
-      ta.setAttribute('readonly', '');
-      ta.style.position = 'absolute';
-      ta.style.left = '-9999px';
-      document.body.appendChild(ta);
-      ta.select();
-      var ok = document.execCommand('copy');
-      ta.remove();
-      return ok;
-    } catch (_) {
-      return false;
-    }
-  }
-
-  /* =========================================================
-     INLINE ACTIONS (progressive enhancement)
-     ========================================================= */
-  document.querySelectorAll('form.inline-action').forEach(function (form) {
-    form.addEventListener('submit', function (event) {
-      var msg = form.getAttribute('data-confirm');
-      if (msg && !window.confirm(msg)) {
-        event.preventDefault();
-        return;
-      }
-
-      if (!window.fetch || !window.FormData) return;
-
-      event.preventDefault();
-      var button = form.querySelector('button[type="submit"]');
-      if (button) {
-        button.disabled = true;
-        button.dataset.label = button.textContent;
-        button.textContent = 'Working…';
-      }
-
-      fetch(form.action, {
-        method: 'POST',
-        body: new FormData(form),
-        credentials: 'same-origin',
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-      }).then(function (response) {
-        if (!response.ok && response.status >= 400) throw new Error('HTTP ' + response.status);
-        /* The view redirects on success; fetch follows it. Reload to
-           reflect the new state (row gone, counts updated). */
-        location.reload();
-      }).catch(function () {
-        if (button) {
-          button.disabled = false;
-          button.textContent = button.dataset.label || 'Retry';
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="robots" content="noindex, nofollow, noarchive">
+    <meta name="theme-color" content="#0c3027">
+    <title>Staff Dashboard | Employer Access Portal</title>
+    <style>
+        :root {
+            --ink: #10221d;
+            --muted: #64736e;
+            --line: #dbe4e0;
+            --surface: #ffffff;
+            --canvas: #f4f7f5;
+            --forest: #0c3027;
+            --forest-2: #124538;
+            --teal: #167c69;
+            --teal-soft: #e6f4f0;
+            --gold: #b8862f;
+            --gold-soft: #fbf3df;
+            --danger: #ae3c47;
+            --danger-soft: #fbeaec;
+            --shadow: 0 18px 50px rgba(16, 34, 29, 0.08);
+            --radius-lg: 22px;
+            --radius-md: 16px;
+            --radius-sm: 12px;
         }
-        toast('Action failed. Try again.', true);
-      });
-    });
-  });
-})();
-</script>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            background: var(--canvas);
+            color: var(--ink);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            line-height: 1.5;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        button,
+        a {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font: inherit;
+        }
+
+        button:focus-visible,
+        a:focus-visible {
+            outline: 3px solid rgba(22, 124, 105, 0.28);
+            outline-offset: 3px;
+        }
+
+        .shell {
+            width: min(1440px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 20px 0 40px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand-mark {
+            display: grid;
+            place-items: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            background: var(--forest);
+            color: #ffffff;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            box-shadow: 0 10px 24px rgba(12, 48, 39, 0.2);
+            flex: 0 0 auto;
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy strong,
+        .brand-copy span {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .brand-copy strong {
+            font-size: 0.94rem;
+        }
+
+        .brand-copy span {
+            margin-top: 1px;
+            color: var(--muted);
+            font-size: 0.78rem;
+        }
+
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .top-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            padding: 0 14px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.82);
+            color: var(--ink);
+            font-size: 0.86rem;
+            font-weight: 700;
+            transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+        }
+
+        .top-link:hover {
+            transform: translateY(-1px);
+            border-color: #bdcec8;
+            background: #ffffff;
+        }
+
+        .top-link.primary {
+            border-color: var(--forest);
+            background: var(--forest);
+            color: #ffffff;
+        }
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+            border-radius: var(--radius-lg);
+            padding: 30px;
+            background:
+                radial-gradient(circle at 84% 16%, rgba(90, 184, 162, 0.26), transparent 30%),
+                linear-gradient(135deg, #0a2d25 0%, #124538 68%, #155948 100%);
+            color: #ffffff;
+            box-shadow: 0 24px 70px rgba(12, 48, 39, 0.2);
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            right: -90px;
+            bottom: -120px;
+            width: 340px;
+            height: 340px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .hero-grid {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.55fr);
+            gap: 24px;
+            align-items: stretch;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: fit-content;
+            padding: 6px 10px;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.88);
+            font-size: 0.73rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .hero h1 {
+            max-width: 780px;
+            margin: 14px 0 8px;
+            font-size: clamp(2rem, 4vw, 3.4rem);
+            line-height: 1.02;
+            letter-spacing: -0.045em;
+        }
+
+        .hero p {
+            max-width: 780px;
+            margin: 0;
+            color: rgba(255, 255, 255, 0.76);
+            font-size: 1rem;
+        }
+
+        .hero-side {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-side .label {
+            margin-bottom: 4px;
+            color: rgba(255, 255, 255, 0.58);
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .hero-side strong {
+            display: block;
+            font-size: 1.05rem;
+        }
+
+        .hero-side small {
+            display: block;
+            margin-top: 3px;
+            color: rgba(255, 255, 255, 0.62);
+            font-size: 0.8rem;
+        }
+
+        .hero-chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .hero-chip {
+            display: inline-flex;
+            align-items: center;
+            min-height: 34px;
+            padding: 0 10px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.07);
+            color: rgba(255, 255, 255, 0.82);
+            font-size: 0.76rem;
+            font-weight: 700;
+        }
+
+        .messages {
+            display: grid;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .message {
+            padding: 13px 15px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: #ffffff;
+            box-shadow: 0 8px 20px rgba(16, 34, 29, 0.04);
+            font-size: 0.88rem;
+            font-weight: 700;
+        }
+
+        .message.success {
+            border-color: #bfe2d7;
+            background: #f0faf6;
+        }
+
+        .message.warning {
+            border-color: #ead9ac;
+            background: #fffaf0;
+        }
+
+        .message.error {
+            border-color: #efc6ca;
+            background: #fff3f4;
+        }
+
+        .metric-row {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin: 18px 0;
+        }
+
+        .metric {
+            padding: 17px 18px;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            background: var(--surface);
+            box-shadow: 0 10px 26px rgba(16, 34, 29, 0.04);
+        }
+
+        .metric-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .metric-label {
+            color: var(--muted);
+            font-size: 0.76rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .metric-icon {
+            display: grid;
+            place-items: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 10px;
+            background: var(--teal-soft);
+            color: var(--teal);
+            font-size: 0.8rem;
+            font-weight: 900;
+        }
+
+        .metric-value {
+            margin-top: 8px;
+            font-size: 1.85rem;
+            font-weight: 850;
+            letter-spacing: -0.04em;
+        }
+
+        .metric-note {
+            margin-top: 2px;
+            color: var(--muted);
+            font-size: 0.78rem;
+        }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: minmax(0, 1.55fr) minmax(320px, 0.75fr);
+            gap: 18px;
+            align-items: start;
+        }
+
+        .panel {
+            min-width: 0;
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
+            background: var(--surface);
+            box-shadow: var(--shadow);
+        }
+
+        .panel-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 20px 20px 15px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .panel-head h2 {
+            margin: 0;
+            font-size: 1.03rem;
+            letter-spacing: -0.02em;
+        }
+
+        .panel-head p {
+            margin: 4px 0 0;
+            color: var(--muted);
+            font-size: 0.8rem;
+        }
+
+        .panel-link {
+            flex: 0 0 auto;
+            color: var(--teal);
+            font-size: 0.8rem;
+            font-weight: 800;
+        }
+
+        .queue {
+            display: grid;
+        }
+
+        .request-card {
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .request-card:last-child {
+            border-bottom: 0;
+        }
+
+        .request-main {
+            display: grid;
+            grid-template-columns: 46px minmax(0, 1fr) auto;
+            gap: 13px;
+            align-items: start;
+        }
+
+        .avatar {
+            display: grid;
+            place-items: center;
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            background: var(--forest);
+            color: #ffffff;
+            font-size: 0.94rem;
+            font-weight: 850;
+        }
+
+        .request-copy {
+            min-width: 0;
+        }
+
+        .request-name {
+            margin: 0;
+            font-size: 0.96rem;
+            font-weight: 850;
+            letter-spacing: -0.02em;
+        }
+
+        .request-company {
+            margin: 2px 0 0;
+            color: var(--muted);
+            font-size: 0.8rem;
+        }
+
+        .request-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px 10px;
+            margin-top: 8px;
+            color: #4f605a;
+            font-size: 0.75rem;
+        }
+
+        .request-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            min-height: 28px;
+            padding: 0 9px;
+            border-radius: 999px;
+            background: var(--gold-soft);
+            color: #7b5a1b;
+            font-size: 0.72rem;
+            font-weight: 850;
+        }
+
+        .assigned {
+            display: inline-flex;
+            align-items: center;
+            min-height: 26px;
+            margin-top: 8px;
+            padding: 0 8px;
+            border-radius: 8px;
+            background: #f2f5f4;
+            color: #55635e;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .request-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 14px;
+            padding-left: 59px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            padding: 0 13px;
+            border: 1px solid var(--line);
+            border-radius: 11px;
+            background: #ffffff;
+            color: var(--ink);
+            font-size: 0.79rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            border-color: #bdcec8;
+            background: #f9fbfa;
+        }
+
+        .btn.primary {
+            border-color: var(--forest);
+            background: var(--forest);
+            color: #ffffff;
+        }
+
+        .btn.secondary {
+            border-color: #c5dbd5;
+            background: #eff8f5;
+            color: var(--forest-2);
+        }
+
+        .btn.danger {
+            border-color: #efc9cd;
+            background: #fff7f7;
+            color: var(--danger);
+        }
+
+        .grant-list,
+        .activity-list {
+            display: grid;
+        }
+
+        .grant-card {
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .grant-card:last-child {
+            border-bottom: 0;
+        }
+
+        .grant-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .grant-title {
+            margin: 0;
+            font-size: 0.92rem;
+            font-weight: 850;
+        }
+
+        .grant-company {
+            margin: 2px 0 0;
+            color: var(--muted);
+            font-size: 0.78rem;
+        }
+
+        .expiry-badge {
+            flex: 0 0 auto;
+            display: inline-flex;
+            align-items: center;
+            min-height: 28px;
+            padding: 0 9px;
+            border-radius: 999px;
+            background: var(--danger-soft);
+            color: var(--danger);
+            font-size: 0.69rem;
+            font-weight: 850;
+            text-align: center;
+        }
+
+        .grant-info {
+            display: grid;
+            gap: 4px;
+            margin-top: 11px;
+            color: #53615d;
+            font-size: 0.75rem;
+        }
+
+        .grant-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .activity-panel {
+            grid-column: 1 / -1;
+        }
+
+        .activity-row {
+            display: grid;
+            grid-template-columns: 11px minmax(0, 1fr) auto;
+            gap: 12px;
+            align-items: start;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .activity-row:last-child {
+            border-bottom: 0;
+        }
+
+        .activity-dot {
+            width: 10px;
+            height: 10px;
+            margin-top: 5px;
+            border-radius: 50%;
+            background: var(--teal);
+            box-shadow: 0 0 0 4px var(--teal-soft);
+        }
+
+        .activity-event {
+            margin: 0;
+            font-size: 0.82rem;
+            font-weight: 800;
+        }
+
+        .activity-who,
+        .activity-ip {
+            margin: 3px 0 0;
+            color: var(--muted);
+            font-size: 0.74rem;
+        }
+
+        .activity-time {
+            color: var(--muted);
+            font-size: 0.72rem;
+            white-space: nowrap;
+        }
+
+        .empty {
+            padding: 38px 22px;
+            text-align: center;
+        }
+
+        .empty-icon {
+            display: grid;
+            place-items: center;
+            width: 44px;
+            height: 44px;
+            margin: 0 auto 10px;
+            border-radius: 13px;
+            background: #f2f6f4;
+            color: var(--teal);
+            font-weight: 900;
+        }
+
+        .empty h3 {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .empty p {
+            max-width: 360px;
+            margin: 5px auto 0;
+            color: var(--muted);
+            font-size: 0.76rem;
+        }
+
+        .footer-note {
+            margin-top: 18px;
+            color: var(--muted);
+            font-size: 0.72rem;
+            text-align: center;
+        }
+
+        @media (max-width: 980px) {
+            .hero-grid,
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+
+            .activity-panel {
+                grid-column: auto;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .shell {
+                width: min(100% - 18px, 1440px);
+                padding: 10px 0 24px;
+            }
+
+            .topbar {
+                align-items: flex-start;
+            }
+
+            .top-actions {
+                width: 100%;
+            }
+
+            .top-link {
+                flex: 1 1 auto;
+                min-width: 0;
+            }
+
+            .hero {
+                padding: 22px;
+                border-radius: 18px;
+            }
+
+            .hero h1 {
+                font-size: clamp(1.85rem, 10vw, 2.65rem);
+            }
+
+            .hero-side {
+                padding: 15px;
+            }
+
+            .metric-row {
+                grid-template-columns: 1fr;
+            }
+
+            .panel-head {
+                padding: 17px 16px 13px;
+            }
+
+            .request-card,
+            .grant-card,
+            .activity-row {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
+            .request-main {
+                grid-template-columns: 42px minmax(0, 1fr);
+            }
+
+            .avatar {
+                width: 42px;
+                height: 42px;
+            }
+
+            .request-main > .status {
+                grid-column: 2;
+                justify-self: start;
+            }
+
+            .request-actions {
+                padding-left: 0;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .request-actions .btn,
+            .request-actions form,
+            .request-actions form .btn {
+                width: 100%;
+            }
+
+            .grant-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .activity-row {
+                grid-template-columns: 11px minmax(0, 1fr);
+            }
+
+            .activity-time {
+                grid-column: 2;
+                white-space: normal;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+
+            *,
+            *::before,
+            *::after {
+                transition: none !important;
+                animation: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <header class="topbar">
+            <a class="brand" href="{% url 'admin:index' %}" aria-label="Employer Access Portal admin">
+                <span class="brand-mark">DN</span>
+                <span class="brand-copy">
+                    <strong>Employer Access Portal</strong>
+                    <span>Private staff workspace</span>
+                </span>
+            </a>
+            <nav class="top-actions" aria-label="Dashboard navigation">
+                <a class="top-link" href="{% url 'admin:index' %}">Admin index</a>
+                <a class="top-link primary" href="{% url 'admin:employer_portal_accessrequest_changelist' %}">All requests</a>
+            </nav>
+        </header>
+
+        <section class="hero" aria-labelledby="dashboard-title">
+            <div class="hero-grid">
+                <div>
+                    <span class="eyebrow">Private operations</span>
+                    <h1 id="dashboard-title">Employer access control</h1>
+                    <p>Review access requests, keep temporary grants under control, and maintain a clear audit trail for portfolio resources.</p>
+                </div>
+                <aside class="hero-side" aria-label="Workspace status">
+                    <div>
+                        <div class="label">Current workspace</div>
+                        <strong>Request triage &amp; access management</strong>
+                        <small>Actions that change access remain protected by staff authentication and POST-only workflows.</small>
+                    </div>
+                    <div class="hero-chip-row" aria-label="Dashboard areas">
+                        <span class="hero-chip">Review queue</span>
+                        <span class="hero-chip">Live grants</span>
+                        <span class="hero-chip">Audit history</span>
+                    </div>
+                </aside>
+            </div>
+        </section>
+
+        {% if messages %}
+            <div class="messages" aria-live="polite">
+                {% for message in messages %}
+                    <div class="message {{ message.tags|default:'' }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <section class="metric-row" aria-label="Dashboard summary">
+            <article class="metric">
+                <div class="metric-top">
+                    <span class="metric-label">Pending</span>
+                    <span class="metric-icon">Q</span>
+                </div>
+                <div class="metric-value">{{ pending_requests|length }}</div>
+                <div class="metric-note">Requests currently awaiting review</div>
+            </article>
+            <article class="metric">
+                <div class="metric-top">
+                    <span class="metric-label">Live grants</span>
+                    <span class="metric-icon">G</span>
+                </div>
+                <div class="metric-value">{{ active_grants|length }}</div>
+                <div class="metric-note">Active grants shown on this page</div>
+            </article>
+            <article class="metric">
+                <div class="metric-top">
+                    <span class="metric-label">Recent activity</span>
+                    <span class="metric-icon">A</span>
+                </div>
+                <div class="metric-value">{{ recent_logs|length }}</div>
+                <div class="metric-note">Latest audit events shown below</div>
+            </article>
+        </section>
+
+        <section class="workspace">
+            <article class="panel" id="pending">
+                <div class="panel-head">
+                    <div>
+                        <h2>Employer requests</h2>
+                        <p>Start with the newest pending requests and open the full review record before deciding.</p>
+                    </div>
+                    <a class="panel-link" href="{% url 'admin:employer_portal_accessrequest_changelist' %}">Open list</a>
+                </div>
+
+                {% if pending_requests %}
+                    <div class="queue">
+                        {% for request in pending_requests %}
+                            <section class="request-card">
+                                <div class="request-main">
+                                    <div class="avatar" aria-hidden="true">{{ request.requester_name|slice:':1'|upper }}</div>
+                                    <div class="request-copy">
+                                        <h3 class="request-name">{{ request.requester_name }}</h3>
+                                        <p class="request-company">{{ request.requester_company|default:'Company not provided' }}</p>
+                                        <div class="request-meta">
+                                            {% if request.requester_job_title %}
+                                                <span>{{ request.requester_job_title }}</span>
+                                            {% endif %}
+                                            <span>{{ request.requester_email }}</span>
+                                            {% if request.requester_phone %}
+                                                <span>{{ request.requester_phone }}</span>
+                                            {% endif %}
+                                            <span>Submitted {{ request.created_at|timesince }} ago</span>
+                                        </div>
+                                        <div class="request-meta">
+                                            <span>{{ request.document_requests.all|length }} document{{ request.document_requests.all|length|pluralize }}</span>
+                                            <span>{{ request.referee_requests.all|length }} referee{{ request.referee_requests.all|length|pluralize }}</span>
+                                        </div>
+                                        {% if request.reviewed_by %}
+                                            <div class="assigned">Assigned to {{ request.reviewed_by.get_full_name|default:request.reviewed_by.username }}</div>
+                                        {% else %}
+                                            <div class="assigned">Unassigned</div>
+                                        {% endif %}
+                                    </div>
+                                    <span class="status">{{ request.get_status_display }}</span>
+                                </div>
+                                <div class="request-actions">
+                                    <a class="btn" href="{% url 'employer_portal:staff_request_detail' request_id=request.request_id %}">Review request</a>
+                                    <form method="post" action="{% url 'employer_portal:assign_request' request_id=request.request_id %}">
+                                        {% csrf_token %}
+                                        <button class="btn secondary" type="submit">Assign to me</button>
+                                    </form>
+                                </div>
+                            </section>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty">
+                        <div class="empty-icon" aria-hidden="true">✓</div>
+                        <h3>No pending employer requests</h3>
+                        <p>Your review queue is clear. New access requests will appear here when they are submitted.</p>
+                    </div>
+                {% endif %}
+            </article>
+
+            <aside class="panel" id="grants">
+                <div class="panel-head">
+                    <div>
+                        <h2>Live access</h2>
+                        <p>Temporary grants that are currently active and available to review.</p>
+                    </div>
+                    <a class="panel-link" href="{% url 'admin:employer_portal_accessgrant_changelist' %}">Open list</a>
+                </div>
+
+                {% if active_grants %}
+                    <div class="grant-list">
+                        {% for grant in active_grants %}
+                            <section class="grant-card">
+                                <div class="grant-head">
+                                    <div>
+                                        <h3 class="grant-title">{{ grant.access_request.requester_name }}</h3>
+                                        <p class="grant-company">{{ grant.access_request.requester_company|default:'Company not provided' }}</p>
+                                    </div>
+                                    <span class="expiry-badge">{{ grant.expires_at|timeuntil }} left</span>
+                                </div>
+                                <div class="grant-info">
+                                    <span>Starts {{ grant.starts_at|date:'M j, Y · g:i A' }}</span>
+                                    <span>Expires {{ grant.expires_at|date:'M j, Y · g:i A' }}</span>
+                                </div>
+                                <div class="grant-actions">
+                                    <a class="btn" href="{% url 'employer_portal:portal' token=grant.token %}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">Open portal</a>
+                                    <form method="post" action="{% url 'employer_portal:revoke_access' request_id=grant.access_request.request_id %}" onsubmit="return confirm('Revoke this employer portal access immediately?');">
+                                        {% csrf_token %}
+                                        <button class="btn danger" type="submit">Revoke access</button>
+                                    </form>
+                                </div>
+                            </section>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty">
+                        <div class="empty-icon" aria-hidden="true">—</div>
+                        <h3>No active grants</h3>
+                        <p>There are no live employer portal grants requiring action right now.</p>
+                    </div>
+                {% endif %}
+            </aside>
+
+            <article class="panel activity-panel" id="activity">
+                <div class="panel-head">
+                    <div>
+                        <h2>Recent activity</h2>
+                        <p>Latest access-control events recorded by the portal.</p>
+                    </div>
+                    <a class="panel-link" href="{% url 'admin:employer_portal_accesslog_changelist' %}">Open audit log</a>
+                </div>
+
+                {% if recent_logs %}
+                    <div class="activity-list">
+                        {% for log in recent_logs %}
+                            <div class="activity-row">
+                                <span class="activity-dot" aria-hidden="true"></span>
+                                <div>
+                                    <p class="activity-event">{{ log.get_event_type_display }}</p>
+                                    {% if log.access_request %}
+                                        <p class="activity-who">{{ log.access_request.requester_name }}{% if log.access_request.requester_company %} · {{ log.access_request.requester_company }}{% endif %}</p>
+                                    {% elif log.employer %}
+                                        <p class="activity-who">{{ log.employer.company_name }}</p>
+                                    {% else %}
+                                        <p class="activity-who">System</p>
+                                    {% endif %}
+                                    {% if log.ip_address %}
+                                        <p class="activity-ip">IP {{ log.ip_address }}</p>
+                                    {% endif %}
+                                </div>
+                                <time class="activity-time" datetime="{{ log.created_at|date:'c' }}">{{ log.created_at|date:'M j, Y · g:i A' }}</time>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty">
+                        <div class="empty-icon" aria-hidden="true">•</div>
+                        <h3>No activity recorded yet</h3>
+                        <p>Audit events will appear here as employers submit requests and use approved resources.</p>
+                    </div>
+                {% endif %}
+            </article>
+        </section>
+
+        <p class="footer-note">Private staff area · Employer access is temporary, auditable, and protected by staff authentication.</p>
+    </main>
 </body>
 </html>
