@@ -50,6 +50,11 @@ from .models import (
     RefereeAccessRequest,
 )
 DEFAULT_ACCESS_DURATION_DAYS = 7
+
+REQUEST_STATUS_SESSION_KEY = "employer_portal.request_status_id"
+
+
+
 def staff_required(view_func):
     """Require an authenticated Django staff account."""
     @wraps(view_func)
@@ -63,6 +68,9 @@ def staff_required(view_func):
             raise PermissionDenied("Active staff access is required.")
         return view_func(request, *args, **kwargs)
     return wrapped_view
+
+
+
 def log_event(
     event_type: str,
     request: HttpRequest | None = None,
@@ -99,12 +107,18 @@ def log_event(
         resource_identifier=identifier,
         metadata=meta,
     )
+
+
+
 def client_ip(request):
     if getattr(settings, "TRUST_X_FORWARDED_FOR", False):
         forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR", "")
         if forwarded_for:
             return forwarded_for.split(",")[0].strip()
     return request.META.get("REMOTE_ADDR", "")
+
+
+
 def grant_fingerprint(token) -> str:
     """
     Return a short, non-reversible identifier for an access grant.
@@ -115,6 +129,9 @@ def grant_fingerprint(token) -> str:
         str(token).encode("utf-8"),
         hashlib.sha256,
     ).hexdigest()[:16]
+
+
+
 def get_valid_grant(token) -> AccessGrant | None:
     """
     Return a currently valid grant for the given token, or ``None``.
@@ -139,6 +156,9 @@ def get_valid_grant(token) -> AccessGrant | None:
         grant.access_request.mark_expired(now=now)
         return None
     return grant
+
+
+
 def _approved_documents(access_request: AccessRequest):
     return list(
         Document.objects
@@ -150,6 +170,9 @@ def _approved_documents(access_request: AccessRequest):
         .distinct()
         .order_by("document_type", "title")
     )
+
+
+
 def _approved_referees(access_request: AccessRequest):
     return list(
         Referee.objects
@@ -161,6 +184,9 @@ def _approved_referees(access_request: AccessRequest):
         .distinct()
         .order_by("name")
     )
+
+
+
 def _requested_documents_for_review(access_request: AccessRequest):
     return list(
         Document.objects
@@ -171,6 +197,9 @@ def _requested_documents_for_review(access_request: AccessRequest):
         .distinct()
         .order_by("document_type", "title")
     )
+
+
+
 def _requested_referees_for_review(access_request: AccessRequest):
     return list(
         Referee.objects
@@ -181,6 +210,9 @@ def _requested_referees_for_review(access_request: AccessRequest):
         .distinct()
         .order_by("name")
     )
+
+
+
 def _resource_availability(form: AccessRequestForm):
     """Return whether active documents or referees are selectable."""
     document_field = (
@@ -200,6 +232,9 @@ def _resource_availability(form: AccessRequestForm):
         and referee_field.queryset.exists()
     )
     return has_documents, has_referees
+
+
+
 def _notify_staff_of_new_request(
     request: HttpRequest,
     access_request: AccessRequest,
@@ -246,6 +281,9 @@ def _notify_staff_of_new_request(
         return True, ""
     except Exception as exc:
         return False, str(exc)[:500]
+
+
+
 def _notify_employer_of_approval(request, access_request, grant):
     recipient = access_request.requester_email
     portal_url = request.build_absolute_uri(
@@ -266,36 +304,36 @@ def _notify_employer_of_approval(request, access_request, grant):
         "Dennis Ndwigah"
     )
     html_message = f"""
-    <html>
-      <body>
-        <p>Hello {escape(access_request.requester_name)},</p>
-        <p>
-          Your request to access my professional portfolio has been approved.
-        </p>
-        <p>
-          Click the button below to access the approved information:
-        </p>
-        <p>
-          <a href="{escape(portal_url)}"
-             style="display:inline-block;
+    \<html>
+      \<body>
+        \<p>Hello {escape(access_request.requester_name)},\</p>
+        \<p>
+          Your request to access my professional portfolio has been approved.
+        \</p>
+        \<p>
+          Click the button below to access the approved information:
+        \</p>
+        \<p>
+          \<a href="{escape(portal_url)}"
+             style="display:inline-block;
                     padding:12px 20px;
                     background:#111827;
                     color:#ffffff;
                     text-decoration:none;
                     border-radius:6px;">
             Open Secure Portfolio
-          </a>
-        </p>
-        <p>
-          This secure link provides access only to the information approved
-          for your request and will expire according to the access period granted.
-        </p>
-        <p>
-          Regards,<br>
-          Dennis Ndwigah
-        </p>
-      </body>
-    </html>
+          \</a>
+        \</p>
+        \<p>
+          This secure link provides access only to the information approved
+          for your request and will expire according to the access period granted.
+        \</p>
+        \<p>
+          Regards,\<br>
+          Dennis Ndwigah
+        \</p>
+      \</body>
+    \</html>
     """
     try:
         send_mail(
@@ -310,6 +348,9 @@ def _notify_employer_of_approval(request, access_request, grant):
     except Exception as exc:
         return False, str(exc)[:500]
 @require_http_methods(["GET", "POST"])
+
+
+
 def request_access(request: HttpRequest) -> HttpResponse:
     """Display and process the public employer access-request form."""
     if request.method == "POST":
@@ -328,6 +369,8 @@ def request_access(request: HttpRequest) -> HttpResponse:
                 status=400,
             )
         access_request = form.save(commit=True)
+
+        request.session[REQUEST_STATUS_SESSION_KEY] = str(access_request.request_id)
         access_request.ip_address = client_ip(request)
         access_request.user_agent = (request.META.get("HTTP_USER_AGENT") or "")[:512]
         access_request.save(
@@ -372,8 +415,14 @@ def request_access(request: HttpRequest) -> HttpResponse:
         },
     )
 @require_GET
+
+
+
 def request_submitted(request: HttpRequest, request_id) -> HttpResponse:
-    """Show the confirmation page for a submitted request."""
+    """Show the confirmation page only to the session that submitted it."""
+    session_request_id = request.session.get(REQUEST_STATUS_SESSION_KEY)
+    if session_request_id != str(request_id):
+        raise Http404("This request confirmation link is invalid or has expired.")
     access_request = get_object_or_404(
         AccessRequest.objects.select_related("employer"),
         request_id=request_id,
@@ -390,33 +439,64 @@ def request_submitted(request: HttpRequest, request_id) -> HttpResponse:
     response["Pragma"] = "no-cache"
     return response
 @require_GET
+
+
 def request_status(request: HttpRequest, request_id) -> HttpResponse:
-    """Show request status without treating the UUID as document authority."""
+
+    """Show request status only to the browser session that submitted it."""
+    session_request_id = request.session.get(REQUEST_STATUS_SESSION_KEY)
+    if session_request_id != str(request_id):
+
+        raise Http404("This request status link is invalid or has expired.")
     access_request = get_object_or_404(
+
         AccessRequest.objects.select_related("employer", "reviewed_by", "grant"),
+
         request_id=request_id,
+
     )
     grant = getattr(access_request, "grant", None)
+    # Self-heal if the grant window has passed.
+
     if (
+
         grant is not None
+
         and grant.is_active
+
         and grant.expires_at <= timezone.now()
+
     ):
+
         access_request.mark_expired()
+
         access_request.refresh_from_db(fields=["status", "updated_at"])
+
         grant.refresh_from_db(fields=["is_active", "revoked_at"])
     response = render(
+
         request,
+
         "employer_portal/request_status.html",
+
         {
+
             "access_request": access_request,
+
             "grant": grant,
+
         },
+
     )
     response["Cache-Control"] = "private, no-store, max-age=0"
+
     response["Pragma"] = "no-cache"
+
     return response
 @require_GET
+
+
+
 def portal(request: HttpRequest, token) -> HttpResponse:
     """Render the secure employer portal for a valid grant token."""
     grant = get_valid_grant(token)
@@ -450,6 +530,9 @@ def portal(request: HttpRequest, token) -> HttpResponse:
     response["Cache-Control"] = "private, no-store, max-age=0"
     response["Pragma"] = "no-cache"
     return response
+
+
+
 def _get_grant_document(grant: AccessGrant, document_id: int) -> Document:
     return get_object_or_404(
         DocumentAccessRequest.objects.select_related("document"),
@@ -458,6 +541,9 @@ def _get_grant_document(grant: AccessGrant, document_id: int) -> Document:
         approved=True,
         document__is_active=True,
     ).document
+
+
+
 def _get_grant_referee(grant: AccessGrant, referee_id: int) -> Referee:
     return get_object_or_404(
         RefereeAccessRequest.objects.select_related("referee"),
@@ -466,6 +552,9 @@ def _get_grant_referee(grant: AccessGrant, referee_id: int) -> Referee:
         approved=True,
         referee__is_active=True,
     ).referee
+
+
+
 def _open_private_document(document: Document):
     if not document.file:
         raise Http404("The requested document is unavailable.")
@@ -476,6 +565,9 @@ def _open_private_document(document: Document):
         return storage.open(document.file.name, "rb")
     except (FileNotFoundError, OSError):
         raise Http404("The requested document is unavailable.")
+
+
+
 def _mark_document_viewed(access_request: AccessRequest, document: Document) -> None:
     item = DocumentAccessRequest.objects.filter(
         access_request=access_request,
@@ -483,6 +575,9 @@ def _mark_document_viewed(access_request: AccessRequest, document: Document) -> 
     ).first()
     if item is not None and item.viewed_at is None:
         item.mark_viewed()
+
+
+
 def _mark_referee_viewed(access_request: AccessRequest, referee: Referee) -> None:
     item = RefereeAccessRequest.objects.filter(
         access_request=access_request,
@@ -491,6 +586,9 @@ def _mark_referee_viewed(access_request: AccessRequest, referee: Referee) -> Non
     if item is not None and item.viewed_at is None:
         item.mark_viewed()
 @require_GET
+
+
+
 def document_view(
     request: HttpRequest,
     token,
@@ -547,6 +645,9 @@ def document_view(
         },
     )
 @require_GET
+
+
+
 def document_stream(
     request: HttpRequest,
     token,
@@ -577,6 +678,9 @@ def document_stream(
     response["Referrer-Policy"] = "no-referrer"
     return response
 @require_GET
+
+
+
 def document_download(
     request: HttpRequest,
     token,
@@ -615,6 +719,9 @@ def document_download(
     response["Expires"] = "0"
     return response
 @require_GET
+
+
+
 def referee_view(
     request: HttpRequest,
     token,
@@ -652,6 +759,9 @@ def referee_view(
     response["Pragma"] = "no-cache"
     return response
 @staff_required
+
+
+
 def staff_dashboard(request: HttpRequest) -> HttpResponse:
     """
     Render the private staff dashboard.
@@ -711,15 +821,6 @@ def staff_request_detail(request: HttpRequest, request_id) -> HttpResponse:
         AccessRequest.objects.select_related("employer", "reviewed_by", "grant"),
         request_id=request_id,
     )
-    if request.GET.get("assign_me") == "1":
-        if access_request.status == AccessRequest.Status.PENDING:
-            access_request.reviewed_by = request.user
-            access_request.save(update_fields=["reviewed_by", "updated_at"])
-            messages.success(request, "Request assigned to you.")
-        return redirect(
-            "employer_portal:staff_request_detail",
-            request_id=access_request.request_id,
-        )
     documents = _requested_documents_for_review(access_request)
     referees = _requested_referees_for_review(access_request)
     document_permissions = {
@@ -757,6 +858,31 @@ def staff_request_detail(request: HttpRequest, request_id) -> HttpResponse:
             "logs": logs,
         },
     )
+@require_POST
+@staff_required
+def assign_request(request: HttpRequest, request_id) -> HttpResponse:
+    """Assign a pending employer access request to the logged-in staff user."""
+    access_request = get_object_or_404(
+        AccessRequest.objects.select_related("employer"),
+        request_id=request_id,
+    )
+
+    if access_request.status == AccessRequest.Status.PENDING:
+        access_request.reviewed_by = request.user
+        access_request.save(update_fields=["reviewed_by", "updated_at"])
+        messages.success(request, "Request assigned to you.")
+    else:
+        messages.warning(
+            request,
+            "Only pending employer access requests can be assigned.",
+        )
+
+    return redirect(
+        "employer_portal:staff_request_detail",
+        request_id=access_request.request_id,
+    )
+
+
 @require_POST
 @staff_required
 def approve_request(request: HttpRequest, request_id) -> HttpResponse:
@@ -832,6 +958,9 @@ def approve_request(request: HttpRequest, request_id) -> HttpResponse:
     )
 @require_POST
 @staff_required
+
+
+
 def reject_request(request: HttpRequest, request_id) -> HttpResponse:
     """Reject a pending request and disable any associated grant."""
     access_request = get_object_or_404(
@@ -879,6 +1008,9 @@ def reject_request(request: HttpRequest, request_id) -> HttpResponse:
     )
 @require_POST
 @staff_required
+
+
+
 def revoke_access(request: HttpRequest, request_id) -> HttpResponse:
     """Immediately revoke an active employer access grant."""
     access_request = get_object_or_404(

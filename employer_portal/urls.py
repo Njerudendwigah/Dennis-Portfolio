@@ -127,6 +127,11 @@ urlpatterns = [
         name="staff_request_detail",
     ),
     path(
+        "staff/requests/<uuid:request_id>/assign/",
+        views.assign_request,
+        name="assign_request",
+    ),
+    path(
         "staff/requests/<uuid:request_id>/approve/",
         views.approve_request,
         name="approve_request",

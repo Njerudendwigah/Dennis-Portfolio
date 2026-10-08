@@ -1,6 +1,5 @@
 """
 Django admin configuration for the employer access portal (Unfold theme).
-
 The admin is the private control centre for:
 - employer records
 - professional documents
@@ -8,42 +7,37 @@ The admin is the private control centre for:
 - access requests
 - access grants
 - audit logs
-
 Setup:
     pip install django-unfold
     Add "unfold" BEFORE "django.contrib.admin" in INSTALLED_APPS.
-
 Dashboard wiring:
     The staff dashboard template expects a context dict produced by
     ``DashboardDataProvider``. Your view should look like::
-
         from .admin import DashboardDataProvider
-
         class StaffDashboardView(StaffRequiredMixin, TemplateView):
             template_name = "admin/employer_portal/dashboard.html"
-
             def get_context_data(self, **kwargs):
                 ctx = super().get_context_data(**kwargs)
                 provider = DashboardDataProvider(self.request)
                 ctx.update(provider.build())
                 return ctx
-
     Every context key the template reads is documented on
     ``DashboardDataProvider`` — nothing else is required.
 """
-
 from __future__ import annotations
 
 import csv
+import hashlib
+import hmac
 from datetime import timedelta
-from typing import Iterable
 
+from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.auth.admin import GroupAdmin as BaseGroupAdmin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import Group, User
 from django.db import models, transaction
-from django.db.models import Count, Q, QuerySet
+from django.db.models import QuerySet
 from django.http import HttpResponse
 from django.urls import reverse
 from django.utils import timezone
@@ -68,16 +62,10 @@ from .models import (
     RefereeAccessRequest,
 )
 
-
-# ---------------------------------------------------------------------------
-# CONSTANTS
-# ---------------------------------------------------------------------------
-
 DEFAULT_GRANT_DAYS = 7
 EXPIRING_SOON_DAYS = 7
 DASHBOARD_RECENT_LIMIT = 5
 DASHBOARD_ACTIVITY_LIMIT = 10
-
 REQUEST_STATUS_COLORS = {
     AccessRequest.Status.PENDING: "warning",
     AccessRequest.Status.APPROVED: "success",
@@ -85,8 +73,6 @@ REQUEST_STATUS_COLORS = {
     AccessRequest.Status.EXPIRED: "info",
     AccessRequest.Status.REVOKED: "danger",
 }
-
-# Tailwind classes the dashboard template applies to status pills.
 REQUEST_STATUS_CLASSES = {
     AccessRequest.Status.PENDING:  "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300",
     AccessRequest.Status.APPROVED: "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300",
@@ -94,8 +80,6 @@ REQUEST_STATUS_CLASSES = {
     AccessRequest.Status.EXPIRED:  "bg-slate-100 text-slate-600 dark:bg-slate-500/10 dark:text-slate-300",
     AccessRequest.Status.REVOKED:  "bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300",
 }
-
-# Icons the dashboard template renders next to each audit event.
 EVENT_ICONS = {
     getattr(AccessLog.EventType, name, name): icon
     for name, icon in (
@@ -112,44 +96,27 @@ EVENT_ICONS = {
 }
 
 
-# ---------------------------------------------------------------------------
-# PRIVATE FILE WIDGET
-# ---------------------------------------------------------------------------
-
-
 class PrivateFileInput(UnfoldAdminFileFieldWidget):
     """
     File input that never renders a link to the stored private file.
-
     Private documents are deliberately not addressable by URL (the
     private storage raises ``NotImplementedError`` from ``.url``), so the
     stock "Currently: <link>" block would crash the admin change page.
     Skipping the initial-value block keeps the plain file chooser, and
     leaving it empty on save keeps the existing file.
     """
-
     def is_initial(self, value):
         return False
 
 
-# ---------------------------------------------------------------------------
-# BASE ADMIN
-# ---------------------------------------------------------------------------
-
-
 class PortalModelAdmin(ModelAdmin):
     """Shared Unfold behaviour for every model in the portal."""
-
     list_filter_submit = True
     compressed_fields = True
     warn_unsaved_form = True
     list_per_page = 25
     save_on_top = True
     show_full_result_count = True
-
-    # ------------------------------------------------------------------
-    # Audit-log helper — shared so no subclass has to re-implement it
-    # ------------------------------------------------------------------
     def log_action(
         self,
         request,
@@ -163,16 +130,13 @@ class PortalModelAdmin(ModelAdmin):
     ) -> AccessLog | None:
         """
         Create an ``AccessLog`` row for a staff action.
-
         Captures the reviewer's IP and user-agent — the original
         implementation silently dropped both.
         """
         if event_type is None:
             return None
-
         meta = dict(metadata or {})
         meta.setdefault("actioned_by", request.user.get_username())
-
         return AccessLog.objects.create(
             employer=employer or getattr(access_request, "employer", None),
             access_request=access_request,
@@ -192,18 +156,11 @@ class PortalModelAdmin(ModelAdmin):
         return request.META.get("REMOTE_ADDR")
 
 
-# ---------------------------------------------------------------------------
-# CUSTOM FILTERS
-# ---------------------------------------------------------------------------
-
-
 class PendingOnlyFilter(admin.SimpleListFilter):
     title = "pending review"
     parameter_name = "pending"
-
     def lookups(self, request, model_admin):
         return (("1", "Pending only"),)
-
     def queryset(self, request, queryset):
         if self.value() == "1":
             return queryset.filter(status=AccessRequest.Status.PENDING)
@@ -213,10 +170,8 @@ class PendingOnlyFilter(admin.SimpleListFilter):
 class ExpiringSoonFilter(admin.SimpleListFilter):
     title = "expiring soon"
     parameter_name = "expiring"
-
     def lookups(self, request, model_admin):
         return (("7", "Next 7 days"), ("1", "Next 24 hours"))
-
     def queryset(self, request, queryset):
         if not self.value():
             return queryset
@@ -227,11 +182,6 @@ class ExpiringSoonFilter(admin.SimpleListFilter):
             expires_at__gte=now,
             expires_at__lte=window,
         )
-
-
-# ---------------------------------------------------------------------------
-# INLINE REQUEST RESOURCES
-# ---------------------------------------------------------------------------
 
 
 class DocumentAccessRequestInline(TabularInline):
@@ -254,12 +204,9 @@ class RefereeAccessRequestInline(TabularInline):
     verbose_name_plural = "Requested referees"
 
 
-# ---------------------------------------------------------------------------
-# EMPLOYERS
-# ---------------------------------------------------------------------------
-
-
 @admin.register(Employer)
+
+
 class EmployerAdmin(PortalModelAdmin):
     list_display = (
         "company_name",
@@ -285,7 +232,6 @@ class EmployerAdmin(PortalModelAdmin):
     ordering = ("-created_at",)
     readonly_fields = ("created_at", "updated_at")
     actions = ("mark_verified", "mark_unverified")
-
     fieldsets = (
         (
             "Employer identity",
@@ -309,7 +255,6 @@ class EmployerAdmin(PortalModelAdmin):
             {"fields": ("created_at", "updated_at")},
         ),
     )
-
     def get_queryset(self, request):
         return super().get_queryset(request).select_related()
 
@@ -331,12 +276,9 @@ class EmployerAdmin(PortalModelAdmin):
         self.message_user(request, f"{updated} employer(s) unverified.", messages.WARNING)
 
 
-# ---------------------------------------------------------------------------
-# DOCUMENTS
-# ---------------------------------------------------------------------------
-
-
 @admin.register(Document)
+
+
 class DocumentAdmin(PortalModelAdmin):
     list_display = (
         "title",
@@ -354,9 +296,6 @@ class DocumentAdmin(PortalModelAdmin):
     search_fields = ("title", "description")
     ordering = ("document_type", "-uploaded_at")
     readonly_fields = ("uploaded_at", "updated_at", "current_file")
-
-    # Private files have no public URL, so use the file input that does
-    # not try to render a "Currently: <link>" block.
     formfield_overrides = {
         models.FileField: {"widget": PrivateFileInput},
     }
@@ -367,7 +306,6 @@ class DocumentAdmin(PortalModelAdmin):
         if obj and obj.pk and obj.file:
             return obj.file.name.rsplit("/", 1)[-1]
         return "No file uploaded"
-
     fieldsets = (
         (
             "Private professional document",
@@ -390,12 +328,9 @@ class DocumentAdmin(PortalModelAdmin):
     )
 
 
-# ---------------------------------------------------------------------------
-# REFEREES
-# ---------------------------------------------------------------------------
-
-
 @admin.register(Referee)
+
+
 class RefereeAdmin(PortalModelAdmin):
     list_display = (
         "name",
@@ -421,7 +356,6 @@ class RefereeAdmin(PortalModelAdmin):
     )
     ordering = ("name",)
     readonly_fields = ("created_at", "updated_at")
-
     fieldsets = (
         (
             "Referee details",
@@ -441,12 +375,9 @@ class RefereeAdmin(PortalModelAdmin):
     )
 
 
-# ---------------------------------------------------------------------------
-# ACCESS REQUESTS
-# ---------------------------------------------------------------------------
-
-
 @admin.register(AccessRequest)
+
+
 class AccessRequestAdmin(PortalModelAdmin):
     list_display = (
         "requester_name",
@@ -489,7 +420,6 @@ class AccessRequestAdmin(PortalModelAdmin):
         "ip_address",
         "user_agent",
     )
-
     fieldsets = (
         (
             "Request",
@@ -527,10 +457,6 @@ class AccessRequestAdmin(PortalModelAdmin):
             },
         ),
     )
-
-    # ------------------------------------------------------------------
-    # QUERYSET
-    # ------------------------------------------------------------------
     def get_queryset(self, request):
         return (
             super()
@@ -539,29 +465,21 @@ class AccessRequestAdmin(PortalModelAdmin):
             .prefetch_related("document_requests", "referee_requests")
         )
 
-    # ------------------------------------------------------------------
-    # DISPLAY
-    # ------------------------------------------------------------------
     @display(description="Status", label=REQUEST_STATUS_COLORS)
     def status_badge(self, obj):
         return obj.status, obj.get_status_display()
 
-    # ------------------------------------------------------------------
-    # ACTIONS
-    # ------------------------------------------------------------------
     @action(description="Approve selected pending requests (7-day access)")
     def approve_requests(self, request, queryset):
         now = timezone.now()
         expires = now + timedelta(days=DEFAULT_GRANT_DAYS)
         count = 0
-
         with transaction.atomic():
             pending = (
                 queryset
                 .filter(status=AccessRequest.Status.PENDING)
                 .select_for_update()
             )
-
             for ar in pending:
                 ar.status = AccessRequest.Status.APPROVED
                 ar.reviewed_by = request.user
@@ -578,10 +496,8 @@ class AccessRequestAdmin(PortalModelAdmin):
                         "updated_at",
                     ]
                 )
-
                 ar.document_requests.update(approved=True)
                 ar.referee_requests.update(approved=True)
-
                 AccessGrant.objects.update_or_create(
                     access_request=ar,
                     defaults={
@@ -591,7 +507,6 @@ class AccessRequestAdmin(PortalModelAdmin):
                         "revoked_at": None,
                     },
                 )
-
                 self.log_action(
                     request,
                     access_request=ar,
@@ -601,21 +516,18 @@ class AccessRequestAdmin(PortalModelAdmin):
                     metadata={"expires_at": expires.isoformat()},
                 )
                 count += 1
-
         self.message_user(request, f"{count} request(s) approved.", messages.SUCCESS)
 
     @action(description="Reject selected pending requests")
     def reject_requests(self, request, queryset):
         now = timezone.now()
         count = 0
-
         with transaction.atomic():
             pending = (
                 queryset
                 .filter(status=AccessRequest.Status.PENDING)
                 .select_for_update()
             )
-
             for ar in pending:
                 ar.status = AccessRequest.Status.REJECTED
                 ar.reviewed_by = request.user
@@ -628,11 +540,9 @@ class AccessRequestAdmin(PortalModelAdmin):
                         "updated_at",
                     ]
                 )
-
                 AccessGrant.objects.filter(
                     access_request=ar, is_active=True
                 ).update(is_active=False, revoked_at=now)
-
                 self.log_action(
                     request,
                     access_request=ar,
@@ -641,21 +551,18 @@ class AccessRequestAdmin(PortalModelAdmin):
                     resource_identifier=str(ar.request_id),
                 )
                 count += 1
-
         self.message_user(request, f"{count} request(s) rejected.", messages.WARNING)
 
     @action(description="Revoke access for selected approved requests")
     def revoke_requests(self, request, queryset):
         now = timezone.now()
         count = 0
-
         with transaction.atomic():
             approved = (
                 queryset
                 .filter(status=AccessRequest.Status.APPROVED)
                 .select_for_update()
             )
-
             for ar in approved:
                 ar.status = AccessRequest.Status.REVOKED
                 ar.reviewed_by = request.user
@@ -668,11 +575,9 @@ class AccessRequestAdmin(PortalModelAdmin):
                         "updated_at",
                     ]
                 )
-
                 AccessGrant.objects.filter(
                     access_request=ar, is_active=True
                 ).update(is_active=False, revoked_at=now)
-
                 self.log_action(
                     request,
                     access_request=ar,
@@ -681,7 +586,6 @@ class AccessRequestAdmin(PortalModelAdmin):
                     resource_identifier=str(ar.request_id),
                 )
                 count += 1
-
         self.message_user(request, f"{count} request(s) revoked.", messages.WARNING)
 
     @action(description=f"Extend access by {DEFAULT_GRANT_DAYS} days")
@@ -689,23 +593,19 @@ class AccessRequestAdmin(PortalModelAdmin):
         now = timezone.now()
         extension = timedelta(days=DEFAULT_GRANT_DAYS)
         count = 0
-
         with transaction.atomic():
             active = (
                 queryset
                 .filter(status=AccessRequest.Status.APPROVED)
                 .select_for_update()
             )
-
             for ar in active:
                 baseline = max(ar.expires_at or now, now)
                 ar.expires_at = baseline + extension
                 ar.save(update_fields=["expires_at", "updated_at"])
-
                 AccessGrant.objects.filter(
                     access_request=ar, is_active=True
                 ).update(expires_at=ar.expires_at)
-
                 self.log_action(
                     request,
                     access_request=ar,
@@ -715,16 +615,12 @@ class AccessRequestAdmin(PortalModelAdmin):
                     metadata={"new_expires_at": ar.expires_at.isoformat()},
                 )
                 count += 1
-
         self.message_user(request, f"{count} request(s) extended.", messages.SUCCESS)
 
 
-# ---------------------------------------------------------------------------
-# ACCESS GRANTS
-# ---------------------------------------------------------------------------
-
-
 @admin.register(AccessGrant)
+
+
 class AccessGrantAdmin(PortalModelAdmin):
     list_display = (
         "access_request",
@@ -742,25 +638,23 @@ class AccessGrantAdmin(PortalModelAdmin):
         ("created_at", RangeDateFilter),
     )
     search_fields = (
-        "token",
         "access_request__request_id",
         "access_request__requester_name",
         "access_request__requester_email",
         "access_request__requester_company",
     )
     ordering = ("-created_at",)
-    readonly_fields = ("token", "created_at", "revoked_at")
+    readonly_fields = ("token_fingerprint", "created_at", "revoked_at")
     autocomplete_fields = ("access_request",)
     actions = ("revoke_grants", "extend_grants")
     list_select_related = ("access_request",)
-
     fieldsets = (
         (
             "Access grant",
             {
                 "fields": (
                     "access_request",
-                    "token",
+                    "token_fingerprint",
                     "starts_at",
                     "expires_at",
                     "is_active",
@@ -770,9 +664,18 @@ class AccessGrantAdmin(PortalModelAdmin):
         ("Revocation", {"fields": ("revoked_at",)}),
         ("Record timestamp", {"fields": ("created_at",)}),
     )
-
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("access_request")
+
+    @display(description="Token fingerprint")
+    def token_fingerprint(self, obj):
+        if not obj or not obj.token:
+            return "Unavailable"
+        return hmac.new(
+            settings.SECRET_KEY.encode("utf-8"),
+            str(obj.token).encode("utf-8"),
+            hashlib.sha256,
+        ).hexdigest()[:16]
 
     @display(
         description="State",
@@ -791,7 +694,6 @@ class AccessGrantAdmin(PortalModelAdmin):
     def revoke_grants(self, request, queryset):
         now = timezone.now()
         count = 0
-
         with transaction.atomic():
             grants = (
                 queryset
@@ -799,21 +701,17 @@ class AccessGrantAdmin(PortalModelAdmin):
                 .select_related("access_request")
                 .select_for_update()
             )
-
             for grant in grants:
                 grant.is_active = False
                 grant.revoked_at = now
                 grant.save(update_fields=["is_active", "revoked_at"])
-
                 access_request = grant.access_request
-
                 if access_request.status == AccessRequest.Status.APPROVED:
                     access_request.status = AccessRequest.Status.REVOKED
                     access_request.reviewed_at = now
                     access_request.save(
                         update_fields=["status", "reviewed_at", "updated_at"]
                     )
-
                     self.log_action(
                         request,
                         access_request=access_request,
@@ -822,9 +720,7 @@ class AccessGrantAdmin(PortalModelAdmin):
                         resource_identifier=str(grant.pk),
                         metadata={"action": "revoke_grant"},
                     )
-
                 count += 1
-
         self.message_user(request, f"{count} grant(s) revoked.", messages.WARNING)
 
     @action(description=f"Extend selected grants by {DEFAULT_GRANT_DAYS} days")
@@ -832,7 +728,6 @@ class AccessGrantAdmin(PortalModelAdmin):
         now = timezone.now()
         extension = timedelta(days=DEFAULT_GRANT_DAYS)
         count = 0
-
         with transaction.atomic():
             grants = (
                 queryset
@@ -840,17 +735,14 @@ class AccessGrantAdmin(PortalModelAdmin):
                 .select_related("access_request")
                 .select_for_update()
             )
-
             for grant in grants:
                 baseline = max(grant.expires_at or now, now)
                 grant.expires_at = baseline + extension
                 grant.save(update_fields=["expires_at"])
-
                 access_request = grant.access_request
                 if access_request.status == AccessRequest.Status.APPROVED:
                     access_request.expires_at = grant.expires_at
                     access_request.save(update_fields=["expires_at", "updated_at"])
-
                 self.log_action(
                     request,
                     access_request=access_request,
@@ -863,20 +755,15 @@ class AccessGrantAdmin(PortalModelAdmin):
                     },
                 )
                 count += 1
-
         self.message_user(request, f"{count} grant(s) extended.", messages.SUCCESS)
-
     def has_delete_permission(self, request, obj=None):
         """Keep access-grant history intact; use revoke instead of delete."""
         return False
 
 
-# ---------------------------------------------------------------------------
-# AUDIT LOG
-# ---------------------------------------------------------------------------
-
-
 @admin.register(AccessLog)
+
+
 class AccessLogAdmin(PortalModelAdmin):
     list_display = (
         "created_at",
@@ -919,7 +806,6 @@ class AccessLogAdmin(PortalModelAdmin):
         "user_agent",
         "metadata",
     )
-
     fieldsets = (
         (
             "Activity",
@@ -947,7 +833,6 @@ class AccessLogAdmin(PortalModelAdmin):
             {"fields": ("ip_address", "user_agent")},
         ),
     )
-
     def get_queryset(self, request):
         return super().get_queryset(request).select_related(
             "employer", "access_request"
@@ -957,29 +842,22 @@ class AccessLogAdmin(PortalModelAdmin):
     def event_badge(self, obj):
         icon = EVENT_ICONS.get(obj.event_type, "info")
         return f"{icon}  {obj.get_event_type_display()}"
-
     def has_add_permission(self, request):
         """Audit entries must be generated by application activity."""
         return False
-
     def has_change_permission(self, request, obj=None):
         """Audit entries are immutable."""
         return False
-
     def has_delete_permission(self, request, obj=None):
         """Audit entries cannot be deleted from Django Admin."""
         return False
-
-
-# ---------------------------------------------------------------------------
-# USERS AND GROUPS (themed to match the portal)
-# ---------------------------------------------------------------------------
-
 admin.site.unregister(User)
 admin.site.unregister(Group)
 
 
 @admin.register(User)
+
+
 class UserAdmin(BaseUserAdmin, ModelAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
@@ -988,22 +866,17 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
 
 
 @admin.register(Group)
+
+
 class GroupAdmin(BaseGroupAdmin, ModelAdmin):
     pass
-
-
-# ---------------------------------------------------------------------------
-# DASHBOARD DATA PROVIDER
-# ---------------------------------------------------------------------------
 
 
 class DashboardDataProvider:
     """
     Build the full context dict the staff dashboard template expects.
-
     The template (``templates/admin/employer_portal/dashboard.html``)
     reads these keys and *only* these keys:
-
     ``kpis``                     list[dict]  – KPI cards
     ``recent_requests``          list[dict]  – latest access requests
     ``expiring_soon``            list[dict]  – grants approaching expiry
@@ -1012,18 +885,12 @@ class DashboardDataProvider:
     ``pending_requests_count``   int
     ``activity_total``           int
     ``htmx_enabled``             bool        – enable live polling if HTMX present
-
     All list dicts are plain, JSON-serializable Python — safe to render,
     safe to reuse in an HTMX partial, safe to dump into a CSV export.
     """
-
     def __init__(self, request, *, htmx_enabled: bool = True):
         self.request = request
         self.htmx_enabled = htmx_enabled
-
-    # ------------------------------------------------------------------
-    # PUBLIC API
-    # ------------------------------------------------------------------
     def build(self) -> dict:
         """Return the full context dict for the dashboard."""
         return {
@@ -1036,7 +903,6 @@ class DashboardDataProvider:
             "activity_total": self.activity_total(),
             "htmx_enabled": self.htmx_enabled,
         }
-
     def activity_context(self) -> dict:
         """
         Subset used by the HTMX polling endpoint — returns the same
@@ -1046,28 +912,20 @@ class DashboardDataProvider:
             "recent_activity": self.recent_activity(),
             "activity_total": self.activity_total(),
         }
-
-    # ------------------------------------------------------------------
-    # KPI CARDS
-    # ------------------------------------------------------------------
     def kpis(self) -> list[dict]:
         now = timezone.now()
         week_ago = now - timedelta(days=7)
         two_weeks_ago = now - timedelta(days=14)
         expiry_window = now + timedelta(days=EXPIRING_SOON_DAYS)
-
         pending_qs = AccessRequest.objects.filter(status=AccessRequest.Status.PENDING)
         active_grants_qs = AccessGrant.objects.filter(
             is_active=True, expires_at__gt=now, revoked_at__isnull=True
         )
         expiring_qs = active_grants_qs.filter(expires_at__lte=expiry_window)
-
-        # Deltas — this week vs last week.
         pending_now = pending_qs.filter(created_at__gte=week_ago).count()
         pending_prev = pending_qs.filter(
             created_at__gte=two_weeks_ago, created_at__lt=week_ago
         ).count()
-
         approved_now = AccessRequest.objects.filter(
             status=AccessRequest.Status.APPROVED, approved_at__gte=week_ago
         ).count()
@@ -1076,7 +934,6 @@ class DashboardDataProvider:
             approved_at__gte=two_weeks_ago,
             approved_at__lt=week_ago,
         ).count()
-
         return [
             {
                 "title": "Pending requests",
@@ -1115,10 +972,6 @@ class DashboardDataProvider:
                         + "?is_active__exact=1",
             },
         ]
-
-    # ------------------------------------------------------------------
-    # RECENT REQUESTS
-    # ------------------------------------------------------------------
     def recent_requests(self, limit: int = DASHBOARD_RECENT_LIMIT) -> list[dict]:
         qs = (
             AccessRequest.objects
@@ -1135,16 +988,11 @@ class DashboardDataProvider:
                     "admin:employer_portal_accessrequest_change", args=[ar.pk]
                 ),
                 "created_at": ar.created_at,
-                # The template degrades gracefully when these are None/False.
                 "assigned_to": getattr(ar, "reviewed_by", None),
                 "can_assign": ar.status == AccessRequest.Status.PENDING,
             }
             for ar in qs
         ]
-
-    # ------------------------------------------------------------------
-    # EXPIRING SOON
-    # ------------------------------------------------------------------
     def expiring_soon(
         self, days: int = EXPIRING_SOON_DAYS, limit: int = DASHBOARD_RECENT_LIMIT
     ) -> list[dict]:
@@ -1168,10 +1016,6 @@ class DashboardDataProvider:
             }
             for grant in qs
         ]
-
-    # ------------------------------------------------------------------
-    # RECENT ACTIVITY
-    # ------------------------------------------------------------------
     def recent_activity(self, limit: int = DASHBOARD_ACTIVITY_LIMIT) -> list[dict]:
         qs = (
             AccessLog.objects
@@ -1187,24 +1031,15 @@ class DashboardDataProvider:
             }
             for log in qs
         ]
-
-    # ------------------------------------------------------------------
-    # COUNTS
-    # ------------------------------------------------------------------
     def documents_count(self) -> int:
         return Document.objects.filter(is_active=True).count()
-
     def pending_requests_count(self) -> int:
         return AccessRequest.objects.filter(
             status=AccessRequest.Status.PENDING
         ).count()
-
     def activity_total(self) -> int:
         return AccessLog.objects.count()
 
-    # ------------------------------------------------------------------
-    # HELPERS
-    # ------------------------------------------------------------------
     @staticmethod
     def _delta_label(current: int, previous: int) -> str:
         if previous == 0:
@@ -1225,45 +1060,47 @@ class DashboardDataProvider:
         return "System"
 
 
-# ---------------------------------------------------------------------------
-# CSV EXPORT HELPER
-# ---------------------------------------------------------------------------
+def _safe_csv_value(value) -> str:
+    text = "" if value is None else str(value)
+    if text.startswith(("=", "+", "-", "@")):
+        return f"'{text}"
+    return text
+
+
+def _safe_download_filename(filename: str) -> str:
+    cleaned = str(filename or "activity.csv").replace("\r", "").replace("\n", "")
+    cleaned = cleaned.replace('"', "")
+    cleaned = cleaned.rsplit("/", 1)[-1].rsplit("\\", 1)[-1]
+    return cleaned or "activity.csv"
 
 
 def export_activity_csv(queryset: QuerySet, *, filename: str = "activity.csv") -> HttpResponse:
     """
     Stream an ``AccessLog`` queryset as CSV.
-
     Wire into your dashboard view::
-
         if request.GET.get("format") == "csv":
             return export_activity_csv(
                 AccessLog.objects.select_related("employer", "access_request")
             )
     """
     response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = f'attachment; filename="{filename}"'
-
+    response["Content-Disposition"] = (
+        f'attachment; filename="{_safe_download_filename(filename)}"'
+    )
     writer = csv.writer(response)
     writer.writerow(["Timestamp", "Event", "Actor", "Resource", "Identifier", "IP"])
     for log in queryset.iterator():
         writer.writerow(
             [
-                log.created_at.isoformat(),
-                log.get_event_type_display(),
-                DashboardDataProvider._actor_label(log),
-                log.resource_type,
-                log.resource_identifier,
-                log.ip_address or "",
+                _safe_csv_value(log.created_at.isoformat()),
+                _safe_csv_value(log.get_event_type_display()),
+                _safe_csv_value(DashboardDataProvider._actor_label(log)),
+                _safe_csv_value(log.resource_type),
+                _safe_csv_value(log.resource_identifier),
+                _safe_csv_value(log.ip_address or ""),
             ]
         )
     return response
-
-
-# ---------------------------------------------------------------------------
-# ADMIN SITE LABELS
-# ---------------------------------------------------------------------------
-
 admin.site.index_title = "Dashboard"
 admin.site.site_header = "Employer Access Portal"
 admin.site.site_title = "Employer Access Portal"
