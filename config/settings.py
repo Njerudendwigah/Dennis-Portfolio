@@ -471,12 +471,26 @@ UNFOLD = {
             },
 
             {
-
                 "title": "Portfolio content",
 
                 "separator": True,
 
                 "items": [
+
+                    {
+
+                        "title": "Portfolio Content Manager",
+
+                        "icon": "edit_square",
+
+                        "link": (
+
+                            "https://njerudendwigah.github.io/"
+                            "Dennis-Portfolio/admin/login.html"
+
+                        ),
+
+                    },
 
                     {
 
