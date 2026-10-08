@@ -1,555 +1,1111 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Documents | Dennis Portfolio Admin</title>
-    <meta name="description" content="Manage professional documents and employer access.">
+    <meta charset="UTF-8">
 
-    <link rel="stylesheet" href="css/admin.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+    <title>Documents | Dennis Portfolio Admin</title>
+
+    <meta name="description" content="Manage professional documents and employer access.">
+
+
+
+    <link rel="stylesheet" href="css/admin.css">
+
 </head>
+
+
 
 <body class="admin-dashboard-page">
 
+
+
 <a href="#mainContent" class="skip-link">Skip to content</a>
+
+
 
 <div class="admin-app">
 
-    <aside class="admin-sidebar" id="adminSidebar">
 
-        <div class="sidebar-header">
-            <a href="dashboard.html" class="admin-logo">
-                <span class="brand-mark">DN</span>
-                <span class="brand-text">
-                    <strong>DN Portfolio</strong>
-                    <small>Admin console</small>
-                </span>
-            </a>
 
-            <button
-                type="button"
-                class="mobile-close"
-                id="closeSidebar"
-                aria-label="Close navigation"
-            >
-                <i data-lucide="x"></i>
-            </button>
-        </div>
+    <aside class="admin-sidebar" id="adminSidebar">
 
-        <nav class="admin-navigation" aria-label="Admin navigation">
 
-            <div class="nav-section">
-                <span class="nav-section-title">Workspace</span>
 
-                <a href="dashboard.html" class="nav-link">
-                    <span class="nav-icon"><i data-lucide="layout-dashboard"></i></span>
-                    <span>Dashboard</span>
-                </a>
+        <div class="sidebar-header">
 
-                <a href="profile.html" class="nav-link">
-                    <span class="nav-icon"><i data-lucide="user-round"></i></span>
-                    <span>Profile</span>
-                </a>
+            <a href="dashboard.html" class="admin-logo">
 
-                <a href="experience.html" class="nav-link">
-                    <span class="nav-icon"><i data-lucide="briefcase-business"></i></span>
-                    <span>Experience</span>
-                </a>
+                <span class="brand-mark">DN</span>
 
-                <a href="projects.html" class="nav-link">
-                    <span class="nav-icon"><i data-lucide="folder-kanban"></i></span>
-                    <span>Projects</span>
-                </a>
+                <span class="brand-text">
 
-                <a href="skills.html" class="nav-link">
-                    <span class="nav-icon"><i data-lucide="sparkles"></i></span>
-                    <span>Skills</span>
-                </a>
-            </div>
+                    <strong>DN Portfolio</strong>
 
-            <div class="nav-section">
-                <span class="nav-section-title">Credentials</span>
+                    <small>Admin console</small>
 
-                <a href="certifications.html" class="nav-link">
-                    <span class="nav-icon"><i data-lucide="award"></i></span>
-                    <span>Certifications</span>
-                </a>
+                </span>
 
-                <a
-                    href="documents.html"
-                    class="nav-link active"
-                    aria-current="page"
-                >
-                    <span class="nav-icon"><i data-lucide="file-text"></i></span>
-                    <span>Documents</span>
-                    <span class="nav-badge" id="documentCount">0</span>
-                </a>
-            </div>
+            </a>
 
-            <div class="nav-section">
-                <span class="nav-section-title">System</span>
 
-                <a href="settings.html" class="nav-link">
-                    <span class="nav-icon"><i data-lucide="settings-2"></i></span>
-                    <span>Settings</span>
-                </a>
 
-                <a href="employer-access.html" class="nav-link">
-                    <span class="nav-icon"><i data-lucide="shield-check"></i></span>
-                    <span>Employer Access</span>
-                </a>
-            </div>
+            <button
 
-        </nav>
+                type="button"
 
-        <div class="sidebar-footer">
+                class="mobile-close"
 
-            <div class="admin-user">
-                <div class="admin-user-avatar">DN</div>
+                id="closeSidebar"
 
-                <div>
-                    <strong>Dennis Ndwigah</strong>
-                    <small>Administrator</small>
-                </div>
-            </div>
+                aria-label="Close navigation"
 
-            <button
-                type="button"
-                class="logout-button"
-                id="logoutButton"
-            >
-                <i data-lucide="log-out"></i>
-                <span>Sign out</span>
-            </button>
+            >
 
-        </div>
+                <i data-lucide="x"></i>
 
-    </aside>
+            </button>
 
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        </div>
 
-    <main class="admin-main" id="mainContent" tabindex="-1">
 
-        <header class="admin-topbar">
 
-            <button
-                type="button"
-                class="menu-button"
-                id="openSidebar"
-                aria-label="Open navigation"
-            >
-                <i data-lucide="menu"></i>
-            </button>
+        <nav class="admin-navigation" aria-label="Admin navigation">
 
-            <div class="topbar-title">Documents</div>
 
-            <div class="topbar-actions">
-                <a
-                    href="../index.html"
-                    class="view-site-button"
-                    target="_blank"
-                    rel="noopener"
-                >
-                    <i data-lucide="external-link"></i>
-                    <span>View site</span>
-                </a>
-            </div>
 
-        </header>
+            <div class="nav-section">
 
-        <div class="admin-content">
+                <span class="nav-section-title">Workspace</span>
 
-            <section class="page-heading">
 
-                <div>
-                    <span class="eyebrow">CREDENTIALS</span>
 
-                    <h1>Documents</h1>
+                <a href="dashboard.html" class="nav-link">
 
-                    <p>
-                        Upload and manage professional documents and control how employers can access them.
-                    </p>
-                </div>
+                    <span class="nav-icon"><i data-lucide="layout-dashboard"></i></span>
 
-                <div class="page-heading-actions">
+                    <span>Dashboard</span>
 
-                    <button
-                        type="button"
-                        class="primary-button"
-                        onclick="openDocumentForm()"
-                    >
-                        <i data-lucide="file-plus-2"></i>
-                        <span>Add document</span>
-                    </button>
+                </a>
 
-                </div>
 
-            </section>
 
-            <section
-                class="employer-access-notice"
-                aria-labelledby="securityNoticeTitle"
-            >
+                <a href="profile.html" class="nav-link">
 
-                <div class="notice-icon">
-                    <i data-lucide="shield-check"></i>
-                </div>
+                    <span class="nav-icon"><i data-lucide="user-round"></i></span>
 
-                <div>
-                    <strong id="securityNoticeTitle">
-                        Controlled document access
-                    </strong>
+                    <span>Profile</span>
 
-                    <p>
-                        Public documents can be linked from the portfolio.
-                        Employer-only and private documents should eventually
-                        be protected by authenticated server-side access.
-                    </p>
-                </div>
+                </a>
 
-            </section>
 
-            <section
-                class="dashboard-card documents-panel"
-                aria-labelledby="documentLibraryTitle"
-            >
 
-                <div class="card-header">
+                <a href="experience.html" class="nav-link">
 
-                    <div>
-                        <span class="card-eyebrow">DOCUMENT LIBRARY</span>
+                    <span class="nav-icon"><i data-lucide="briefcase-business"></i></span>
 
-                        <h2 id="documentLibraryTitle">
-                            Portfolio documents
-                        </h2>
-                    </div>
+                    <span>Experience</span>
 
-                    <div class="card-header-meta">
-                        <span id="documentSummary">
-                            Manage your professional documents.
-                        </span>
-                    </div>
+                </a>
 
-                </div>
 
-                <div
-                    id="documentList"
-                    class="document-admin-list"
-                    aria-live="polite"
-                ></div>
 
-            </section>
+                <a href="projects.html" class="nav-link">
 
-        </div>
+                    <span class="nav-icon"><i data-lucide="folder-kanban"></i></span>
 
-        <footer class="admin-footer">
-            <span>
-                &copy;
-                <span id="currentYear"></span>
-                Dennis Ndwigah
-            </span>
+                    <span>Projects</span>
 
-            <span>Administrator access only</span>
-        </footer>
+                </a>
 
-    </main>
+
+
+                <a href="skills.html" class="nav-link">
+
+                    <span class="nav-icon"><i data-lucide="sparkles"></i></span>
+
+                    <span>Skills</span>
+
+                </a>
+
+            </div>
+
+
+
+            <div class="nav-section">
+
+                <span class="nav-section-title">Credentials</span>
+
+
+
+                <a href="certifications.html" class="nav-link">
+
+                    <span class="nav-icon"><i data-lucide="award"></i></span>
+
+                    <span>Certifications</span>
+
+                </a>
+
+
+
+                <a
+
+                    href="documents.html"
+
+                    class="nav-link active"
+
+                    aria-current="page"
+
+                >
+
+                    <span class="nav-icon"><i data-lucide="file-text"></i></span>
+
+                    <span>Documents</span>
+
+                    <span class="nav-badge" id="documentCount">0</span>
+
+                </a>
+
+            </div>
+
+
+
+            <div class="nav-section">
+
+                <span class="nav-section-title">System</span>
+
+
+
+                <a href="settings.html" class="nav-link">
+
+                    <span class="nav-icon"><i data-lucide="settings-2"></i></span>
+
+                    <span>Settings</span>
+
+                </a>
+
+
+
+                <a href="employer-access.html" class="nav-link">
+
+                    <span class="nav-icon"><i data-lucide="shield-check"></i></span>
+
+                    <span>Employer Access</span>
+
+                </a>
+
+            </div>
+
+
+
+        </nav>
+
+
+
+        <div class="sidebar-footer">
+
+
+
+            <div class="admin-user">
+
+                <div class="admin-user-avatar">DN</div>
+
+
+
+                <div>
+
+                    <strong>Dennis Ndwigah</strong>
+
+                    <small>Administrator</small>
+
+                </div>
+
+            </div>
+
+
+
+            <button
+
+                type="button"
+
+                class="logout-button"
+
+                id="logoutButton"
+
+            >
+
+                <i data-lucide="log-out"></i>
+
+                <span>Sign out</span>
+
+            </button>
+
+
+
+        </div>
+
+
+
+    </aside>
+
+
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+
+
+    <main class="admin-main" id="mainContent" tabindex="-1">
+
+
+
+        <header class="admin-topbar">
+
+
+
+            <button
+
+                type="button"
+
+                class="menu-button"
+
+                id="openSidebar"
+
+                aria-label="Open navigation"
+
+            >
+
+                <i data-lucide="menu"></i>
+
+            </button>
+
+
+
+            <div class="topbar-title">Documents</div>
+
+
+
+            <div class="topbar-actions">
+
+                <a
+
+                    href="../index.html"
+
+                    class="view-site-button"
+
+                    target="_blank"
+
+                    rel="noopener"
+
+                >
+
+                    <i data-lucide="external-link"></i>
+
+                    <span>View site</span>
+
+                </a>
+
+            </div>
+
+
+
+        </header>
+
+
+
+        <div class="admin-content">
+
+
+
+            <section class="page-heading">
+
+
+
+                <div>
+
+                    <span class="eyebrow">CREDENTIALS</span>
+
+
+
+                    <h1>Documents</h1>
+
+
+
+                    <p>
+
+                        Upload and manage professional documents and control how employers can access them.
+
+                    </p>
+
+                </div>
+
+
+
+                <div class="page-heading-actions">
+
+
+
+                    <button
+
+                        type="button"
+
+                        class="primary-button"
+
+                        onclick="openDocumentForm()"
+
+                    >
+
+                        <i data-lucide="file-plus-2"></i>
+
+                        <span>Add document</span>
+
+                    </button>
+
+
+
+                </div>
+
+
+
+            </section>
+
+
+
+            <section
+
+                class="employer-access-notice"
+
+                aria-labelledby="securityNoticeTitle"
+
+            >
+
+
+
+                <div class="notice-icon">
+
+                    <i data-lucide="shield-check"></i>
+
+                </div>
+
+
+
+                <div>
+
+                    <strong id="securityNoticeTitle">
+
+                        Controlled document access
+
+                    </strong>
+
+
+
+                    <p>
+
+                        Public documents can be linked from the portfolio.
+
+                        Employer-only and private documents should eventually
+
+                        be protected by authenticated server-side access.
+
+                    </p>
+
+                </div>
+
+
+
+            </section>
+
+
+
+            <section
+
+                class="dashboard-card documents-panel"
+
+                aria-labelledby="documentLibraryTitle"
+
+            >
+
+
+
+                <div class="card-header">
+
+
+
+                    <div>
+
+                        <span class="card-eyebrow">DOCUMENT LIBRARY</span>
+
+
+
+                        <h2 id="documentLibraryTitle">
+
+                            Portfolio documents
+
+                        </h2>
+
+                    </div>
+
+
+
+                    <div class="card-header-meta">
+
+                        <span id="documentSummary">
+
+                            Manage your professional documents.
+
+                        </span>
+
+                    </div>
+
+
+
+                </div>
+
+
+
+                <div
+
+                    id="documentList"
+
+                    class="document-admin-list"
+
+                    aria-live="polite"
+
+                ></div>
+
+
+
+            </section>
+
+
+
+        </div>
+
+
+
+        <footer class="admin-footer">
+
+            <span>
+
+                &copy;
+
+                <span id="currentYear"></span>
+
+                Dennis Ndwigah
+
+            </span>
+
+
+
+            <span>Administrator access only</span>
+
+        </footer>
+
+
+
+    </main>
+
+
 
 </div>
+
+
+
 
 
 <div
-    id="documentModal"
-    class="admin-modal hidden"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="documentModalTitle"
-    aria-describedby="documentModalDesc"
+
+    id="documentModal"
+
+    class="admin-modal hidden"
+
+    role="dialog"
+
+    aria-modal="true"
+
+    aria-labelledby="documentModalTitle"
+
+    aria-describedby="documentModalDesc"
+
 >
 
-    <div class="admin-modal-content">
 
-        <div class="admin-modal-header">
 
-            <div>
-                <span class="card-eyebrow">DOCUMENT MANAGEMENT</span>
+    <div class="admin-modal-content">
 
-                <h2 id="documentModalTitle">
-                    Add Document
-                </h2>
 
-                <p id="documentModalDesc">
-                    Upload a professional document and define its access level.
-                </p>
-            </div>
 
-            <button
-                type="button"
-                class="modal-close"
-                onclick="closeDocumentForm()"
-                aria-label="Close document form"
-            >
-                <i data-lucide="x"></i>
-            </button>
+        <div class="admin-modal-header">
 
-        </div>
 
 
-        <form id="documentForm">
+            <div>
 
-            <input type="hidden" id="documentId">
+                <span class="card-eyebrow">DOCUMENT MANAGEMENT</span>
 
-            <div class="form-grid">
 
-                <div class="form-group">
 
-                    <label for="documentName">
-                        Document name
-                    </label>
+                <h2 id="documentModalTitle">
 
-                    <input
-                        type="text"
-                        id="documentName"
-                        placeholder="e.g. Professional CV"
-                        required
-                    >
+                    Add Document
 
-                </div>
+                </h2>
 
 
-                <div class="form-group">
 
-                    <label for="documentCategory">
-                        Category
-                    </label>
+                <p id="documentModalDesc">
 
-                    <select
-                        id="documentCategory"
-                        required
-                    >
-                        <option value="CV">CV / Resume</option>
-                        <option value="Certificate">Certificate</option>
-                        <option value="Academic">Academic</option>
-                        <option value="Training">Training</option>
-                        <option value="Professional">Professional</option>
-                        <option value="Other">Other</option>
-                    </select>
+                    Upload a professional document and define its access level.
 
-                </div>
+                </p>
 
+            </div>
 
-                <div class="form-group">
 
-                    <label for="documentAccess">
-                        Access level
-                    </label>
 
-                    <select
-                        id="documentAccess"
-                        required
-                    >
-                        <option value="public">Public</option>
-                        <option value="employer">Employer Only</option>
-                        <option value="private">Private</option>
-                    </select>
+            <button
 
-                </div>
+                type="button"
 
+                class="modal-close"
 
-                <div class="form-group">
+                onclick="closeDocumentForm()"
 
-                    <label for="documentStatus">
-                        Status
-                    </label>
+                aria-label="Close document form"
 
-                    <select
-                        id="documentStatus"
-                        required
-                    >
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                    </select>
+            >
 
-                </div>
+                <i data-lucide="x"></i>
 
+            </button>
 
-                <div class="form-group full-width">
 
-                    <label for="documentDescription">
-                        Description
-                    </label>
 
-                    <textarea
-                        id="documentDescription"
-                        rows="3"
-                        placeholder="Describe this document."
-                    ></textarea>
+        </div>
 
-                </div>
 
 
-                <div class="form-group full-width">
 
-                    <label>
-                        Upload file
-                    </label>
 
-                    <div
-                        class="document-upload-area"
-                        id="documentUploadArea"
-                    >
+        <form id="documentForm">
 
-                        <input
-                            type="file"
-                            id="documentFile"
-                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                            hidden
-                        >
 
-                        <div class="document-upload-content">
 
-                            <div class="document-upload-icon">
-                                <i data-lucide="upload-cloud"></i>
-                            </div>
+            <input type="hidden" id="documentId">
 
-                            <strong>
-                                Upload a document
-                            </strong>
 
-                            <p>
-                                PDF, DOC, DOCX, JPG or PNG up to 10 MB.
-                            </p>
 
-                            <button
-                                type="button"
-                                class="secondary-button"
-                                onclick="document.getElementById('documentFile').click()"
-                            >
-                                <i data-lucide="folder-open"></i>
-                                <span>Choose file</span>
-                            </button>
+            <div class="form-grid">
 
-                            <small>
-                                You can also drag and drop a file here.
-                            </small>
 
-                        </div>
 
+                <div class="form-group">
 
-                        <div
-                            id="selectedFile"
-                            class="selected-file hidden"
-                        >
 
-                            <div class="selected-file-icon">
-                                <i data-lucide="file-text"></i>
-                            </div>
 
-                            <div class="selected-file-info">
+                    <label for="documentName">
 
-                                <strong id="selectedFileName">
-                                    No file selected
-                                </strong>
+                        Document name
 
-                                <span id="selectedFileMeta">
-                                    0 KB
-                                </span>
+                    </label>
 
-                            </div>
 
-                            <button
-                                type="button"
-                                class="icon-button"
-                                id="removeSelectedFile"
-                                aria-label="Remove selected file"
-                                title="Remove selected file"
-                            >
-                                <i data-lucide="x"></i>
-                            </button>
 
-                        </div>
+                    <input
 
-                    </div>
+                        type="text"
 
-                    <small class="form-help">
-                        Files are stored locally in this MVP using browser IndexedDB.
-                        Production storage should be moved to secure server-side storage.
-                    </small>
+                        id="documentName"
 
-                </div>
+                        placeholder="e.g. Professional CV"
 
+                        required
 
-                <div class="form-group">
+                    >
 
-                    <label for="documentVersion">
-                        Version
-                    </label>
 
-                    <input
-                        type="text"
-                        id="documentVersion"
-                        value="1.0"
-                        placeholder="1.0"
-                    >
 
-                </div>
+                </div>
 
 
-                <div class="form-group checkbox-group">
 
-                    <label>
 
-                        <input
-                            type="checkbox"
-                            id="documentFeatured"
-                        >
 
-                        <span>Feature this document</span>
+                <div class="form-group">
 
-                    </label>
 
-                </div>
 
-            </div>
+                    <label for="documentCategory">
 
+                        Category
 
-            <div class="form-actions">
+                    </label>
 
-                <button
-                    type="button"
-                    class="secondary-button"
-                    onclick="closeDocumentForm()"
-                >
-                    Cancel
-                </button>
 
-                <button
-                    type="submit"
-                    class="primary-button"
-                >
-                    <i data-lucide="save"></i>
-                    <span>Save document</span>
-                </button>
 
-            </div>
+                    <select
 
-        </form>
+                        id="documentCategory"
 
-    </div>
+                        required
+
+                    >
+
+                        <option value="CV">CV / Resume</option>
+
+                        <option value="Certificate">Certificate</option>
+
+                        <option value="Academic">Academic</option>
+
+                        <option value="Training">Training</option>
+
+                        <option value="Professional">Professional</option>
+
+                        <option value="Other">Other</option>
+
+                    </select>
+
+
+
+                </div>
+
+
+
+
+
+                <div class="form-group">
+
+
+
+                    <label for="documentAccess">
+
+                        Access level
+
+                    </label>
+
+
+
+                    <select
+
+                        id="documentAccess"
+
+                        required
+
+                    >
+
+                        <option value="public">Public</option>
+
+                        <option value="employer">Employer Only</option>
+
+                        <option value="private">Private</option>
+
+                    </select>
+
+
+
+                </div>
+
+
+
+
+
+                <div class="form-group">
+
+
+
+                    <label for="documentStatus">
+
+                        Status
+
+                    </label>
+
+
+
+                    <select
+
+                        id="documentStatus"
+
+                        required
+
+                    >
+
+                        <option value="active">Active</option>
+
+                        <option value="inactive">Inactive</option>
+
+                    </select>
+
+
+
+                </div>
+
+
+
+
+
+                <div class="form-group full-width">
+
+
+
+                    <label for="documentDescription">
+
+                        Description
+
+                    </label>
+
+
+
+                    <textarea
+
+                        id="documentDescription"
+
+                        rows="3"
+
+                        placeholder="Describe this document."
+
+                    ></textarea>
+
+
+
+                </div>
+
+
+
+
+
+                <div class="form-group full-width">
+
+
+
+                    <label>
+
+                        Upload file
+
+                    </label>
+
+
+
+                    <div
+
+                        class="document-upload-area"
+
+                        id="documentUploadArea"
+
+                    >
+
+
+
+                        <input
+
+                            type="file"
+
+                            id="documentFile"
+
+                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+
+                            hidden
+
+                        >
+
+
+
+                        <div class="document-upload-content">
+
+
+
+                            <div class="document-upload-icon">
+
+                                <i data-lucide="upload-cloud"></i>
+
+                            </div>
+
+
+
+                            <strong>
+
+                                Upload a document
+
+                            </strong>
+
+
+
+                            <p>
+
+                                PDF, DOC, DOCX, JPG or PNG up to 10 MB.
+
+                            </p>
+
+
+
+                            <button
+
+                                type="button"
+
+                                class="secondary-button"
+
+                                onclick="document.getElementById('documentFile').click()"
+
+                            >
+
+                                <i data-lucide="folder-open"></i>
+
+                                <span>Choose file</span>
+
+                            </button>
+
+
+
+                            <small>
+
+                                You can also drag and drop a file here.
+
+                            </small>
+
+
+
+                        </div>
+
+
+
+
+
+                        <div
+
+                            id="selectedFile"
+
+                            class="selected-file hidden"
+
+                        >
+
+
+
+                            <div class="selected-file-icon">
+
+                                <i data-lucide="file-text"></i>
+
+                            </div>
+
+
+
+                            <div class="selected-file-info">
+
+
+
+                                <strong id="selectedFileName">
+
+                                    No file selected
+
+                                </strong>
+
+
+
+                                <span id="selectedFileMeta">
+
+                                    0 KB
+
+                                </span>
+
+
+
+                            </div>
+
+
+
+                            <button
+
+                                type="button"
+
+                                class="icon-button"
+
+                                id="removeSelectedFile"
+
+                                aria-label="Remove selected file"
+
+                                title="Remove selected file"
+
+                            >
+
+                                <i data-lucide="x"></i>
+
+                            </button>
+
+
+
+                        </div>
+
+
+
+                    </div>
+
+
+
+                    <small class="form-help">
+
+                        Files are stored locally in this MVP using browser IndexedDB.
+
+                        Production storage should be moved to secure server-side storage.
+
+                    </small>
+
+
+
+                </div>
+
+
+
+
+
+                <div class="form-group">
+
+
+
+                    <label for="documentVersion">
+
+                        Version
+
+                    </label>
+
+
+
+                    <input
+
+                        type="text"
+
+                        id="documentVersion"
+
+                        value="1.0"
+
+                        placeholder="1.0"
+
+                    >
+
+
+
+                </div>
+
+
+
+
+
+                <div class="form-group checkbox-group">
+
+
+
+                    <label>
+
+
+
+                        <input
+
+                            type="checkbox"
+
+                            id="documentFeatured"
+
+                        >
+
+
+
+                        <span>Feature this document</span>
+
+
+
+                    </label>
+
+
+
+                </div>
+
+
+
+            </div>
+
+
+
+
+
+            <div class="form-actions">
+
+
+
+                <button
+
+                    type="button"
+
+                    class="secondary-button"
+
+                    onclick="closeDocumentForm()"
+
+                >
+
+                    Cancel
+
+                </button>
+
+
+
+                <button
+
+                    type="submit"
+
+                    class="primary-button"
+
+                >
+
+                    <i data-lucide="save"></i>
+
+                    <span>Save document</span>
+
+                </button>
+
+
+
+            </div>
+
+
+
+        </form>
+
+
+
+    </div>
+
+
 
 </div>
 
 
+
+
+
 <script src="https://unpkg.com/lucide@latest"></script>
+<script src="js/auth.js"></script>
+<script src="js/api.js"></script>
+<script src="js/admin.js"></script>
 <script src="js/documents.js"></script>
 
+
+
 <script>
-    lucide.createIcons({
-        attrs: {
-            "stroke-width": 1.8
-        }
-    });
+
+    lucide.createIcons({
+
+        attrs: {
+
+            "stroke-width": 1.8
+
+        }
+
+    });
+
 </script>
 
+
+
 </body>
+
 </html>

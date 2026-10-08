@@ -1,673 +1,1343 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Employer Access | Dennis Ndwigah Portfolio Admin</title>
+    <meta charset="UTF-8">
 
-    <meta
-        name="description"
-        content="Manage controlled employer access to Dennis Ndwigah portfolio documents."
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" href="css/admin.css">
-    <link rel="stylesheet" href="css/employer-access.css">
+
+
+    <title>Employer Access | Dennis Ndwigah Portfolio Admin</title>
+
+
+
+    <meta
+
+        name="description"
+
+        content="Manage controlled employer access to Dennis Ndwigah portfolio documents."
+
+    >
+
+
+
+    <link rel="stylesheet" href="css/admin.css">
+
+    <link rel="stylesheet" href="css/employer-access.css">
+
 </head>
+
+
 
 <body class="admin-dashboard-page">
 
+
+
 <div class="admin-app">
 
-    <!-- SIDEBAR -->
 
-    <aside class="admin-sidebar" id="adminSidebar">
 
-        <div class="sidebar-header">
+    <!-- SIDEBAR -->
 
-            <a href="dashboard.html" class="admin-logo">
 
-                <span class="brand-mark">DN</span>
 
-                <span class="brand-text">
-                    <strong>DN Portfolio</strong>
-                    <small>Admin console</small>
-                </span>
+    <aside class="admin-sidebar" id="adminSidebar">
 
-            </a>
 
-            <button
-                type="button"
-                class="mobile-close"
-                id="closeSidebar"
-                aria-label="Close navigation"
-            >
-                <i data-lucide="x"></i>
-            </button>
 
-        </div>
+        <div class="sidebar-header">
 
 
-        <nav class="admin-navigation">
 
-            <div class="nav-section">
+            <a href="dashboard.html" class="admin-logo">
 
-                <span class="nav-section-title">
-                    Workspace
-                </span>
 
-                <a href="dashboard.html" class="nav-link">
 
-                    <span class="nav-icon">
-                        <i data-lucide="layout-dashboard"></i>
-                    </span>
+                <span class="brand-mark">DN</span>
 
-                    <span>Dashboard</span>
 
-                </a>
 
+                <span class="brand-text">
 
-                <a href="profile.html" class="nav-link">
+                    <strong>DN Portfolio</strong>
 
-                    <span class="nav-icon">
-                        <i data-lucide="user-round"></i>
-                    </span>
+                    <small>Admin console</small>
 
-                    <span>Profile</span>
+                </span>
 
-                </a>
 
 
-                <a href="experience.html" class="nav-link">
+            </a>
 
-                    <span class="nav-icon">
-                        <i data-lucide="briefcase-business"></i>
-                    </span>
 
-                    <span>Experience</span>
 
-                </a>
+            <button
 
+                type="button"
 
-                <a href="projects.html" class="nav-link">
+                class="mobile-close"
 
-                    <span class="nav-icon">
-                        <i data-lucide="folder-kanban"></i>
-                    </span>
+                id="closeSidebar"
 
-                    <span>Projects</span>
+                aria-label="Close navigation"
 
-                </a>
+            >
 
+                <i data-lucide="x"></i>
 
-                <a href="skills.html" class="nav-link">
+            </button>
 
-                    <span class="nav-icon">
-                        <i data-lucide="sparkles"></i>
-                    </span>
 
-                    <span>Skills</span>
 
-                </a>
+        </div>
 
-            </div>
 
 
-            <div class="nav-section">
 
-                <span class="nav-section-title">
-                    Credentials
-                </span>
 
+        <nav class="admin-navigation">
 
-                <a href="certifications.html" class="nav-link">
 
-                    <span class="nav-icon">
-                        <i data-lucide="award"></i>
-                    </span>
 
-                    <span>Certifications</span>
+            <div class="nav-section">
 
-                </a>
 
 
-                <a href="documents.html" class="nav-link">
+                <span class="nav-section-title">
 
-                    <span class="nav-icon">
-                        <i data-lucide="file-text"></i>
-                    </span>
+                    Workspace
 
-                    <span>Documents</span>
+                </span>
 
-                    <span class="nav-badge">
-                        0
-                    </span>
 
-                </a>
 
-            </div>
+                <a href="dashboard.html" class="nav-link">
 
 
-            <div class="nav-section">
 
-                <span class="nav-section-title">
-                    System
-                </span>
+                    <span class="nav-icon">
 
+                        <i data-lucide="layout-dashboard"></i>
 
-                <a href="settings.html" class="nav-link">
+                    </span>
 
-                    <span class="nav-icon">
-                        <i data-lucide="settings-2"></i>
-                    </span>
 
-                    <span>Settings</span>
 
-                </a>
+                    <span>Dashboard</span>
 
 
-                <a
-                    href="employer-access.html"
-                    class="nav-link active"
-                >
 
-                    <span class="nav-icon">
-                        <i data-lucide="shield-check"></i>
-                    </span>
+                </a>
 
-                    <span>Employer Access</span>
 
-                </a>
 
-            </div>
 
-        </nav>
 
+                <a href="profile.html" class="nav-link">
 
-        <div class="sidebar-footer">
 
-            <div class="admin-user">
 
-                <div class="admin-user-avatar">
-                    DN
-                </div>
+                    <span class="nav-icon">
 
-                <div>
+                        <i data-lucide="user-round"></i>
 
-                    <strong>Dennis Ndwigah</strong>
+                    </span>
 
-                    <small>
-                        Administrator
-                    </small>
 
-                </div>
 
-            </div>
+                    <span>Profile</span>
 
 
-            <button
-                type="button"
-                class="logout-button"
-                id="logoutButton"
-            >
 
-                <i data-lucide="log-out"></i>
+                </a>
 
-                <span>
-                    Sign out
-                </span>
 
-            </button>
 
-        </div>
 
-    </aside>
 
+                <a href="experience.html" class="nav-link">
 
-    <div
-        class="sidebar-overlay"
-        id="sidebarOverlay"
-    ></div>
 
 
-    <!-- MAIN -->
+                    <span class="nav-icon">
 
-    <main class="admin-main">
+                        <i data-lucide="briefcase-business"></i>
 
-        <!-- TOPBAR -->
+                    </span>
 
-        <header class="admin-topbar">
 
-            <button
-                type="button"
-                class="menu-button"
-                id="openSidebar"
-                aria-label="Open navigation"
-            >
 
-                <i data-lucide="menu"></i>
+                    <span>Experience</span>
 
-            </button>
 
 
-            <div class="topbar-title">
-                Employer Access
-            </div>
+                </a>
 
 
-            <div class="topbar-actions">
 
-                <a
-                    href="../index.html"
-                    class="view-site-button"
-                    target="_blank"
-                    rel="noopener"
-                >
 
-                    <i data-lucide="external-link"></i>
 
-                    <span>
-                        View site
-                    </span>
+                <a href="projects.html" class="nav-link">
 
-                </a>
 
-            </div>
 
-        </header>
+                    <span class="nav-icon">
 
+                        <i data-lucide="folder-kanban"></i>
 
-        <!-- CONTENT -->
+                    </span>
 
-        <div class="admin-content">
 
-            <!-- PAGE HEADING -->
 
-            <section class="page-heading">
+                    <span>Projects</span>
 
-                <div>
 
-                    <span class="eyebrow">
-                        CONTROLLED ACCESS
-                    </span>
 
-                    <h1>
-                        Employer access
-                    </h1>
+                </a>
 
-                    <p>
-                        Create and manage controlled access to selected portfolio documents for employers and recruiters.
-                    </p>
 
-                </div>
 
-            </section>
 
 
-            <!-- SECURITY NOTICE -->
+                <a href="skills.html" class="nav-link">
 
-            <section class="employer-access-notice">
 
-                <div class="notice-icon">
 
-                    <i data-lucide="shield-check"></i>
+                    <span class="nav-icon">
 
-                </div>
+                        <i data-lucide="sparkles"></i>
 
+                    </span>
 
-                <div>
 
-                    <strong>
-                        Controlled employer access
-                    </strong>
 
-                    <p>
-                        Use this area to prepare employer-specific document access.
-                        Production authentication and permission checks should be enforced server-side when Django is connected.
-                    </p>
+                    <span>Skills</span>
 
-                </div>
 
-            </section>
 
+                </a>
 
-            <!-- ACCESS WORKSPACE -->
 
-            <div class="employer-access-workspace">
 
-                <!-- ACCESS LIST -->
+            </div>
 
-                <section class="dashboard-card employer-access-panel">
 
-                    <div class="card-header">
 
-                        <div>
 
-                            <span class="card-eyebrow">
-                                ACCESS RECORDS
-                            </span>
 
-                            <h2>
-                                Employer access list
-                            </h2>
+            <div class="nav-section">
 
-                        </div>
 
-                    </div>
 
+                <span class="nav-section-title">
 
-                    <div
-                        class="employer-access-list"
-                        id="employerAccessList"
-                        aria-live="polite"
-                    >
+                    Credentials
 
-                        <div class="empty-state">
+                </span>
 
-                            <div class="empty-state-icon">
 
-                                <i data-lucide="shield-check"></i>
 
-                            </div>
 
 
-                            <h3>
-                                No employer access records yet
-                            </h3>
+                <a href="certifications.html" class="nav-link">
 
 
-                            <p>
-                                Create an access record using the form to the right.
-                            </p>
 
-                        </div>
+                    <span class="nav-icon">
 
-                    </div>
+                        <i data-lucide="award"></i>
 
-                </section>
+                    </span>
 
 
-                <!-- ACCESS EDITOR -->
 
-                <section class="dashboard-card employer-access-form-card">
+                    <span>Certifications</span>
 
-                    <div class="card-header">
 
-                        <div>
 
-                            <span class="card-eyebrow">
-                                ACCESS EDITOR
-                            </span>
+                </a>
 
-                            <h2 id="editorTitle">
-                                Create employer access
-                            </h2>
 
-                        </div>
 
-                    </div>
 
 
-                    <form id="employerAccessForm">
+                <a href="documents.html" class="nav-link">
 
-                        <input
-                            type="hidden"
-                            id="accessId"
-                            name="accessId"
-                        >
 
 
-                        <!-- EMPLOYER -->
+                    <span class="nav-icon">
 
-                        <div class="form-group">
+                        <i data-lucide="file-text"></i>
 
-                            <label for="employerName">
-                                Employer / company
-                            </label>
+                    </span>
 
 
-                            <input
-                                type="text"
-                                id="employerName"
-                                name="employerName"
-                                placeholder="Company or organisation"
-                                required
-                            >
 
-                        </div>
+                    <span>Documents</span>
 
 
-                        <!-- POSITION -->
 
-                        <div class="form-group">
+                    <span class="nav-badge">
 
-                            <label for="employerPosition">
-                                Position / role
-                            </label>
+                        0
 
+                    </span>
 
-                            <input
-                                type="text"
-                                id="employerPosition"
-                                name="employerPosition"
-                                placeholder="Recruiter, Hiring Manager, Supply Chain Manager"
-                                required
-                            >
 
-                        </div>
 
+                </a>
 
-                        <!-- CONTACT -->
 
-                        <div class="form-group">
 
-                            <label for="employerContact">
-                                Contact
-                            </label>
+            </div>
 
 
-                            <input
-                                type="text"
-                                id="employerContact"
-                                name="employerContact"
-                                placeholder="Email or phone"
-                            >
 
-                        </div>
 
 
-                        <!-- EXPIRY + CODE -->
+            <div class="nav-section">
 
-                        <div class="form-grid">
 
-                            <div class="form-group">
 
-                                <label for="accessExpiry">
-                                    Access expiry
-                                </label>
+                <span class="nav-section-title">
 
+                    System
 
-                                <input
-                                    type="date"
-                                    id="accessExpiry"
-                                    name="accessExpiry"
-                                >
+                </span>
 
-                            </div>
 
 
-                            <div class="form-group">
 
-                                <label for="accessCode">
-                                    Access code
-                                </label>
 
+                <a href="settings.html" class="nav-link">
 
-                                <input
-                                    type="text"
-                                    id="accessCode"
-                                    name="accessCode"
-                                    placeholder="Auto-generate or enter code"
-                                >
 
-                            </div>
 
-                        </div>
+                    <span class="nav-icon">
 
+                        <i data-lucide="settings-2"></i>
 
-                        <!-- DOCUMENTS -->
+                    </span>
 
-                        <div class="form-group">
 
-                            <label>
-                                Allowed documents
-                            </label>
 
+                    <span>Settings</span>
 
-                            <div
-                                class="document-selector"
-                                id="documentSelector"
-                            >
 
-                                <div class="document-selector-empty">
 
-                                    No documents available.
-                                    Add documents from Admin &gt; Documents.
+                </a>
 
-                                </div>
 
-                            </div>
 
-                        </div>
 
 
-                        <!-- ACTIVE STATUS -->
+                <a
 
-                        <div class="form-group">
+                    href="employer-access.html"
 
-                            <div class="checkbox-row">
+                    class="nav-link active"
 
-                                <input
-                                    type="checkbox"
-                                    id="accessActive"
-                                    name="accessActive"
-                                    checked
-                                >
+                >
 
 
-                                <label for="accessActive">
 
-                                    <strong>
-                                        Access active
-                                    </strong>
+                    <span class="nav-icon">
 
-                                    <span>
-                                        Allow this employer access record to remain active.
-                                    </span>
+                        <i data-lucide="shield-check"></i>
 
-                                </label>
+                    </span>
 
-                            </div>
 
-                        </div>
 
+                    <span>Employer Access</span>
 
-                        <!-- FORM ACTIONS -->
 
-                        <div class="form-actions">
 
-                            <button
-                                type="button"
-                                class="secondary-button"
-                                id="cancelEmployerAccess"
-                            >
+                </a>
 
-                                Cancel
 
-                            </button>
 
+            </div>
 
-                            <button
-                                type="submit"
-                                class="primary-button"
-                            >
 
-                                <i data-lucide="shield-check"></i>
 
-                                <span>
-                                    Save access
-                                </span>
+        </nav>
 
-                            </button>
 
-                        </div>
 
-                    </form>
 
-                </section>
 
-            </div>
+        <div class="sidebar-footer">
 
 
-            <!-- FOOTER -->
 
-            <footer class="admin-footer">
+            <div class="admin-user">
 
-                <span>
-                    © <span id="currentYear"></span> Dennis Ndwigah
-                </span>
 
 
-                <span>
-                    Administrator access only
-                </span>
+                <div class="admin-user-avatar">
 
-            </footer>
+                    DN
 
-        </div>
+                </div>
 
-    </main>
+
+
+                <div>
+
+
+
+                    <strong>Dennis Ndwigah</strong>
+
+
+
+                    <small>
+
+                        Administrator
+
+                    </small>
+
+
+
+                </div>
+
+
+
+            </div>
+
+
+
+
+
+            <button
+
+                type="button"
+
+                class="logout-button"
+
+                id="logoutButton"
+
+            >
+
+
+
+                <i data-lucide="log-out"></i>
+
+
+
+                <span>
+
+                    Sign out
+
+                </span>
+
+
+
+            </button>
+
+
+
+        </div>
+
+
+
+    </aside>
+
+
+
+
+
+    <div
+
+        class="sidebar-overlay"
+
+        id="sidebarOverlay"
+
+    ></div>
+
+
+
+
+
+    <!-- MAIN -->
+
+
+
+    <main class="admin-main">
+
+
+
+        <!-- TOPBAR -->
+
+
+
+        <header class="admin-topbar">
+
+
+
+            <button
+
+                type="button"
+
+                class="menu-button"
+
+                id="openSidebar"
+
+                aria-label="Open navigation"
+
+            >
+
+
+
+                <i data-lucide="menu"></i>
+
+
+
+            </button>
+
+
+
+
+
+            <div class="topbar-title">
+
+                Employer Access
+
+            </div>
+
+
+
+
+
+            <div class="topbar-actions">
+
+
+
+                <a
+
+                    href="../index.html"
+
+                    class="view-site-button"
+
+                    target="_blank"
+
+                    rel="noopener"
+
+                >
+
+
+
+                    <i data-lucide="external-link"></i>
+
+
+
+                    <span>
+
+                        View site
+
+                    </span>
+
+
+
+                </a>
+
+
+
+            </div>
+
+
+
+        </header>
+
+
+
+
+
+        <!-- CONTENT -->
+
+
+
+        <div class="admin-content">
+
+
+
+            <!-- PAGE HEADING -->
+
+
+
+            <section class="page-heading">
+
+
+
+                <div>
+
+
+
+                    <span class="eyebrow">
+
+                        CONTROLLED ACCESS
+
+                    </span>
+
+
+
+                    <h1>
+
+                        Employer access
+
+                    </h1>
+
+
+
+                    <p>
+
+                        Create and manage controlled access to selected portfolio documents for employers and recruiters.
+
+                    </p>
+
+
+
+                </div>
+
+
+
+            </section>
+
+
+
+
+
+            <!-- SECURITY NOTICE -->
+
+
+
+            <section class="employer-access-notice">
+
+
+
+                <div class="notice-icon">
+
+
+
+                    <i data-lucide="shield-check"></i>
+
+
+
+                </div>
+
+
+
+
+
+                <div>
+
+
+
+                    <strong>
+
+                        Controlled employer access
+
+                    </strong>
+
+
+
+                    <p>
+
+                        Use this area to prepare employer-specific document access.
+
+                        Production authentication and permission checks should be enforced server-side when Django is connected.
+
+                    </p>
+
+
+
+                </div>
+
+
+
+            </section>
+
+
+
+
+
+            <!-- ACCESS WORKSPACE -->
+
+
+
+            <div class="employer-access-workspace">
+
+
+
+                <!-- ACCESS LIST -->
+
+
+
+                <section class="dashboard-card employer-access-panel">
+
+
+
+                    <div class="card-header">
+
+
+
+                        <div>
+
+
+
+                            <span class="card-eyebrow">
+
+                                ACCESS RECORDS
+
+                            </span>
+
+
+
+                            <h2>
+
+                                Employer access list
+
+                            </h2>
+
+
+
+                        </div>
+
+
+
+                    </div>
+
+
+
+
+
+                    <div
+
+                        class="employer-access-list"
+
+                        id="employerAccessList"
+
+                        aria-live="polite"
+
+                    >
+
+
+
+                        <div class="empty-state">
+
+
+
+                            <div class="empty-state-icon">
+
+
+
+                                <i data-lucide="shield-check"></i>
+
+
+
+                            </div>
+
+
+
+
+
+                            <h3>
+
+                                No employer access records yet
+
+                            </h3>
+
+
+
+
+
+                            <p>
+
+                                Create an access record using the form to the right.
+
+                            </p>
+
+
+
+                        </div>
+
+
+
+                    </div>
+
+
+
+                </section>
+
+
+
+
+
+                <!-- ACCESS EDITOR -->
+
+
+
+                <section class="dashboard-card employer-access-form-card">
+
+
+
+                    <div class="card-header">
+
+
+
+                        <div>
+
+
+
+                            <span class="card-eyebrow">
+
+                                ACCESS EDITOR
+
+                            </span>
+
+
+
+                            <h2 id="editorTitle">
+
+                                Create employer access
+
+                            </h2>
+
+
+
+                        </div>
+
+
+
+                    </div>
+
+
+
+
+
+                    <form id="employerAccessForm">
+
+
+
+                        <input
+
+                            type="hidden"
+
+                            id="accessId"
+
+                            name="accessId"
+
+                        >
+
+
+
+
+
+                        <!-- EMPLOYER -->
+
+
+
+                        <div class="form-group">
+
+
+
+                            <label for="employerName">
+
+                                Employer / company
+
+                            </label>
+
+
+
+
+
+                            <input
+
+                                type="text"
+
+                                id="employerName"
+
+                                name="employerName"
+
+                                placeholder="Company or organisation"
+
+                                required
+
+                            >
+
+
+
+                        </div>
+
+
+
+
+
+                        <!-- POSITION -->
+
+
+
+                        <div class="form-group">
+
+
+
+                            <label for="employerPosition">
+
+                                Position / role
+
+                            </label>
+
+
+
+
+
+                            <input
+
+                                type="text"
+
+                                id="employerPosition"
+
+                                name="employerPosition"
+
+                                placeholder="Recruiter, Hiring Manager, Supply Chain Manager"
+
+                                required
+
+                            >
+
+
+
+                        </div>
+
+
+
+
+
+                        <!-- CONTACT -->
+
+
+
+                        <div class="form-group">
+
+
+
+                            <label for="employerContact">
+
+                                Contact
+
+                            </label>
+
+
+
+
+
+                            <input
+
+                                type="text"
+
+                                id="employerContact"
+
+                                name="employerContact"
+
+                                placeholder="Email or phone"
+
+                            >
+
+
+
+                        </div>
+
+
+
+
+
+                        <!-- EXPIRY + CODE -->
+
+
+
+                        <div class="form-grid">
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label for="accessExpiry">
+
+                                    Access expiry
+
+                                </label>
+
+
+
+
+
+                                <input
+
+                                    type="date"
+
+                                    id="accessExpiry"
+
+                                    name="accessExpiry"
+
+                                >
+
+
+
+                            </div>
+
+
+
+
+
+                            <div class="form-group">
+
+
+
+                                <label for="accessCode">
+
+                                    Access code
+
+                                </label>
+
+
+
+
+
+                                <input
+
+                                    type="text"
+
+                                    id="accessCode"
+
+                                    name="accessCode"
+
+                                    placeholder="Auto-generate or enter code"
+
+                                >
+
+
+
+                            </div>
+
+
+
+                        </div>
+
+
+
+
+
+                        <!-- DOCUMENTS -->
+
+
+
+                        <div class="form-group">
+
+
+
+                            <label>
+
+                                Allowed documents
+
+                            </label>
+
+
+
+
+
+                            <div
+
+                                class="document-selector"
+
+                                id="documentSelector"
+
+                            >
+
+
+
+                                <div class="document-selector-empty">
+
+
+
+                                    No documents available.
+
+                                    Add documents from Admin &gt; Documents.
+
+
+
+                                </div>
+
+
+
+                            </div>
+
+
+
+                        </div>
+
+
+
+
+
+                        <!-- ACTIVE STATUS -->
+
+
+
+                        <div class="form-group">
+
+
+
+                            <div class="checkbox-row">
+
+
+
+                                <input
+
+                                    type="checkbox"
+
+                                    id="accessActive"
+
+                                    name="accessActive"
+
+                                    checked
+
+                                >
+
+
+
+
+
+                                <label for="accessActive">
+
+
+
+                                    <strong>
+
+                                        Access active
+
+                                    </strong>
+
+
+
+                                    <span>
+
+                                        Allow this employer access record to remain active.
+
+                                    </span>
+
+
+
+                                </label>
+
+
+
+                            </div>
+
+
+
+                        </div>
+
+
+
+
+
+                        <!-- FORM ACTIONS -->
+
+
+
+                        <div class="form-actions">
+
+
+
+                            <button
+
+                                type="button"
+
+                                class="secondary-button"
+
+                                id="cancelEmployerAccess"
+
+                            >
+
+
+
+                                Cancel
+
+
+
+                            </button>
+
+
+
+
+
+                            <button
+
+                                type="submit"
+
+                                class="primary-button"
+
+                            >
+
+
+
+                                <i data-lucide="shield-check"></i>
+
+
+
+                                <span>
+
+                                    Save access
+
+                                </span>
+
+
+
+                            </button>
+
+
+
+                        </div>
+
+
+
+                    </form>
+
+
+
+                </section>
+
+
+
+            </div>
+
+
+
+
+
+            <!-- FOOTER -->
+
+
+
+            <footer class="admin-footer">
+
+
+
+                <span>
+
+                    © <span id="currentYear"></span> Dennis Ndwigah
+
+                </span>
+
+
+
+
+
+                <span>
+
+                    Administrator access only
+
+                </span>
+
+
+
+            </footer>
+
+
+
+        </div>
+
+
+
+    </main>
+
+
 
 </div>
 
 
+
+
+
 <!-- LUCIDE -->
+
+
 
 <script src="https://unpkg.com/lucide@latest"></script>
 
+<script src="js/auth.js"></script>
 
-<!-- EMPLOYER ACCESS JAVASCRIPT -->
+<script src="js/api.js"></script>
+
+<script src="js/admin.js"></script>
 
 <script src="js/employer-access.js"></script>
 
 
+
+
+
 <!-- ICON INITIALISATION -->
 
+
+
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
 
-        if (window.lucide) {
+    document.addEventListener("DOMContentLoaded", () => {
 
-            lucide.createIcons({
-                attrs: {
-                    "stroke-width": 1.8
-                }
-            });
 
-        }
 
-        const currentYear =
-            document.getElementById("currentYear");
+        if (window.lucide) {
 
-        if (currentYear) {
 
-            currentYear.textContent =
-                new Date().getFullYear();
 
-        }
+            lucide.createIcons({
 
-    });
+                attrs: {
+
+                    "stroke-width": 1.8
+
+                }
+
+            });
+
+
+
+        }
+
+
+
+        const currentYear =
+
+            document.getElementById("currentYear");
+
+
+
+        if (currentYear) {
+
+
+
+            currentYear.textContent =
+
+                new Date().getFullYear();
+
+
+
+        }
+
+
+
+    });
+
 </script>
 
+
+
 </body>
+
 </html>

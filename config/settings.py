@@ -141,7 +141,15 @@ def env_list(name: str, default: str = "") -> list[str]:
         if item.strip()
 
     ]
+PORTFOLIO_ADMIN_ORIGIN = os.environ.get(
+    "PORTFOLIO_ADMIN_ORIGIN",
+    "https://njerudendwigah.github.io",
+).strip().rstrip("/")
 
+PORTFOLIO_API_TOKEN_MAX_AGE = env_int(
+    "PORTFOLIO_API_TOKEN_MAX_AGE",
+    28800,
+)
 # ---------------------------------------------------------------------------
 
 # SECURITY

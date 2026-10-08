@@ -27,7 +27,7 @@ from django.conf import settings
 from django.contrib.auth import views as auth_views
 from django.urls import path
 
-from . import forms, views
+from . import forms, portfolio_api, views
 
 
 app_name = "employer_portal"
@@ -57,6 +57,27 @@ urlpatterns = [
             next_page=settings.LOGOUT_REDIRECT_URL,
         ),
         name="logout",
+    ),
+
+    path(
+    "api/portfolio/login/",
+    portfolio_api.login,
+    name="portfolio_api_login",
+),
+path(
+    "api/portfolio/logout/",
+    portfolio_api.logout,
+    name="portfolio_api_logout",
+),
+path(
+    "api/portfolio/data/",
+    portfolio_api.data,
+    name="portfolio_api_data",
+),
+path(
+    "api/portfolio/data/<str:key>/",
+     portfolio_api.section,
+     name="portfolio_api_section",
     ),
 
     # -----------------------------------------------------------------------

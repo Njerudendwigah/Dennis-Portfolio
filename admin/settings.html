@@ -1,525 +1,1051 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Settings | Dennis Ndwigah Portfolio Admin</title>
+    <meta charset="UTF-8">
 
-    <meta name="description" content="Manage Dennis Ndwigah portfolio administration settings.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap"
-        rel="stylesheet"
-    >
 
-    <link rel="stylesheet" href="css/admin.css">
+
+    <title>Settings | Dennis Ndwigah Portfolio Admin</title>
+
+
+
+    <meta name="description" content="Manage Dennis Ndwigah portfolio administration settings.">
+
+
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap"
+
+        rel="stylesheet"
+
+    >
+
+
+
+    <link rel="stylesheet" href="css/admin.css">
+
 </head>
+
+
 
 <body class="admin-dashboard-page">
 
+
+
 <div class="admin-app">
 
-    <!-- Mobile overlay -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-    <!-- =========================================
-         SIDEBAR
-         ========================================= -->
-
-    <aside class="admin-sidebar" id="adminSidebar">
-
-        <div class="sidebar-header">
-
-            <a href="dashboard.html" class="admin-logo">
-                <span class="brand-mark">DN</span>
-
-                <span class="brand-text">
-                    <strong>DN Portfolio</strong>
-                    <small>Admin console</small>
-                </span>
-            </a>
-
-            <button
-                type="button"
-                class="mobile-close"
-                id="closeSidebar"
-                aria-label="Close navigation"
-            >
-                <i data-lucide="x" aria-hidden="true"></i>
-            </button>
-
-        </div>
-
-        <nav class="admin-navigation" aria-label="Admin navigation">
-
-            <div class="nav-section">
-                <span class="nav-section-title">Workspace</span>
-
-                <a href="dashboard.html" class="nav-link">
-                    <span class="nav-icon">
-                        <i data-lucide="layout-dashboard" aria-hidden="true"></i>
-                    </span>
-                    <span>Dashboard</span>
-                </a>
-
-                <a href="profile.html" class="nav-link">
-                    <span class="nav-icon">
-                        <i data-lucide="user-round" aria-hidden="true"></i>
-                    </span>
-                    <span>Profile</span>
-                </a>
-
-                <a href="experience.html" class="nav-link">
-                    <span class="nav-icon">
-                        <i data-lucide="briefcase" aria-hidden="true"></i>
-                    </span>
-                    <span>Experience</span>
-                </a>
-
-                <a href="projects.html" class="nav-link">
-                    <span class="nav-icon">
-                        <i data-lucide="folder-kanban" aria-hidden="true"></i>
-                    </span>
-                    <span>Projects</span>
-                </a>
-
-                <a href="skills.html" class="nav-link">
-                    <span class="nav-icon">
-                        <i data-lucide="sparkles" aria-hidden="true"></i>
-                    </span>
-                    <span>Skills</span>
-                </a>
-
-            </div>
-
-            <div class="nav-section">
-                <span class="nav-section-title">Credentials</span>
-
-                <a href="certifications.html" class="nav-link">
-                    <span class="nav-icon">
-                        <i data-lucide="award" aria-hidden="true"></i>
-                    </span>
-                    <span>Certifications</span>
-                </a>
-
-                <a href="documents.html" class="nav-link">
-                    <span class="nav-icon">
-                        <i data-lucide="file-text" aria-hidden="true"></i>
-                    </span>
-                    <span>Documents</span>
-                    <span class="nav-badge">0</span>
-                </a>
-
-            </div>
-
-            <div class="nav-section">
-                <span class="nav-section-title">System</span>
-
-                <a href="settings.html" class="nav-link active" aria-current="page">
-                    <span class="nav-icon">
-                        <i data-lucide="settings-2" aria-hidden="true"></i>
-                    </span>
-                    <span>Settings</span>
-                </a>
 
-                <a href="employer-access.html" class="nav-link">
-                    <span class="nav-icon">
-                        <i data-lucide="shield-check" aria-hidden="true"></i>
-                    </span>
-                    <span>Employer Access</span>
-                </a>
 
-            </div>
+    <!-- Mobile overlay -->
 
-        </nav>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-        <div class="sidebar-footer">
 
-            <div class="admin-user">
-                <div class="user-avatar" aria-hidden="true">DN</div>
 
-                <div class="user-details">
-                    <strong>Dennis Ndwigah</strong>
-                    <span>Administrator</span>
-                </div>
-            </div>
+    <!-- =========================================
 
-            <button type="button" class="logout-button" id="logoutButton">
-                <i data-lucide="log-out" aria-hidden="true"></i>
-                <span>Sign out</span>
-            </button>
+         SIDEBAR
 
-        </div>
+         ========================================= -->
 
-    </aside>
 
-    <!-- =========================================
-         MAIN
-         ========================================= -->
 
-    <main class="admin-main">
+    <aside class="admin-sidebar" id="adminSidebar">
 
-        <header class="admin-topbar">
 
-            <button
-                type="button"
-                class="menu-button"
-                id="openSidebar"
-                aria-label="Open navigation"
-            >
-                <i data-lucide="menu" aria-hidden="true"></i>
-            </button>
 
-            <div class="topbar-title">
-                <span>Settings</span>
-            </div>
+        <div class="sidebar-header">
 
-            <div class="topbar-actions">
-                <a
-                    href="../index.html"
-                    class="view-site-button"
-                    target="_blank"
-                    rel="noopener"
-                >
-                    <i data-lucide="external-link" aria-hidden="true"></i>
-                    <span>View site</span>
-                </a>
-            </div>
 
-        </header>
 
-        <div class="admin-content">
+            <a href="dashboard.html" class="admin-logo">
 
-            <!-- Page heading -->
+                <span class="brand-mark">DN</span>
 
-            <section class="page-heading compact">
 
-                <div>
-                    <span class="eyebrow">System configuration</span>
-
-                    <h1>Settings</h1>
-
-                    <p>
-                        Manage portfolio behaviour, visibility, and
-                        administrative preferences.
-                    </p>
-                </div>
-
-            </section>
-
-            <!-- =================================
-                 PORTFOLIO SETTINGS
-                 ================================= -->
-
-            <form id="settingsForm" class="settings-management" novalidate>
-
-                <section class="dashboard-card">
-
-                    <div class="card-header">
-                        <h2>Portfolio settings</h2>
-                    </div>
-
-                    <div class="form-grid">
-
-                        <div class="form-group">
-                            <label for="siteTitle">Site title</label>
-
-                            <input
-                                type="text"
-                                id="siteTitle"
-                                name="siteTitle"
-                                value="Dennis Ndwigah | Supply Chain & Operations"
-                                maxlength="120"
-                            >
-                        </div>
-
-                        <div class="form-group">
-                            <label for="siteStatus">Portfolio status</label>
-
-                            <select id="siteStatus" name="siteStatus">
-                                <option value="live" selected>Live</option>
-                                <option value="maintenance">Maintenance mode</option>
-                                <option value="private">Private</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group full-width">
-                            <label for="siteDescription">Site description</label>
-
-                            <textarea
-                                id="siteDescription"
-                                name="siteDescription"
-                                rows="4"
-                                maxlength="300"
-                            >Supply Chain and Operations professional portfolio for Dennis Ndwigah Njeru.</textarea>
-
-                            <small>
-                                Used as the portfolio description and browser metadata where supported.
-                            </small>
-                        </div>
-
-                    </div>
-
-                </section>
-
-                <!-- =================================
-                     PUBLIC VISIBILITY
-                     ================================= -->
-
-                <section class="dashboard-card">
-
-                    <div class="card-header">
-                        <h2>Public visibility</h2>
-                    </div>
-
-                    <div class="settings-list">
-
-                        <div class="settings-row">
-                            <div class="settings-row-content">
-                                <strong>Show professional profile</strong>
-                                <span>
-                                    Display your profile information on the public portfolio.
-                                </span>
-                            </div>
-
-                            <label class="toggle-control">
-                                <input
-                                    type="checkbox"
-                                    id="showProfile"
-                                    name="showProfile"
-                                    checked
-                                >
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-
-                        <div class="settings-row">
-                            <div class="settings-row-content">
-                                <strong>Show experience</strong>
-                                <span>
-                                    Display your professional experience timeline.
-                                </span>
-                            </div>
-
-                            <label class="toggle-control">
-                                <input
-                                    type="checkbox"
-                                    id="showExperience"
-                                    name="showExperience"
-                                    checked
-                                >
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-
-                        <div class="settings-row">
-                            <div class="settings-row-content">
-                                <strong>Show selected work</strong>
-                                <span>
-                                    Display public projects and case studies.
-                                </span>
-                            </div>
-
-                            <label class="toggle-control">
-                                <input
-                                    type="checkbox"
-                                    id="showProjects"
-                                    name="showProjects"
-                                    checked
-                                >
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-
-                        <div class="settings-row">
-                            <div class="settings-row-content">
-                                <strong>Show contact information</strong>
-                                <span>
-                                    Display approved contact channels on the public site.
-                                </span>
-                            </div>
-
-                            <label class="toggle-control">
-                                <input
-                                    type="checkbox"
-                                    id="showContact"
-                                    name="showContact"
-                                    checked
-                                >
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-
-                    </div>
-
-                </section>
-
-                <!-- =================================
-                     ADMIN PREFERENCES
-                     ================================= -->
-
-                <section class="dashboard-card">
-
-                    <div class="card-header">
-                        <h2>Administrative preferences</h2>
-                    </div>
-
-                    <div class="form-grid">
-
-                        <div class="form-group">
-                            <label for="defaultVisibility">Default content visibility</label>
-
-                            <select
-                                id="defaultVisibility"
-                                name="defaultVisibility"
-                            >
-                                <option value="public" selected>Public</option>
-                                <option value="employer">Employer only</option>
-                                <option value="private">Private</option>
-                            </select>
-
-                            <small>
-                                Used when creating new portfolio content.
-                            </small>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="dateFormat">Date format</label>
-
-                            <select id="dateFormat" name="dateFormat">
-                                <option value="month-year" selected>Month Year</option>
-                                <option value="year">Year only</option>
-                                <option value="full">Month Year with duration</option>
-                            </select>
-
-                            <small>
-                                Controls how experience dates are presented.
-                            </small>
-                        </div>
-
-                    </div>
-
-                </section>
-
-                <!-- =================================
-                     DATA MANAGEMENT
-                     ================================= -->
-
-                <section class="dashboard-card">
-
-                    <div class="card-header">
-                        <h2>Data management</h2>
-                    </div>
-
-                    <div class="settings-list">
-
-                        <div class="settings-row data-row settings-data-row">
-                            <div class="settings-row-content">
-                                <strong>Portfolio data</strong>
-                                <span>
-                                    Portfolio content is currently stored locally in this browser.
-                                    Production deployment should use secure server-side storage.
-                                </span>
-                            </div>
-
-                            <span class="status-badge data-status-badge">
-                                <i data-lucide="database" aria-hidden="true"></i>
-                                Local
-                            </span>
-                        </div>
-
-                        <div class="settings-row data-row settings-data-row">
-                            <div class="settings-row-content">
-                                <strong>Authentication</strong>
-                                <span>
-                                    Administrator authentication will be handled by the backend
-                                    when the Django system is connected.
-                                </span>
-                            </div>
-
-                            <span class="status-badge data-status-badge">
-                                <i data-lucide="lock-keyhole" aria-hidden="true"></i>
-                                Backend ready
-                            </span>
-                        </div>
-
-                    </div>
-
-                </section>
-
-                <!-- Save bar -->
-
-                <div class="form-actions">
-
-                    <span
-                        class="save-message"
-                        id="saveMessage"
-                        role="status"
-                        aria-live="polite"
-                    ></span>
-
-                    <button
-                        type="button"
-                        class="secondary-button"
-                        id="resetSettings"
-                    >
-                        <i data-lucide="rotate-ccw" aria-hidden="true"></i>
-                        <span>Reset</span>
-                    </button>
-
-                    <button type="submit" class="primary-button">
-                        <i data-lucide="check" aria-hidden="true"></i>
-                        <span>Save settings</span>
-                    </button>
-
-                </div>
-
-            </form>
-
-            <footer class="admin-footer">
-
-                <span>
-                    &copy; <span id="currentYear"></span>
-                    Dennis Ndwigah
-                </span>
-
-                <span>Administrator access only</span>
-
-            </footer>
-
-        </div>
-
-    </main>
+
+                <span class="brand-text">
+
+                    <strong>DN Portfolio</strong>
+
+                    <small>Admin console</small>
+
+                </span>
+
+            </a>
+
+
+
+            <button
+
+                type="button"
+
+                class="mobile-close"
+
+                id="closeSidebar"
+
+                aria-label="Close navigation"
+
+            >
+
+                <i data-lucide="x" aria-hidden="true"></i>
+
+            </button>
+
+
+
+        </div>
+
+
+
+        <nav class="admin-navigation" aria-label="Admin navigation">
+
+
+
+            <div class="nav-section">
+
+                <span class="nav-section-title">Workspace</span>
+
+
+
+                <a href="dashboard.html" class="nav-link">
+
+                    <span class="nav-icon">
+
+                        <i data-lucide="layout-dashboard" aria-hidden="true"></i>
+
+                    </span>
+
+                    <span>Dashboard</span>
+
+                </a>
+
+
+
+                <a href="profile.html" class="nav-link">
+
+                    <span class="nav-icon">
+
+                        <i data-lucide="user-round" aria-hidden="true"></i>
+
+                    </span>
+
+                    <span>Profile</span>
+
+                </a>
+
+
+
+                <a href="experience.html" class="nav-link">
+
+                    <span class="nav-icon">
+
+                        <i data-lucide="briefcase" aria-hidden="true"></i>
+
+                    </span>
+
+                    <span>Experience</span>
+
+                </a>
+
+
+
+                <a href="projects.html" class="nav-link">
+
+                    <span class="nav-icon">
+
+                        <i data-lucide="folder-kanban" aria-hidden="true"></i>
+
+                    </span>
+
+                    <span>Projects</span>
+
+                </a>
+
+
+
+                <a href="skills.html" class="nav-link">
+
+                    <span class="nav-icon">
+
+                        <i data-lucide="sparkles" aria-hidden="true"></i>
+
+                    </span>
+
+                    <span>Skills</span>
+
+                </a>
+
+
+
+            </div>
+
+
+
+            <div class="nav-section">
+
+                <span class="nav-section-title">Credentials</span>
+
+
+
+                <a href="certifications.html" class="nav-link">
+
+                    <span class="nav-icon">
+
+                        <i data-lucide="award" aria-hidden="true"></i>
+
+                    </span>
+
+                    <span>Certifications</span>
+
+                </a>
+
+
+
+                <a href="documents.html" class="nav-link">
+
+                    <span class="nav-icon">
+
+                        <i data-lucide="file-text" aria-hidden="true"></i>
+
+                    </span>
+
+                    <span>Documents</span>
+
+                    <span class="nav-badge">0</span>
+
+                </a>
+
+
+
+            </div>
+
+
+
+            <div class="nav-section">
+
+                <span class="nav-section-title">System</span>
+
+
+
+                <a href="settings.html" class="nav-link active" aria-current="page">
+
+                    <span class="nav-icon">
+
+                        <i data-lucide="settings-2" aria-hidden="true"></i>
+
+                    </span>
+
+                    <span>Settings</span>
+
+                </a>
+
+
+
+                <a href="employer-access.html" class="nav-link">
+
+                    <span class="nav-icon">
+
+                        <i data-lucide="shield-check" aria-hidden="true"></i>
+
+                    </span>
+
+                    <span>Employer Access</span>
+
+                </a>
+
+
+
+            </div>
+
+
+
+        </nav>
+
+
+
+        <div class="sidebar-footer">
+
+
+
+            <div class="admin-user">
+
+                <div class="user-avatar" aria-hidden="true">DN</div>
+
+
+
+                <div class="user-details">
+
+                    <strong>Dennis Ndwigah</strong>
+
+                    <span>Administrator</span>
+
+                </div>
+
+            </div>
+
+
+
+            <button type="button" class="logout-button" id="logoutButton">
+
+                <i data-lucide="log-out" aria-hidden="true"></i>
+
+                <span>Sign out</span>
+
+            </button>
+
+
+
+        </div>
+
+
+
+    </aside>
+
+
+
+    <!-- =========================================
+
+         MAIN
+
+         ========================================= -->
+
+
+
+    <main class="admin-main">
+
+
+
+        <header class="admin-topbar">
+
+
+
+            <button
+
+                type="button"
+
+                class="menu-button"
+
+                id="openSidebar"
+
+                aria-label="Open navigation"
+
+            >
+
+                <i data-lucide="menu" aria-hidden="true"></i>
+
+            </button>
+
+
+
+            <div class="topbar-title">
+
+                <span>Settings</span>
+
+            </div>
+
+
+
+            <div class="topbar-actions">
+
+                <a
+
+                    href="../index.html"
+
+                    class="view-site-button"
+
+                    target="_blank"
+
+                    rel="noopener"
+
+                >
+
+                    <i data-lucide="external-link" aria-hidden="true"></i>
+
+                    <span>View site</span>
+
+                </a>
+
+            </div>
+
+
+
+        </header>
+
+
+
+        <div class="admin-content">
+
+
+
+            <!-- Page heading -->
+
+
+
+            <section class="page-heading compact">
+
+
+
+                <div>
+
+                    <span class="eyebrow">System configuration</span>
+
+
+
+                    <h1>Settings</h1>
+
+
+
+                    <p>
+
+                        Manage portfolio behaviour, visibility, and
+
+                        administrative preferences.
+
+                    </p>
+
+                </div>
+
+
+
+            </section>
+
+
+
+            <!-- =================================
+
+                 PORTFOLIO SETTINGS
+
+                 ================================= -->
+
+
+
+            <form id="settingsForm" class="settings-management" novalidate>
+
+
+
+                <section class="dashboard-card">
+
+
+
+                    <div class="card-header">
+
+                        <h2>Portfolio settings</h2>
+
+                    </div>
+
+
+
+                    <div class="form-grid">
+
+
+
+                        <div class="form-group">
+
+                            <label for="siteTitle">Site title</label>
+
+
+
+                            <input
+
+                                type="text"
+
+                                id="siteTitle"
+
+                                name="siteTitle"
+
+                                value="Dennis Ndwigah | Supply Chain & Operations"
+
+                                maxlength="120"
+
+                            >
+
+                        </div>
+
+
+
+                        <div class="form-group">
+
+                            <label for="siteStatus">Portfolio status</label>
+
+
+
+                            <select id="siteStatus" name="siteStatus">
+
+                                <option value="live" selected>Live</option>
+
+                                <option value="maintenance">Maintenance mode</option>
+
+                                <option value="private">Private</option>
+
+                            </select>
+
+                        </div>
+
+
+
+                        <div class="form-group full-width">
+
+                            <label for="siteDescription">Site description</label>
+
+
+
+                            <textarea
+
+                                id="siteDescription"
+
+                                name="siteDescription"
+
+                                rows="4"
+
+                                maxlength="300"
+
+                            >Supply Chain and Operations professional portfolio for Dennis Ndwigah Njeru.</textarea>
+
+
+
+                            <small>
+
+                                Used as the portfolio description and browser metadata where supported.
+
+                            </small>
+
+                        </div>
+
+
+
+                    </div>
+
+
+
+                </section>
+
+
+
+                <!-- =================================
+
+                     PUBLIC VISIBILITY
+
+                     ================================= -->
+
+
+
+                <section class="dashboard-card">
+
+
+
+                    <div class="card-header">
+
+                        <h2>Public visibility</h2>
+
+                    </div>
+
+
+
+                    <div class="settings-list">
+
+
+
+                        <div class="settings-row">
+
+                            <div class="settings-row-content">
+
+                                <strong>Show professional profile</strong>
+
+                                <span>
+
+                                    Display your profile information on the public portfolio.
+
+                                </span>
+
+                            </div>
+
+
+
+                            <label class="toggle-control">
+
+                                <input
+
+                                    type="checkbox"
+
+                                    id="showProfile"
+
+                                    name="showProfile"
+
+                                    checked
+
+                                >
+
+                                <span class="toggle-slider"></span>
+
+                            </label>
+
+                        </div>
+
+
+
+                        <div class="settings-row">
+
+                            <div class="settings-row-content">
+
+                                <strong>Show experience</strong>
+
+                                <span>
+
+                                    Display your professional experience timeline.
+
+                                </span>
+
+                            </div>
+
+
+
+                            <label class="toggle-control">
+
+                                <input
+
+                                    type="checkbox"
+
+                                    id="showExperience"
+
+                                    name="showExperience"
+
+                                    checked
+
+                                >
+
+                                <span class="toggle-slider"></span>
+
+                            </label>
+
+                        </div>
+
+
+
+                        <div class="settings-row">
+
+                            <div class="settings-row-content">
+
+                                <strong>Show selected work</strong>
+
+                                <span>
+
+                                    Display public projects and case studies.
+
+                                </span>
+
+                            </div>
+
+
+
+                            <label class="toggle-control">
+
+                                <input
+
+                                    type="checkbox"
+
+                                    id="showProjects"
+
+                                    name="showProjects"
+
+                                    checked
+
+                                >
+
+                                <span class="toggle-slider"></span>
+
+                            </label>
+
+                        </div>
+
+
+
+                        <div class="settings-row">
+
+                            <div class="settings-row-content">
+
+                                <strong>Show contact information</strong>
+
+                                <span>
+
+                                    Display approved contact channels on the public site.
+
+                                </span>
+
+                            </div>
+
+
+
+                            <label class="toggle-control">
+
+                                <input
+
+                                    type="checkbox"
+
+                                    id="showContact"
+
+                                    name="showContact"
+
+                                    checked
+
+                                >
+
+                                <span class="toggle-slider"></span>
+
+                            </label>
+
+                        </div>
+
+
+
+                    </div>
+
+
+
+                </section>
+
+
+
+                <!-- =================================
+
+                     ADMIN PREFERENCES
+
+                     ================================= -->
+
+
+
+                <section class="dashboard-card">
+
+
+
+                    <div class="card-header">
+
+                        <h2>Administrative preferences</h2>
+
+                    </div>
+
+
+
+                    <div class="form-grid">
+
+
+
+                        <div class="form-group">
+
+                            <label for="defaultVisibility">Default content visibility</label>
+
+
+
+                            <select
+
+                                id="defaultVisibility"
+
+                                name="defaultVisibility"
+
+                            >
+
+                                <option value="public" selected>Public</option>
+
+                                <option value="employer">Employer only</option>
+
+                                <option value="private">Private</option>
+
+                            </select>
+
+
+
+                            <small>
+
+                                Used when creating new portfolio content.
+
+                            </small>
+
+                        </div>
+
+
+
+                        <div class="form-group">
+
+                            <label for="dateFormat">Date format</label>
+
+
+
+                            <select id="dateFormat" name="dateFormat">
+
+                                <option value="month-year" selected>Month Year</option>
+
+                                <option value="year">Year only</option>
+
+                                <option value="full">Month Year with duration</option>
+
+                            </select>
+
+
+
+                            <small>
+
+                                Controls how experience dates are presented.
+
+                            </small>
+
+                        </div>
+
+
+
+                    </div>
+
+
+
+                </section>
+
+
+
+                <!-- =================================
+
+                     DATA MANAGEMENT
+
+                     ================================= -->
+
+
+
+                <section class="dashboard-card">
+
+
+
+                    <div class="card-header">
+
+                        <h2>Data management</h2>
+
+                    </div>
+
+
+
+                    <div class="settings-list">
+
+
+
+                        <div class="settings-row data-row settings-data-row">
+
+                            <div class="settings-row-content">
+
+                                <strong>Portfolio data</strong>
+
+                                <span>
+
+                                    Portfolio content is currently stored locally in this browser.
+
+                                    Production deployment should use secure server-side storage.
+
+                                </span>
+
+                            </div>
+
+
+
+                            <span class="status-badge data-status-badge">
+
+                                <i data-lucide="database" aria-hidden="true"></i>
+
+                                Local
+
+                            </span>
+
+                        </div>
+
+
+
+                        <div class="settings-row data-row settings-data-row">
+
+                            <div class="settings-row-content">
+
+                                <strong>Authentication</strong>
+
+                                <span>
+
+                                    Administrator authentication will be handled by the backend
+
+                                    when the Django system is connected.
+
+                                </span>
+
+                            </div>
+
+
+
+                            <span class="status-badge data-status-badge">
+
+                                <i data-lucide="lock-keyhole" aria-hidden="true"></i>
+
+                                Backend ready
+
+                            </span>
+
+                        </div>
+
+
+
+                    </div>
+
+
+
+                </section>
+
+
+
+                <!-- Save bar -->
+
+
+
+                <div class="form-actions">
+
+
+
+                    <span
+
+                        class="save-message"
+
+                        id="saveMessage"
+
+                        role="status"
+
+                        aria-live="polite"
+
+                    ></span>
+
+
+
+                    <button
+
+                        type="button"
+
+                        class="secondary-button"
+
+                        id="resetSettings"
+
+                    >
+
+                        <i data-lucide="rotate-ccw" aria-hidden="true"></i>
+
+                        <span>Reset</span>
+
+                    </button>
+
+
+
+                    <button type="submit" class="primary-button">
+
+                        <i data-lucide="check" aria-hidden="true"></i>
+
+                        <span>Save settings</span>
+
+                    </button>
+
+
+
+                </div>
+
+
+
+            </form>
+
+
+
+            <footer class="admin-footer">
+
+
+
+                <span>
+
+                    &copy; <span id="currentYear"></span>
+
+                    Dennis Ndwigah
+
+                </span>
+
+
+
+                <span>Administrator access only</span>
+
+
+
+            </footer>
+
+
+
+        </div>
+
+
+
+    </main>
+
+
 
 </div>
 
+
+
 <script src="https://unpkg.com/lucide@latest"></script>
+<script src="js/auth.js"></script>
+<script src="js/api.js"></script>
+<script src="js/admin.js"></script>
 <script src="js/settings.js"></script>
 
+
+
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
 
-        const yearEl = document.getElementById("currentYear");
+    document.addEventListener("DOMContentLoaded", () => {
 
-        if (yearEl) {
-            yearEl.textContent = new Date().getFullYear();
-        }
 
-        if (!window.lucide) {
-            return;
-        }
 
-        window.lucide.createIcons({
-            attrs: {
-                "stroke-width": 1.8
-            }
-        });
+        const yearEl = document.getElementById("currentYear");
 
-    });
+
+
+        if (yearEl) {
+
+            yearEl.textContent = new Date().getFullYear();
+
+        }
+
+
+
+        if (!window.lucide) {
+
+            return;
+
+        }
+
+
+
+        window.lucide.createIcons({
+
+            attrs: {
+
+                "stroke-width": 1.8
+
+            }
+
+        });
+
+
+
+    });
+
 </script>
 
+
+
 </body>
+
 </html>

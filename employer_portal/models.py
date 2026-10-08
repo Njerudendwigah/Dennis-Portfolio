@@ -38,6 +38,8 @@ from django.utils import timezone
 
 from django.utils.deconstruct import deconstructible
 
+from .portfolio_models import PortfolioContent
+
 ALLOWED_DOCUMENT_EXTENSIONS = frozenset(
 
     {

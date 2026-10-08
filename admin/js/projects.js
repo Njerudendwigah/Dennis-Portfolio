@@ -2,13 +2,10 @@
    PROJECTS MANAGEMENT
    Dennis Ndwigah Portfolio Admin
    ========================================= */
-
 (() => {
     "use strict";
-
     const STORAGE_KEY = "dennis_projects";
     const EVENT_NAME = "portfolioProjectsUpdated";
-
     const DEFAULT_PROJECTS = [
         {
             id: "samaki-mtaani-distribution",
@@ -36,7 +33,6 @@
             visible: true,
             featured: true
         },
-
         {
             id: "kyosk-fulfillment",
             title: "High-Volume FMCG Fulfillment Operations",
@@ -63,7 +59,6 @@
             visible: true,
             featured: true
         },
-
         {
             id: "iprocure-warehouse",
             title: "Warehouse Capacity & Transport Optimization",
@@ -89,7 +84,6 @@
             visible: true,
             featured: false
         },
-
         {
             id: "kuehne-nagel-air-freight",
             title: "Air Freight Export Turnaround Improvement",
@@ -126,10 +120,8 @@
 
     const $$ = (selector, scope = document) =>
         [...scope.querySelectorAll(selector)];
-
     const clean = (value) =>
         String(value ?? "").trim();
-
     const escapeHtml = (value) => {
         return clean(value)
             .replaceAll("&", "&amp;")
@@ -150,23 +142,14 @@
                 `project-${Date.now()}-${Math.random()
                     .toString(36)
                     .slice(2, 8)}`,
-
             title: clean(project?.title),
-
             organization: clean(project?.organization),
-
             category: clean(project?.category),
-
             period: clean(project?.period),
-
             summary: clean(project?.summary),
-
             challenge: clean(project?.challenge),
-
             approach: clean(project?.approach),
-
             results: clean(project?.results),
-
             skills: Array.isArray(project?.skills)
                 ? project.skills
                       .map(clean)
@@ -175,13 +158,9 @@
                       .split(",")
                       .map(clean)
                       .filter(Boolean),
-
             link: clean(project?.link),
-
             image: clean(project?.image),
-
             visible: project?.visible !== false,
-
             featured: project?.featured === true
         };
     }
@@ -192,42 +171,35 @@
 
     function loadProjects() {
         const raw = localStorage.getItem(STORAGE_KEY);
-
         if (!raw) {
             const defaults =
                 DEFAULT_PROJECTS.map(normalizeProject);
-
             localStorage.setItem(
                 STORAGE_KEY,
                 JSON.stringify(defaults)
             );
-
             return defaults;
         }
-
         try {
             const parsed = JSON.parse(raw);
-
             if (!Array.isArray(parsed)) {
                 throw new Error(
                     "Stored projects are not an array."
                 );
             }
-
             return parsed.map(normalizeProject);
         } catch (error) {
             console.error(
                 "Unable to load projects.",
                 error
             );
-
             return DEFAULT_PROJECTS.map(
                 normalizeProject
             );
         }
     }
 
-    let projects = loadProjects();
+    let projects = [];
 
     /* =========================================
        SAVE PROJECTS
@@ -237,12 +209,10 @@
         projects = nextProjects.map(
             normalizeProject
         );
-
         localStorage.setItem(
             STORAGE_KEY,
             JSON.stringify(projects)
         );
-
         window.dispatchEvent(
             new CustomEvent(EVENT_NAME, {
                 detail: projects
@@ -260,26 +230,20 @@
     ) {
         const messageElement =
             $("#projectMessage");
-
         if (!messageElement) {
             return;
         }
-
         messageElement.textContent = message;
-
         messageElement.className =
             `save-message show ${
                 type === "error"
                     ? "error"
                     : ""
             }`;
-
         clearTimeout(showMessage.timer);
-
         showMessage.timer =
             setTimeout(() => {
                 messageElement.textContent = "";
-
                 messageElement.className =
                     "save-message";
             }, 3500);
@@ -294,31 +258,24 @@
             projects.filter(
                 project => project.featured
             ).length;
-
         const publicCount =
             projects.filter(
                 project => project.visible
             ).length;
-
         const projectCount =
             $("#projectCount");
-
         const featuredProjectCount =
             $("#featuredProjectCount");
-
         const publicProjectCount =
             $("#publicProjectCount");
-
         if (projectCount) {
             projectCount.textContent =
                 projects.length;
         }
-
         if (featuredProjectCount) {
             featuredProjectCount.textContent =
                 featuredCount;
         }
-
         if (publicProjectCount) {
             publicProjectCount.textContent =
                 publicCount;
@@ -332,13 +289,10 @@
     function renderProjects() {
         const list =
             $("#projectList");
-
         if (!list) {
             return;
         }
-
         updateCounts();
-
         const orderedProjects =
             [...projects].sort(
                 (a, b) => {
@@ -350,29 +304,23 @@
                             ? -1
                             : 1;
                     }
-
                     return a.title.localeCompare(
                         b.title
                     );
                 }
             );
-
         if (!orderedProjects.length) {
             list.innerHTML = `
                 <div class="empty-state">
-
                     <h3>No projects added</h3>
-
                     <p>
                         Add your first case study
                         or operational project.
                     </p>
                 </div>
             `;
-
             return;
         }
-
         list.innerHTML =
             orderedProjects
                 .map((project, index) => {
@@ -393,7 +341,6 @@
                                         "0"
                                     )}
                                 </span>
-
                                 <div
                                     class="project-statuses"
                                 >
@@ -408,7 +355,6 @@
                                             `
                                             : ""
                                     }
-
                                     ${
                                         project.visible
                                             ? `
@@ -428,7 +374,6 @@
                                     }
                                 </div>
                             </div>
-
                             <div
                                 class="project-card-content"
                             >
@@ -445,13 +390,11 @@
                                         `
                                         : ""
                                 }
-
                                 <h3>
                                     ${escapeHtml(
                                         project.title
                                     )}
                                 </h3>
-
                                 ${
                                     project.organization
                                         ? `
@@ -465,7 +408,6 @@
                                         `
                                         : ""
                                 }
-
                                 ${
                                     project.period
                                         ? `
@@ -479,7 +421,6 @@
                                         `
                                         : ""
                                 }
-
                                 ${
                                     project.summary
                                         ? `
@@ -493,14 +434,12 @@
                                         `
                                         : ""
                                 }
-
                                 <div
                                     class="project-result"
                                 >
                                     <strong>
                                         Result
                                     </strong>
-
                                     <span>
                                         ${
                                             escapeHtml(
@@ -510,7 +449,6 @@
                                         }
                                     </span>
                                 </div>
-
                                 ${
                                     project.skills.length
                                         ? `
@@ -535,7 +473,6 @@
                                                     .join(
                                                         ""
                                                     )}
-
                                                 ${
                                                     project
                                                         .skills
@@ -560,7 +497,6 @@
                                         : ""
                                 }
                             </div>
-
                             <div
                                 class="project-card-actions"
                             >
@@ -574,7 +510,6 @@
                                 >
                                     Edit
                                 </button>
-
                                 <button
                                     type="button"
                                     class="danger-button"
@@ -602,7 +537,6 @@
     ) {
         const field =
             document.getElementById(id);
-
         if (field) {
             field.value = value ?? "";
         }
@@ -611,35 +545,26 @@
     function resetForm() {
         const form =
             $("#projectForm");
-
         if (!form) {
             return;
         }
-
         form.reset();
-
         setField(
             "projectId",
             ""
         );
-
         const visible =
             $("#visible");
-
         const featured =
             $("#featured");
-
         if (visible) {
             visible.checked = true;
         }
-
         if (featured) {
             featured.checked = false;
         }
-
         const editorTitle =
             $("#editorTitle");
-
         if (editorTitle) {
             editorTitle.textContent =
                 "Add a project";
@@ -655,98 +580,77 @@
             projects.find(
                 item => item.id === id
             );
-
         if (!project) {
             return;
         }
-
         setField(
             "projectId",
             project.id
         );
-
         setField(
             "projectTitle",
             project.title
         );
-
         setField(
             "organization",
             project.organization
         );
-
         setField(
             "category",
             project.category
         );
-
         setField(
             "period",
             project.period
         );
-
         setField(
             "summary",
             project.summary
         );
-
         setField(
             "challenge",
             project.challenge
         );
-
         setField(
             "approach",
             project.approach
         );
-
         setField(
             "results",
             project.results
         );
-
         setField(
             "skills",
             project.skills.join(", ")
         );
-
         setField(
             "projectLink",
             project.link
         );
-
         setField(
             "projectImage",
             project.image
         );
-
         const visible =
             $("#visible");
-
         const featured =
             $("#featured");
-
         if (visible) {
             visible.checked =
                 project.visible;
         }
-
         if (featured) {
             featured.checked =
                 project.featured;
         }
-
         const editorTitle =
             $("#editorTitle");
-
         if (editorTitle) {
             editorTitle.textContent =
                 "Edit project";
         }
-
         const editor =
             $("#projectEditor");
-
         if (editor) {
             editor.scrollIntoView({
                 behavior: "smooth",
@@ -765,28 +669,22 @@
         if (!project.title) {
             return "Project title is required.";
         }
-
         if (!project.organization) {
             return "Organization is required.";
         }
-
         if (!project.category) {
             return "Project category is required.";
         }
-
         if (!project.summary) {
             return "Project summary is required.";
         }
-
         if (!project.results) {
             return "Project results are required.";
         }
-
         if (project.link) {
             try {
                 const url =
                     new URL(project.link);
-
                 if (
                     ![
                         "http:",
@@ -805,7 +703,6 @@
                 );
             }
         }
-
         return "";
     }
 
@@ -815,85 +712,66 @@
 
     function saveProject(event) {
         event.preventDefault();
-
         const project = {
             id: clean(
                 $("#projectId")?.value
             ),
-
             title: clean(
                 $("#projectTitle")?.value
             ),
-
             organization: clean(
                 $("#organization")?.value
             ),
-
             category: clean(
                 $("#category")?.value
             ),
-
             period: clean(
                 $("#period")?.value
             ),
-
             summary: clean(
                 $("#summary")?.value
             ),
-
             challenge: clean(
                 $("#challenge")?.value
             ),
-
             approach: clean(
                 $("#approach")?.value
             ),
-
             results: clean(
                 $("#results")?.value
             ),
-
             skills: clean(
                 $("#skills")?.value
             )
                 .split(",")
                 .map(clean)
                 .filter(Boolean),
-
             link: clean(
                 $("#projectLink")?.value
             ),
-
             image: clean(
                 $("#projectImage")?.value
             ),
-
             visible:
                 $("#visible")?.checked !==
                 false,
-
             featured:
                 $("#featured")?.checked ===
                 true
         };
-
         const validationError =
             validateProject(project);
-
         if (validationError) {
             showMessage(
                 validationError,
                 "error"
             );
-
             return;
         }
-
         const normalized =
             normalizeProject(
                 project
             );
-
         if (project.id) {
             projects =
                 projects.map(
@@ -909,13 +787,9 @@
                 normalized
             ];
         }
-
         commitProjects(projects);
-
         renderProjects();
-
         resetForm();
-
         showMessage(
             "Project saved successfully."
         );
@@ -930,30 +804,23 @@
             projects.find(
                 item => item.id === id
             );
-
         if (!project) {
             return;
         }
-
         const confirmed =
             window.confirm(
                 `Delete "${project.title}" at ${project.organization}? This cannot be undone from the Admin interface.`
             );
-
         if (!confirmed) {
             return;
         }
-
         commitProjects(
             projects.filter(
                 item => item.id !== id
             )
         );
-
         renderProjects();
-
         resetForm();
-
         showMessage(
             "Project deleted."
         );
@@ -966,49 +833,39 @@
     function initializeSidebar() {
         const sidebar =
             $("#adminSidebar");
-
         const overlay =
             $("#sidebarOverlay");
-
         const openButton =
             $("#openSidebar");
-
         const closeButton =
             $("#closeSidebar");
-
-        function closeNavigation() {
+    function closeNavigation() {
             sidebar?.classList.remove(
                 "open"
             );
-
             overlay?.classList.remove(
                 "active"
             );
         }
-
         openButton?.addEventListener(
             "click",
             () => {
                 sidebar?.classList.add(
                     "open"
                 );
-
                 overlay?.classList.add(
                     "active"
                 );
             }
         );
-
         closeButton?.addEventListener(
             "click",
             closeNavigation
         );
-
         overlay?.addEventListener(
             "click",
             closeNavigation
         );
-
         $$(".nav-link").forEach(
             link => {
                 link.addEventListener(
@@ -1024,8 +881,7 @@
                 );
             }
         );
-
-        document.addEventListener(
+    document.addEventListener(
             "keydown",
             event => {
                 if (
@@ -1042,44 +898,59 @@
        INITIALIZE
        ========================================= */
 
-    function initialize() {
+    async function initialize() {
+        try {
+            if (!window.portfolioApi?.ready) {
+                throw new Error("The portfolio API is unavailable.");
+            }
+            const ready = await window.portfolioApi.ready;
+            if (!ready) {
+                return;
+            }
+        } catch (error) {
+            console.error(
+                "Unable to load projects from the server.",
+                error
+            );
+            window.dispatchEvent(
+                new CustomEvent("portfolioDataLoadError", {
+                    detail: {
+                        section: "projects",
+                        message: "Unable to load saved projects. Please refresh and try again."
+                    }
+                })
+            );
+            return;
+        }
+        projects = loadProjects();
         const currentYear =
             $("#currentYear");
-
         if (currentYear) {
             currentYear.textContent =
                 new Date().getFullYear();
         }
-
         initializeSidebar();
-
         $("#projectForm")?.addEventListener(
             "submit",
             saveProject
         );
-
         $("#cancelEdit")?.addEventListener(
             "click",
             resetForm
         );
-
         $("#addProjectButton")?.addEventListener(
             "click",
             () => {
                 resetForm();
-
                 const editor =
                     $("#projectEditor");
-
                 editor?.scrollIntoView({
                     behavior: "smooth",
                     block: "start"
                 });
-
                 $("#projectTitle")?.focus();
             }
         );
-
         $("#projectList")?.addEventListener(
             "click",
             event => {
@@ -1087,24 +958,19 @@
                     event.target.closest(
                         "button[data-action]"
                     );
-
                 if (!button) {
                     return;
                 }
-
                 const action =
                     button.dataset.action;
-
                 const id =
                     button.dataset.id;
-
                 if (
                     action ===
                     "edit"
                 ) {
                     editProject(id);
                 }
-
                 if (
                     action ===
                     "delete"
@@ -1113,7 +979,6 @@
                 }
             }
         );
-
         $("#resetProjects")?.addEventListener(
             "click",
             () => {
@@ -1121,29 +986,22 @@
                     window.confirm(
                         "Restore the original project records? This will replace your current project data."
                     );
-
                 if (!confirmed) {
                     return;
                 }
-
                 commitProjects(
                     DEFAULT_PROJECTS
                 );
-
                 renderProjects();
-
                 resetForm();
-
                 showMessage(
                     "Default projects restored."
                 );
             }
         );
-
         /* =====================================
            SYNC WITH OTHER TABS
            ===================================== */
-
         window.addEventListener(
             "storage",
             event => {
@@ -1153,16 +1011,25 @@
                 ) {
                     projects =
                         loadProjects();
-
                     renderProjects();
                 }
             }
         );
-
+        window.addEventListener(
+            "portfolioSaveError",
+            event => {
+                if (event.detail?.section === "projects") {
+                    showMessage(
+                        event.detail.message ||
+                            "The project change could not be saved to the server.",
+                        "error"
+                    );
+                }
+            }
+        );
         /* =====================================
            LOGOUT
            ===================================== */
-
         $("#logoutButton")?.addEventListener(
             "click",
             () => {
@@ -1170,16 +1037,13 @@
                     window.confirm(
                         "Are you sure you want to sign out?"
                     );
-
                 if (!confirmed) {
                     return;
                 }
-
                 window.location.href =
                     "login.html";
             }
         );
-
         renderProjects();
     }
 
