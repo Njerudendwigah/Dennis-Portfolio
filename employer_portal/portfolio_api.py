@@ -5,12 +5,14 @@ import json
 import secrets
 from datetime import timedelta
 from functools import wraps
+from typing import Any, Callable
 
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model
 from django.core import signing
-from django.http import JsonResponse
+from django.http import HttpRequest, JsonResponse
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from .portfolio_models import PortfolioContent, PortfolioSession
@@ -31,13 +33,10 @@ MAX_PORTFOLIO_PAYLOAD_BYTES = 1_000_000
 TOKEN_SALT = "portfolio-api"
 
 
-def _cors_headers(request):
+def _cors_headers(request: HttpRequest) -> dict[str, str]:
+    """Return CORS headers only for the configured admin frontend origin."""
     origin = request.headers.get("Origin", "")
-    allowed = getattr(
-        settings,
-        "PORTFOLIO_ADMIN_ORIGIN",
-        "",
-    ).rstrip("/")
+    allowed = getattr(settings, "PORTFOLIO_ADMIN_ORIGIN", "").rstrip("/")
 
     if not origin or origin.rstrip("/") != allowed:
         return {}
@@ -50,7 +49,12 @@ def _cors_headers(request):
     }
 
 
-def _json_response(request, data, status=200):
+def _json_response(
+    request: HttpRequest,
+    data: Any,
+    status: int = 200,
+) -> JsonResponse:
+    """Return a no-cache JSON response with origin-checked CORS headers."""
     response = JsonResponse(
         data,
         status=status,
@@ -62,19 +66,16 @@ def _json_response(request, data, status=200):
 
     response["Cache-Control"] = "no-store"
     response["Pragma"] = "no-cache"
-
     return response
 
 
-def _token_hash(token):
-    return hashlib.sha256(
-        token.encode("utf-8")
-    ).hexdigest()
+def _token_hash(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
 
-def _token_for_user(user):
+def _token_for_user(user: Any) -> str:
+    """Create a signed bearer token and store its revocable session record."""
     session_id = secrets.token_urlsafe(32)
-
     payload = json.dumps(
         {
             "user_id": user.pk,
@@ -83,10 +84,7 @@ def _token_for_user(user):
         }
     )
 
-    token = signing.TimestampSigner(
-        salt=TOKEN_SALT
-    ).sign(payload)
-
+    token = signing.TimestampSigner(salt=TOKEN_SALT).sign(payload)
     expires_at = timezone.now() + timedelta(
         seconds=settings.PORTFOLIO_API_TOKEN_MAX_AGE
     )
@@ -97,38 +95,28 @@ def _token_for_user(user):
         token_hash=_token_hash(token),
         expires_at=expires_at,
     )
-
     return token
 
 
-def _user_from_token(request):
-    authorization = request.headers.get(
-        "Authorization",
-        "",
-    )
-
+def _user_from_token(request: HttpRequest) -> Any | None:
+    """Resolve a valid, unexpired, non-revoked staff bearer token."""
+    authorization = request.headers.get("Authorization", "")
     if not authorization.startswith("Bearer "):
         return None
 
     token = authorization[7:].strip()
-
     if not token:
         return None
 
     try:
-        payload = signing.TimestampSigner(
-            salt=TOKEN_SALT
-        ).unsign(
+        payload = signing.TimestampSigner(salt=TOKEN_SALT).unsign(
             token,
             max_age=settings.PORTFOLIO_API_TOKEN_MAX_AGE,
         )
-
         data = json.loads(payload)
-
         user_id = int(data["user_id"])
         session_id = str(data["session_id"])
         username = str(data["username"])
-
     except (
         ValueError,
         TypeError,
@@ -139,8 +127,7 @@ def _user_from_token(request):
         return None
 
     session = (
-        PortfolioSession.objects
-        .select_related("user")
+        PortfolioSession.objects.select_related("user")
         .filter(
             session_id=session_id,
             token_hash=_token_hash(token),
@@ -155,49 +142,39 @@ def _user_from_token(request):
         return None
 
     user = session.user
-
     if not user.is_active or not user.is_staff:
         return None
-
     if username != user.get_username():
         return None
 
     return user
 
 
-def _revoke_token(request):
-    authorization = request.headers.get(
-        "Authorization",
-        "",
-    )
-
+def _revoke_token(request: HttpRequest) -> None:
+    """Revoke the bearer token in the Authorization header, if present."""
+    authorization = request.headers.get("Authorization", "")
     if not authorization.startswith("Bearer "):
         return
 
     token = authorization[7:].strip()
-
     if not token:
         return
 
     PortfolioSession.objects.filter(
         token_hash=_token_hash(token),
         revoked_at__isnull=True,
-    ).update(
-        revoked_at=timezone.now()
-    )
+    ).update(revoked_at=timezone.now())
 
 
-def staff_api_required(view_func):
+def staff_api_required(view_func: Callable) -> Callable:
+    """Require a valid bearer token belonging to an active staff user."""
+
     @wraps(view_func)
-    def wrapped(request, *args, **kwargs):
+    def wrapped(request: HttpRequest, *args: Any, **kwargs: Any):
         if request.method == "OPTIONS":
-            return _json_response(
-                request,
-                {"ok": True},
-            )
+            return _json_response(request, {"ok": True})
 
         user = _user_from_token(request)
-
         if user is None:
             return _json_response(
                 request,
@@ -206,68 +183,55 @@ def staff_api_required(view_func):
             )
 
         request.portfolio_user = user
-
-        return view_func(
-            request,
-            *args,
-            **kwargs,
-        )
+        return view_func(request, *args, **kwargs)
 
     return wrapped
 
 
+@csrf_exempt
 @require_http_methods(["OPTIONS", "POST"])
-def login(request):
+def login(request: HttpRequest) -> JsonResponse:
+    """Authenticate a staff user and issue a revocable bearer token.
+
+    This endpoint uses JSON credentials rather than Django session cookies.
+    CSRF is therefore exempted for this API view only; global CSRF middleware
+    remains enabled for the rest of the application.
+    """
     if request.method == "OPTIONS":
-        return _json_response(
-            request,
-            {"ok": True},
-        )
+        return _json_response(request, {"ok": True})
 
     try:
-        body = json.loads(
-            request.body or "{}"
-        )
-    except json.JSONDecodeError:
+        body = json.loads(request.body or b"{}")
+    except (json.JSONDecodeError, UnicodeDecodeError):
         return _json_response(
             request,
             {"detail": "Invalid JSON."},
             status=400,
         )
 
-    email = str(
-        body.get("email", "")
-    ).strip()
+    if not isinstance(body, dict):
+        return _json_response(
+            request,
+            {"detail": "The request body must be a JSON object."},
+            status=400,
+        )
 
-    password = str(
-        body.get("password", "")
-    )
+    email = str(body.get("email", "")).strip()
+    password = str(body.get("password", ""))
 
     if not email or not password:
         return _json_response(
             request,
-            {
-                "detail": (
-                    "Email and password are required."
-                )
-            },
+            {"detail": "Email and password are required."},
             status=400,
         )
 
-    user = authenticate(
-        request,
-        username=email,
-        password=password,
-    )
+    user = authenticate(request, username=email, password=password)
 
     if user is None:
         candidate = (
-            get_user_model()
-            .objects
-            .filter(email__iexact=email)
-            .first()
+            get_user_model().objects.filter(email__iexact=email).first()
         )
-
         if candidate is not None:
             user = authenticate(
                 request,
@@ -275,11 +239,7 @@ def login(request):
                 password=password,
             )
 
-    if (
-        user is None
-        or not user.is_active
-        or not user.is_staff
-    ):
+    if user is None or not user.is_active or not user.is_staff:
         return _json_response(
             request,
             {"detail": "Invalid staff credentials."},
@@ -287,7 +247,6 @@ def login(request):
         )
 
     token = _token_for_user(user)
-
     return _json_response(
         request,
         {
@@ -302,33 +261,24 @@ def login(request):
     )
 
 
+@csrf_exempt
 @require_http_methods(["OPTIONS", "POST"])
-def logout(request):
+def logout(request: HttpRequest) -> JsonResponse:
+    """Revoke a presented bearer token and clear the client session."""
     if request.method == "OPTIONS":
-        return _json_response(
-            request,
-            {"ok": True},
-        )
+        return _json_response(request, {"ok": True})
 
     _revoke_token(request)
-
-    return _json_response(
-        request,
-        {"authenticated": False},
-    )
+    return _json_response(request, {"authenticated": False})
 
 
+@csrf_exempt
 @require_http_methods(["OPTIONS", "GET"])
 @staff_api_required
-def data(request):
-    records = PortfolioContent.objects.filter(
-        key__in=ALLOWED_KEYS
-    )
-
-    sections = {
-        record.key: record.data
-        for record in records
-    }
+def data(request: HttpRequest) -> JsonResponse:
+    """Return all stored portfolio sections allowed by this API."""
+    records = PortfolioContent.objects.filter(key__in=ALLOWED_KEYS)
+    sections = {record.key: record.data for record in records}
 
     return _json_response(
         request,
@@ -339,9 +289,11 @@ def data(request):
     )
 
 
+@csrf_exempt
 @require_http_methods(["OPTIONS", "PUT"])
 @staff_api_required
-def section(request, key):
+def section(request: HttpRequest, key: str) -> JsonResponse:
+    """Create or update one allowed portfolio section."""
     if key not in ALLOWED_KEYS:
         return _json_response(
             request,
@@ -357,10 +309,8 @@ def section(request, key):
         )
 
     try:
-        body = json.loads(
-            request.body or "{}"
-        )
-    except json.JSONDecodeError:
+        body = json.loads(request.body or b"{}")
+    except (json.JSONDecodeError, UnicodeDecodeError):
         return _json_response(
             request,
             {"detail": "Invalid JSON."},
@@ -372,33 +322,22 @@ def section(request, key):
             request,
             {
                 "detail": (
-                    "Portfolio data must be a JSON "
-                    "object or array."
+                    "Portfolio data must be a JSON object or array."
                 )
             },
             status=400,
         )
 
-    record, _ = PortfolioContent.objects.get_or_create(
+    record, created = PortfolioContent.objects.update_or_create(
         key=key,
-        defaults={"data": {}},
-    )
-
-    record.data = body
-    record.updated_by = request.portfolio_user
-
-    record.save(
-        update_fields=[
-            "data",
-            "updated_by",
-            "updated_at",
-        ]
+        defaults={"data": body},
     )
 
     return _json_response(
         request,
         {
+            "saved": True,
             "key": record.key,
-            "data": record.data,
+            "created": created,
         },
     )
