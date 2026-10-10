@@ -4,17 +4,17 @@
 
 <head>
 
-    <meta charset="UTF-8">
+    <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta name="description" content="Manage Dennis Ndwigah professional experience.">
+    <meta name="description" content="Manage Dennis Ndwigah professional experience.">
 
-    <title>Experience | Dennis Ndwigah Portfolio Admin</title>
+    <title>Experience | Dennis Ndwigah Portfolio Admin</title>
 
-    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/admin.css">
 
-    <link rel="stylesheet" href="css/experience.css">
+    <link rel="stylesheet" href="css/experience.css">
 
 </head>
 
@@ -26,11 +26,11 @@
 
 
 
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
 
 
-    <aside class="admin-sidebar" id="adminSidebar">
+    <aside class="admin-sidebar" id="adminSidebar">
 
             <div class="sidebar-header">
 
@@ -234,257 +234,257 @@
 
 
 
-    <main class="admin-main">
+    <main class="admin-main">
 
-        <header class="admin-topbar">
+        <header class="admin-topbar">
 
-            <button type="button" class="menu-button" id="openSidebar" aria-label="Open navigation">☰</button>
+            <button type="button" class="menu-button" id="openSidebar" aria-label="Open navigation">☰</button>
 
-            <div class="topbar-title">Experience Management</div>
+            <div class="topbar-title">Experience Management</div>
 
-            <div class="topbar-actions">
+            <div class="topbar-actions">
 
-                <a href="../index.html" class="view-site-button" target="_blank" rel="noopener">View site ↗</a>
+                <a href="../index.html" class="view-site-button" target="_blank" rel="noopener">View site ↗</a>
 
-                <div class="topbar-avatar">DN</div>
+                <div class="topbar-avatar">DN</div>
 
-            </div>
+            </div>
 
-        </header>
+        </header>
 
 
 
-        <div class="admin-content">
+        <div class="admin-content">
 
-            <section class="page-heading">
+            <section class="page-heading">
 
-                <div>
+                <div>
 
-                    <span class="eyebrow">CAREER HISTORY</span>
+                    <span class="eyebrow">CAREER HISTORY</span>
 
-                    <h1>Professional Experience</h1>
+                    <h1>Professional Experience</h1>
 
-                    <p>Manage the positions, achievements and career evidence displayed on your public portfolio.</p>
+                    <p>Manage the positions, achievements and career evidence displayed on your public portfolio.</p>
 
-                </div>
+                </div>
 
-                <button type="button" class="primary-button" id="addExperienceButton">+ Add position</button>
+                <button type="button" class="primary-button" id="addExperienceButton">+ Add position</button>
 
-            </section>
+            </section>
 
 
 
-            <div class="experience-toolbar">
+            <div class="experience-toolbar">
 
-                <div class="experience-summary-stats" aria-live="polite">
+                <div class="experience-summary-stats" aria-live="polite">
 
-                    <div class="experience-stat">
+                    <div class="experience-stat">
 
-                        <strong id="experienceCount">0</strong>
+                        <strong id="experienceCount">0</strong>
 
-                        <span>Professional positions</span>
+                        <span>Professional positions</span>
 
-                    </div>
+                    </div>
 
-                    <div class="experience-stat-divider" aria-hidden="true"></div>
+                    <div class="experience-stat-divider" aria-hidden="true"></div>
 
-                    <div class="experience-stat secondary">
+                    <div class="experience-stat secondary">
 
-                        <strong id="currentExperienceCount">0</strong>
+                        <strong id="currentExperienceCount">0</strong>
 
-                        <span>Current</span>
+                        <span>Current</span>
 
-                    </div>
+                    </div>
 
-                    <div class="experience-stat secondary">
+                    <div class="experience-stat secondary">
 
-                        <strong id="previousExperienceCount">0</strong>
+                        <strong id="previousExperienceCount">0</strong>
 
-                        <span>Previous</span>
+                        <span>Previous</span>
 
-                    </div>
+                    </div>
 
-                </div>
+                </div>
 
-                <button type="button" class="secondary-button" id="resetExperience">Restore default data</button>
+                <button type="button" class="secondary-button" id="resetExperience">Restore default data</button>
 
-            </div>
+            </div>
 
 
 
-            <section class="admin-card experience-manager" aria-labelledby="careerJourneyTitle">
+            <section class="admin-card experience-manager" aria-labelledby="careerJourneyTitle">
 
-                <div class="section-heading">
+                <div class="section-heading">
 
-                    <div>
+                    <div>
 
-                        <span class="eyebrow">POSITIONS</span>
+                        <span class="eyebrow">POSITIONS</span>
 
-                        <h2 id="careerJourneyTitle">Your career journey</h2>
+                        <h2 id="careerJourneyTitle">Your career journey</h2>
 
-                    </div>
+                    </div>
 
-                </div>
+                </div>
 
-                <div id="experienceList" class="experience-list"></div>
+                <div id="experienceList" class="experience-list"></div>
 
-            </section>
+            </section>
 
 
 
-            <section class="admin-card experience-editor" id="experienceEditor" aria-labelledby="editorTitle">
+            <section class="admin-card experience-editor" id="experienceEditor" aria-labelledby="editorTitle">
 
-                <div class="section-heading">
+                <div class="section-heading">
 
-                    <div>
+                    <div>
 
-                        <span class="eyebrow">EDITOR</span>
+                        <span class="eyebrow">EDITOR</span>
 
-                        <h2 id="editorTitle">Add a position</h2>
+                        <h2 id="editorTitle">Add a position</h2>
 
-                    </div>
+                    </div>
 
-                </div>
+                </div>
 
 
 
-                <form id="experienceForm" novalidate>
+                <form id="experienceForm" novalidate>
 
-                    <input type="hidden" id="experienceId" name="experienceId">
+                    <input type="hidden" id="experienceId" name="experienceId">
 
 
 
-                    <div class="form-grid">
+                    <div class="form-grid">
 
-                        <div class="form-group">
+                        <div class="form-group">
 
-                            <label for="jobTitle">Job title <span>\*</span></label>
+                            <label for="jobTitle">Job title <span>\*</span></label>
 
-                            <input type="text" id="jobTitle" name="jobTitle" maxlength="140" required placeholder="e.g. Supply Chain Manager">
+                            <input type="text" id="jobTitle" name="jobTitle" maxlength="140" required placeholder="e.g. Supply Chain Manager">
 
-                        </div>
+                        </div>
 
 
 
-                        <div class="form-group">
+                        <div class="form-group">
 
-                            <label for="company">Company / Organisation <span>\*</span></label>
+                            <label for="company">Company / Organisation <span>\*</span></label>
 
-                            <input type="text" id="company" name="company" maxlength="140" required placeholder="e.g. Kyosk Digital Services">
+                            <input type="text" id="company" name="company" maxlength="140" required placeholder="e.g. Kyosk Digital Services">
 
-                        </div>
+                        </div>
 
 
 
-                        <div class="form-group">
+                        <div class="form-group">
 
-                            <label for="startDate">Start date <span>\*</span></label>
+                            <label for="startDate">Start date <span>\*</span></label>
 
-                            <input type="text" id="startDate" name="startDate" inputmode="text" maxlength="20" required placeholder="e.g. Jan 2026">
+                            <input type="text" id="startDate" name="startDate" inputmode="text" maxlength="20" required placeholder="e.g. Jan 2026">
 
-                            <small>Use Month Year format.</small>
+                            <small>Use Month Year format.</small>
 
-                        </div>
+                        </div>
 
 
 
-                        <div class="form-group">
+                        <div class="form-group">
 
-                            <label for="endDate">End date</label>
+                            <label for="endDate">End date</label>
 
-                            <input type="text" id="endDate" name="endDate" inputmode="text" maxlength="20" placeholder="Leave blank for current role">
+                            <input type="text" id="endDate" name="endDate" inputmode="text" maxlength="20" placeholder="Leave blank for current role">
 
-                            <div class="current-role-preview" id="currentRolePreview"></div>
+                            <div class="current-role-preview" id="currentRolePreview"></div>
 
-                        </div>
+                        </div>
 
 
 
-                        <div class="form-group">
+                        <div class="form-group">
 
-                            <label for="workLocation">Location</label>
+                            <label for="workLocation">Location</label>
 
-                            <input type="text" id="workLocation" name="workLocation" maxlength="120" placeholder="e.g. Nairobi, Kenya">
+                            <input type="text" id="workLocation" name="workLocation" maxlength="120" placeholder="e.g. Nairobi, Kenya">
 
-                        </div>
+                        </div>
 
 
 
-                        <div class="form-group option-panel">
+                        <div class="form-group option-panel">
 
-                            <label>Publishing</label>
+                            <label>Publishing</label>
 
-                            <label class="checkbox-row">
+                            <label class="checkbox-row">
 
-                                <input type="checkbox" id="visible" name="visible" checked>
+                                <input type="checkbox" id="visible" name="visible" checked>
 
-                                <span>Show on public website</span>
+                                <span>Show on public website</span>
 
-                            </label>
+                            </label>
 
-                            <label class="checkbox-row">
+                            <label class="checkbox-row">
 
-                                <input type="checkbox" id="featured" name="featured">
+                                <input type="checkbox" id="featured" name="featured">
 
-                                <span>Mark as featured</span>
+                                <span>Mark as featured</span>
 
-                            </label>
+                            </label>
 
-                        </div>
+                        </div>
 
-                    </div>
+                    </div>
 
 
 
-                    <div class="form-group">
+                    <div class="form-group">
 
-                        <label for="description">Role summary</label>
+                        <label for="description">Role summary</label>
 
-                        <textarea id="description" name="description" rows="4" maxlength="700" placeholder="Briefly describe the scope of this role."></textarea>
+                        <textarea id="description" name="description" rows="4" maxlength="700" placeholder="Briefly describe the scope of this role."></textarea>
 
-                    </div>
+                    </div>
 
 
 
-                    <div class="form-group">
+                    <div class="form-group">
 
-                        <label for="achievements">Key achievements</label>
+                        <label for="achievements">Key achievements</label>
 
-                        <textarea id="achievements" name="achievements" rows="8" maxlength="3500" placeholder="One achievement per line. Use measurable results where possible."></textarea>
+                        <textarea id="achievements" name="achievements" rows="8" maxlength="3500" placeholder="One achievement per line. Use measurable results where possible."></textarea>
 
-                        <small>One achievement per line. Quantified results are especially useful to recruiters.</small>
+                        <small>One achievement per line. Quantified results are especially useful to recruiters.</small>
 
-                    </div>
+                    </div>
 
 
 
-                    <div class="form-actions">
+                    <div class="form-actions">
 
-                        <span class="save-message" id="experienceMessage" role="status" aria-live="polite"></span>
+                        <span class="save-message" id="experienceMessage" role="status" aria-live="polite"></span>
 
-                        <button type="button" class="secondary-button" id="cancelEdit">Clear</button>
+                        <button type="button" class="secondary-button" id="cancelEdit">Clear</button>
 
-                        <button type="submit" class="primary-button">Save position</button>
+                        <button type="submit" class="primary-button">Save position</button>
 
-                    </div>
+                    </div>
 
-                </form>
+                </form>
 
-            </section>
+            </section>
 
 
 
-            <footer class="admin-footer">
+            <footer class="admin-footer">
 
-                <span>© <span id="currentYear"></span> Dennis Ndwigah</span>
+                <span>© <span id="currentYear"></span> Dennis Ndwigah</span>
 
-                <span>Portfolio Administration</span>
+                <span>Portfolio Administration</span>
 
-            </footer>
+            </footer>
 
-        </div>
+        </div>
 
-    </main>
+    </main>
 
 </div>
 

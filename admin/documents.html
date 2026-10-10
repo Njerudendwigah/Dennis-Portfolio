@@ -4,19 +4,19 @@
 
 <head>
 
-    <meta charset="UTF-8">
+    <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
-
-    <title>Documents | Dennis Portfolio Admin</title>
-
-    <meta name="description" content="Manage professional documents and employer access.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
 
-    <link rel="stylesheet" href="css/admin.css">
+    <title>Documents | Dennis Portfolio Admin</title>
+
+    <meta name="description" content="Manage professional documents and employer access.">
+
+
+
+    <link rel="stylesheet" href="css/admin.css">
 
 </head>
 
@@ -34,7 +34,7 @@
 
 
 
-    <aside class="admin-sidebar" id="adminSidebar">
+    <aside class="admin-sidebar" id="adminSidebar">
 
             <div class="sidebar-header">
 
@@ -238,259 +238,259 @@
 
 
 
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
 
 
-    <main class="admin-main" id="mainContent" tabindex="-1">
+    <main class="admin-main" id="mainContent" tabindex="-1">
 
 
 
-        <header class="admin-topbar">
+        <header class="admin-topbar">
 
 
 
-            <button
+            <button
 
-                type="button"
+                type="button"
 
-                class="menu-button"
+                class="menu-button"
 
-                id="openSidebar"
+                id="openSidebar"
 
-                aria-label="Open navigation"
+                aria-label="Open navigation"
 
-            >
+            >
 
-                <i data-lucide="menu"></i>
+                <i data-lucide="menu"></i>
 
-            </button>
+            </button>
 
 
 
-            <div class="topbar-title">Documents</div>
+            <div class="topbar-title">Documents</div>
 
 
 
-            <div class="topbar-actions">
+            <div class="topbar-actions">
 
-                <a
+                <a
 
-                    href="../index.html"
+                    href="../index.html"
 
-                    class="view-site-button"
+                    class="view-site-button"
 
-                    target="_blank"
+                    target="_blank"
 
-                    rel="noopener"
+                    rel="noopener"
 
-                >
+                >
 
-                    <i data-lucide="external-link"></i>
+                    <i data-lucide="external-link"></i>
 
-                    <span>View site</span>
+                    <span>View site</span>
 
-                </a>
+                </a>
 
-            </div>
+            </div>
 
 
 
-        </header>
+        </header>
 
 
 
-        <div class="admin-content">
+        <div class="admin-content">
 
 
 
-            <section class="page-heading">
+            <section class="page-heading">
 
 
 
-                <div>
+                <div>
 
-                    <span class="eyebrow">CREDENTIALS</span>
+                    <span class="eyebrow">CREDENTIALS</span>
 
 
 
-                    <h1>Documents</h1>
+                    <h1>Documents</h1>
 
 
 
-                    <p>
+                    <p>
 
-                        Upload and manage professional documents and control how employers can access them.
+                        Upload and manage professional documents and control how employers can access them.
 
-                    </p>
+                    </p>
 
-                </div>
+                </div>
 
 
 
-                <div class="page-heading-actions">
+                <div class="page-heading-actions">
 
 
 
-                    <button
+                    <button
 
-                        type="button"
+                        type="button"
 
-                        class="primary-button"
+                        class="primary-button"
 
-                        onclick="openDocumentForm()"
+                        onclick="openDocumentForm()"
 
-                    >
+                    >
 
-                        <i data-lucide="file-plus-2"></i>
+                        <i data-lucide="file-plus-2"></i>
 
-                        <span>Add document</span>
+                        <span>Add document</span>
 
-                    </button>
+                    </button>
 
 
 
-                </div>
+                </div>
 
 
 
-            </section>
+            </section>
 
 
 
-            <section
+            <section
 
-                class="employer-access-notice"
+                class="employer-access-notice"
 
-                aria-labelledby="securityNoticeTitle"
+                aria-labelledby="securityNoticeTitle"
 
-            >
+            >
 
 
 
-                <div class="notice-icon">
+                <div class="notice-icon">
 
-                    <i data-lucide="shield-check"></i>
+                    <i data-lucide="shield-check"></i>
 
-                </div>
+                </div>
 
 
 
-                <div>
+                <div>
 
-                    <strong id="securityNoticeTitle">
+                    <strong id="securityNoticeTitle">
 
-                        Controlled document access
+                        Controlled document access
 
-                    </strong>
+                    </strong>
 
 
 
-                    <p>
+                    <p>
 
-                        Public documents can be linked from the portfolio.
+                        Public documents can be linked from the portfolio.
 
-                        Employer-only and private documents should eventually
+                        Employer-only and private documents should eventually
 
-                        be protected by authenticated server-side access.
+                        be protected by authenticated server-side access.
 
-                    </p>
+                    </p>
 
-                </div>
+                </div>
 
 
 
-            </section>
+            </section>
 
 
 
-            <section
+            <section
 
-                class="dashboard-card documents-panel"
+                class="dashboard-card documents-panel"
 
-                aria-labelledby="documentLibraryTitle"
+                aria-labelledby="documentLibraryTitle"
 
-            >
+            >
 
 
 
-                <div class="card-header">
+                <div class="card-header">
 
 
 
-                    <div>
+                    <div>
 
-                        <span class="card-eyebrow">DOCUMENT LIBRARY</span>
+                        <span class="card-eyebrow">DOCUMENT LIBRARY</span>
 
 
 
-                        <h2 id="documentLibraryTitle">
+                        <h2 id="documentLibraryTitle">
 
-                            Portfolio documents
+                            Portfolio documents
 
-                        </h2>
+                        </h2>
 
-                    </div>
+                    </div>
 
 
 
-                    <div class="card-header-meta">
+                    <div class="card-header-meta">
 
-                        <span id="documentSummary">
+                        <span id="documentSummary">
 
-                            Manage your professional documents.
+                            Manage your professional documents.
 
-                        </span>
+                        </span>
 
-                    </div>
+                    </div>
 
 
 
-                </div>
+                </div>
 
 
 
-                <div
+                <div
 
-                    id="documentList"
+                    id="documentList"
 
-                    class="document-admin-list"
+                    class="document-admin-list"
 
-                    aria-live="polite"
+                    aria-live="polite"
 
-                ></div>
+                ></div>
 
 
 
-            </section>
+            </section>
 
 
 
-        </div>
+        </div>
 
 
 
-        <footer class="admin-footer">
+        <footer class="admin-footer">
 
-            <span>
+            <span>
 
-                &copy;
+                &copy;
 
-                <span id="currentYear"></span>
+                <span id="currentYear"></span>
 
-                Dennis Ndwigah
+                Dennis Ndwigah
 
-            </span>
+            </span>
 
 
 
-            <span>Administrator access only</span>
+            <span>Administrator access only</span>
 
-        </footer>
+        </footer>
 
 
 
-    </main>
+    </main>
 
 
 
@@ -502,559 +502,559 @@
 
 <div
 
-    id="documentModal"
+    id="documentModal"
 
-    class="admin-modal hidden"
+    class="admin-modal hidden"
 
-    role="dialog"
+    role="dialog"
 
-    aria-modal="true"
+    aria-modal="true"
 
-    aria-labelledby="documentModalTitle"
+    aria-labelledby="documentModalTitle"
 
-    aria-describedby="documentModalDesc"
+    aria-describedby="documentModalDesc"
 
 >
 
 
 
-    <div class="admin-modal-content">
+    <div class="admin-modal-content">
 
 
 
-        <div class="admin-modal-header">
+        <div class="admin-modal-header">
 
 
 
-            <div>
+            <div>
 
-                <span class="card-eyebrow">DOCUMENT MANAGEMENT</span>
+                <span class="card-eyebrow">DOCUMENT MANAGEMENT</span>
 
 
 
-                <h2 id="documentModalTitle">
+                <h2 id="documentModalTitle">
 
-                    Add Document
+                    Add Document
 
-                </h2>
+                </h2>
 
 
 
-                <p id="documentModalDesc">
+                <p id="documentModalDesc">
 
-                    Upload a professional document and define its access level.
+                    Upload a professional document and define its access level.
 
-                </p>
+                </p>
 
-            </div>
+            </div>
 
 
 
-            <button
+            <button
 
-                type="button"
+                type="button"
 
-                class="modal-close"
+                class="modal-close"
 
-                onclick="closeDocumentForm()"
+                onclick="closeDocumentForm()"
 
-                aria-label="Close document form"
+                aria-label="Close document form"
 
-            >
+            >
 
-                <i data-lucide="x"></i>
+                <i data-lucide="x"></i>
 
-            </button>
+            </button>
 
 
 
-        </div>
+        </div>
 
 
 
 
 
-        <form id="documentForm">
+        <form id="documentForm">
 
 
 
-            <input type="hidden" id="documentId">
+            <input type="hidden" id="documentId">
 
 
 
-            <div class="form-grid">
+            <div class="form-grid">
 
 
 
-                <div class="form-group">
+                <div class="form-group">
 
 
 
-                    <label for="documentName">
+                    <label for="documentName">
 
-                        Document name
+                        Document name
 
-                    </label>
+                    </label>
 
 
 
-                    <input
+                    <input
 
-                        type="text"
+                        type="text"
 
-                        id="documentName"
+                        id="documentName"
 
-                        placeholder="e.g. Professional CV"
+                        placeholder="e.g. Professional CV"
 
-                        required
+                        required
 
-                    >
+                    >
 
 
 
-                </div>
+                </div>
 
 
 
 
 
-                <div class="form-group">
+                <div class="form-group">
 
 
 
-                    <label for="documentCategory">
+                    <label for="documentCategory">
 
-                        Category
+                        Category
 
-                    </label>
+                    </label>
 
 
 
-                    <select
+                    <select
 
-                        id="documentCategory"
+                        id="documentCategory"
 
-                        required
+                        required
 
-                    >
+                    >
 
-                        <option value="CV">CV / Resume</option>
+                        <option value="CV">CV / Resume</option>
 
-                        <option value="Certificate">Certificate</option>
+                        <option value="Certificate">Certificate</option>
 
-                        <option value="Academic">Academic</option>
+                        <option value="Academic">Academic</option>
 
-                        <option value="Training">Training</option>
+                        <option value="Training">Training</option>
 
-                        <option value="Professional">Professional</option>
+                        <option value="Professional">Professional</option>
 
-                        <option value="Other">Other</option>
+                        <option value="Other">Other</option>
 
-                    </select>
+                    </select>
 
 
 
-                </div>
+                </div>
 
 
 
 
 
-                <div class="form-group">
+                <div class="form-group">
 
 
 
-                    <label for="documentAccess">
+                    <label for="documentAccess">
 
-                        Access level
+                        Access level
 
-                    </label>
+                    </label>
 
 
 
-                    <select
+                    <select
 
-                        id="documentAccess"
+                        id="documentAccess"
 
-                        required
+                        required
 
-                    >
+                    >
 
-                        <option value="public">Public</option>
+                        <option value="public">Public</option>
 
-                        <option value="employer">Employer Only</option>
+                        <option value="employer">Employer Only</option>
 
-                        <option value="private">Private</option>
+                        <option value="private">Private</option>
 
-                    </select>
+                    </select>
 
 
 
-                </div>
+                </div>
 
 
 
 
 
-                <div class="form-group">
+                <div class="form-group">
 
 
 
-                    <label for="documentStatus">
+                    <label for="documentStatus">
 
-                        Status
+                        Status
 
-                    </label>
+                    </label>
 
 
 
-                    <select
+                    <select
 
-                        id="documentStatus"
+                        id="documentStatus"
 
-                        required
+                        required
 
-                    >
+                    >
 
-                        <option value="active">Active</option>
+                        <option value="active">Active</option>
 
-                        <option value="inactive">Inactive</option>
+                        <option value="inactive">Inactive</option>
 
-                    </select>
+                    </select>
 
 
 
-                </div>
+                </div>
 
 
 
 
 
-                <div class="form-group full-width">
+                <div class="form-group full-width">
 
 
 
-                    <label for="documentDescription">
+                    <label for="documentDescription">
 
-                        Description
+                        Description
 
-                    </label>
+                    </label>
 
 
 
-                    <textarea
+                    <textarea
 
-                        id="documentDescription"
+                        id="documentDescription"
 
-                        rows="3"
+                        rows="3"
 
-                        placeholder="Describe this document."
+                        placeholder="Describe this document."
 
-                    ></textarea>
+                    ></textarea>
 
 
 
-                </div>
+                </div>
 
 
 
 
 
-                <div class="form-group full-width">
+                <div class="form-group full-width">
 
 
 
-                    <label>
+                    <label>
 
-                        Upload file
+                        Upload file
 
-                    </label>
+                    </label>
 
 
 
-                    <div
+                    <div
 
-                        class="document-upload-area"
+                        class="document-upload-area"
 
-                        id="documentUploadArea"
+                        id="documentUploadArea"
 
-                    >
+                    >
 
 
 
-                        <input
+                        <input
 
-                            type="file"
+                            type="file"
 
-                            id="documentFile"
+                            id="documentFile"
 
-                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
 
-                            hidden
+                            hidden
 
-                        >
+                        >
 
 
 
-                        <div class="document-upload-content">
+                        <div class="document-upload-content">
 
 
 
-                            <div class="document-upload-icon">
+                            <div class="document-upload-icon">
 
-                                <i data-lucide="upload-cloud"></i>
+                                <i data-lucide="upload-cloud"></i>
 
-                            </div>
+                            </div>
 
 
 
-                            <strong>
+                            <strong>
 
-                                Upload a document
+                                Upload a document
 
-                            </strong>
+                            </strong>
 
 
 
-                            <p>
+                            <p>
 
-                                PDF, DOC, DOCX, JPG or PNG up to 10 MB.
+                                PDF, DOC, DOCX, JPG or PNG up to 10 MB.
 
-                            </p>
+                            </p>
 
 
 
-                            <button
+                            <button
 
-                                type="button"
+                                type="button"
 
-                                class="secondary-button"
+                                class="secondary-button"
 
-                                onclick="document.getElementById('documentFile').click()"
+                                onclick="document.getElementById('documentFile').click()"
 
-                            >
+                            >
 
-                                <i data-lucide="folder-open"></i>
+                                <i data-lucide="folder-open"></i>
 
-                                <span>Choose file</span>
+                                <span>Choose file</span>
 
-                            </button>
+                            </button>
 
 
 
-                            <small>
+                            <small>
 
-                                You can also drag and drop a file here.
+                                You can also drag and drop a file here.
 
-                            </small>
+                            </small>
 
 
 
-                        </div>
+                        </div>
 
 
 
 
 
-                        <div
+                        <div
 
-                            id="selectedFile"
+                            id="selectedFile"
 
-                            class="selected-file hidden"
+                            class="selected-file hidden"
 
-                        >
+                        >
 
 
 
-                            <div class="selected-file-icon">
+                            <div class="selected-file-icon">
 
-                                <i data-lucide="file-text"></i>
+                                <i data-lucide="file-text"></i>
 
-                            </div>
+                            </div>
 
 
 
-                            <div class="selected-file-info">
+                            <div class="selected-file-info">
 
 
 
-                                <strong id="selectedFileName">
+                                <strong id="selectedFileName">
 
-                                    No file selected
+                                    No file selected
 
-                                </strong>
+                                </strong>
 
 
 
-                                <span id="selectedFileMeta">
+                                <span id="selectedFileMeta">
 
-                                    0 KB
+                                    0 KB
 
-                                </span>
+                                </span>
 
 
 
-                            </div>
+                            </div>
 
 
 
-                            <button
+                            <button
 
-                                type="button"
+                                type="button"
 
-                                class="icon-button"
+                                class="icon-button"
 
-                                id="removeSelectedFile"
+                                id="removeSelectedFile"
 
-                                aria-label="Remove selected file"
+                                aria-label="Remove selected file"
 
-                                title="Remove selected file"
+                                title="Remove selected file"
 
-                            >
+                            >
 
-                                <i data-lucide="x"></i>
+                                <i data-lucide="x"></i>
 
-                            </button>
+                            </button>
 
 
 
-                        </div>
+                        </div>
 
 
 
-                    </div>
+                    </div>
 
 
 
-                    <small class="form-help">
+                    <small class="form-help">
 
-                        Files are stored locally in this MVP using browser IndexedDB.
+                        Files are stored locally in this MVP using browser IndexedDB.
 
-                        Production storage should be moved to secure server-side storage.
+                        Production storage should be moved to secure server-side storage.
 
-                    </small>
+                    </small>
 
 
 
-                </div>
+                </div>
 
 
 
 
 
-                <div class="form-group">
+                <div class="form-group">
 
 
 
-                    <label for="documentVersion">
+                    <label for="documentVersion">
 
-                        Version
+                        Version
 
-                    </label>
+                    </label>
 
 
 
-                    <input
+                    <input
 
-                        type="text"
+                        type="text"
 
-                        id="documentVersion"
+                        id="documentVersion"
 
-                        value="1.0"
+                        value="1.0"
 
-                        placeholder="1.0"
+                        placeholder="1.0"
 
-                    >
+                    >
 
 
 
-                </div>
+                </div>
 
 
 
 
 
-                <div class="form-group checkbox-group">
+                <div class="form-group checkbox-group">
 
 
 
-                    <label>
+                    <label>
 
 
 
-                        <input
+                        <input
 
-                            type="checkbox"
+                            type="checkbox"
 
-                            id="documentFeatured"
+                            id="documentFeatured"
 
-                        >
+                        >
 
 
 
-                        <span>Feature this document</span>
+                        <span>Feature this document</span>
 
 
 
-                    </label>
+                    </label>
 
 
 
-                </div>
+                </div>
 
 
 
-            </div>
+            </div>
 
 
 
 
 
-            <div class="form-actions">
+            <div class="form-actions">
 
 
 
-                <button
+                <button
 
-                    type="button"
+                    type="button"
 
-                    class="secondary-button"
+                    class="secondary-button"
 
-                    onclick="closeDocumentForm()"
+                    onclick="closeDocumentForm()"
 
-                >
+                >
 
-                    Cancel
+                    Cancel
 
-                </button>
+                </button>
 
 
 
-                <button
+                <button
 
-                    type="submit"
+                    type="submit"
 
-                    class="primary-button"
+                    class="primary-button"
 
-                >
+                >
 
-                    <i data-lucide="save"></i>
+                    <i data-lucide="save"></i>
 
-                    <span>Save document</span>
+                    <span>Save document</span>
 
-                </button>
+                </button>
 
 
 
-            </div>
+            </div>
 
 
 
-        </form>
+        </form>
 
 
 
-    </div>
+    </div>
 
 
 
@@ -1074,15 +1074,15 @@
 
 <script>
 
-    lucide.createIcons({
+    lucide.createIcons({
 
-        attrs: {
+        attrs: {
 
-            "stroke-width": 1.8
+            "stroke-width": 1.8
 
-        }
+        }
 
-    });
+    });
 
 </script>
 

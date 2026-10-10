@@ -4,35 +4,35 @@
 
 <head>
 
-    <meta charset="UTF-8">
+    <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
-
-    <title>Settings | Dennis Ndwigah Portfolio Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
 
-    <meta name="description" content="Manage Dennis Ndwigah portfolio administration settings.">
+    <title>Settings | Dennis Ndwigah Portfolio Admin</title>
 
 
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <link
-
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap"
-
-        rel="stylesheet"
-
-    >
+    <meta name="description" content="Manage Dennis Ndwigah portfolio administration settings.">
 
 
 
-    <link rel="stylesheet" href="css/admin.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap"
+
+        rel="stylesheet"
+
+    >
+
+
+
+    <link rel="stylesheet" href="css/admin.css">
 
 </head>
 
@@ -46,21 +46,21 @@
 
 
 
-    <!-- Mobile overlay -->
+    <!-- Mobile overlay -->
 
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-
-
-    <!-- =========================================
-
-         SIDEBAR
-
-         ========================================= -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
 
 
-    <aside class="admin-sidebar" id="adminSidebar">
+    <!-- =========================================
+
+         SIDEBAR
+
+         ========================================= -->
+
+
+
+    <aside class="admin-sidebar" id="adminSidebar">
 
             <div class="sidebar-header">
 
@@ -264,679 +264,679 @@
 
 
 
-    <!-- =========================================
+    <!-- =========================================
 
-         MAIN
+         MAIN
 
-         ========================================= -->
+         ========================================= -->
 
 
 
-    <main class="admin-main">
+    <main class="admin-main">
 
 
 
-        <header class="admin-topbar">
+        <header class="admin-topbar">
 
 
 
-            <button
+            <button
 
-                type="button"
+                type="button"
 
-                class="menu-button"
+                class="menu-button"
 
-                id="openSidebar"
+                id="openSidebar"
 
-                aria-label="Open navigation"
+                aria-label="Open navigation"
 
-            >
+            >
 
-                <i data-lucide="menu" aria-hidden="true"></i>
+                <i data-lucide="menu" aria-hidden="true"></i>
 
-            </button>
+            </button>
 
 
 
-            <div class="topbar-title">
+            <div class="topbar-title">
 
-                <span>Settings</span>
+                <span>Settings</span>
 
-            </div>
+            </div>
 
 
 
-            <div class="topbar-actions">
+            <div class="topbar-actions">
 
-                <a
+                <a
 
-                    href="../index.html"
+                    href="../index.html"
 
-                    class="view-site-button"
+                    class="view-site-button"
 
-                    target="_blank"
+                    target="_blank"
 
-                    rel="noopener"
+                    rel="noopener"
 
-                >
+                >
 
-                    <i data-lucide="external-link" aria-hidden="true"></i>
+                    <i data-lucide="external-link" aria-hidden="true"></i>
 
-                    <span>View site</span>
+                    <span>View site</span>
 
-                </a>
+                </a>
 
-            </div>
+            </div>
 
 
 
-        </header>
+        </header>
 
 
 
-        <div class="admin-content">
+        <div class="admin-content">
 
 
 
-            <!-- Page heading -->
+            <!-- Page heading -->
 
 
 
-            <section class="page-heading compact">
+            <section class="page-heading compact">
 
 
 
-                <div>
+                <div>
 
-                    <span class="eyebrow">System configuration</span>
+                    <span class="eyebrow">System configuration</span>
 
 
 
-                    <h1>Settings</h1>
+                    <h1>Settings</h1>
 
 
 
-                    <p>
+                    <p>
 
-                        Manage portfolio behaviour, visibility, and
+                        Manage portfolio behaviour, visibility, and
 
-                        administrative preferences.
+                        administrative preferences.
 
-                    </p>
+                    </p>
 
-                </div>
+                </div>
 
 
 
-            </section>
+            </section>
 
 
 
-            <!-- =================================
+            <!-- =================================
 
-                 PORTFOLIO SETTINGS
+                 PORTFOLIO SETTINGS
 
-                 ================================= -->
+                 ================================= -->
 
 
 
-            <form id="settingsForm" class="settings-management" novalidate>
+            <form id="settingsForm" class="settings-management" novalidate>
 
 
 
-                <section class="dashboard-card">
+                <section class="dashboard-card">
 
 
 
-                    <div class="card-header">
+                    <div class="card-header">
 
-                        <h2>Portfolio settings</h2>
+                        <h2>Portfolio settings</h2>
 
-                    </div>
+                    </div>
 
 
 
-                    <div class="form-grid">
+                    <div class="form-grid">
 
 
 
-                        <div class="form-group">
+                        <div class="form-group">
 
-                            <label for="siteTitle">Site title</label>
+                            <label for="siteTitle">Site title</label>
 
 
 
-                            <input
+                            <input
 
-                                type="text"
+                                type="text"
 
-                                id="siteTitle"
+                                id="siteTitle"
 
-                                name="siteTitle"
+                                name="siteTitle"
 
-                                value="Dennis Ndwigah | Supply Chain & Operations"
+                                value="Dennis Ndwigah | Supply Chain & Operations"
 
-                                maxlength="120"
+                                maxlength="120"
 
-                            >
+                            >
 
-                        </div>
+                        </div>
 
 
 
-                        <div class="form-group">
+                        <div class="form-group">
 
-                            <label for="siteStatus">Portfolio status</label>
+                            <label for="siteStatus">Portfolio status</label>
 
 
 
-                            <select id="siteStatus" name="siteStatus">
+                            <select id="siteStatus" name="siteStatus">
 
-                                <option value="live" selected>Live</option>
+                                <option value="live" selected>Live</option>
 
-                                <option value="maintenance">Maintenance mode</option>
+                                <option value="maintenance">Maintenance mode</option>
 
-                                <option value="private">Private</option>
+                                <option value="private">Private</option>
 
-                            </select>
+                            </select>
 
-                        </div>
+                        </div>
 
 
 
-                        <div class="form-group full-width">
+                        <div class="form-group full-width">
 
-                            <label for="siteDescription">Site description</label>
+                            <label for="siteDescription">Site description</label>
 
 
 
-                            <textarea
+                            <textarea
 
-                                id="siteDescription"
+                                id="siteDescription"
 
-                                name="siteDescription"
+                                name="siteDescription"
 
-                                rows="4"
+                                rows="4"
 
-                                maxlength="300"
+                                maxlength="300"
 
-                            >Supply Chain and Operations professional portfolio for Dennis Ndwigah Njeru.</textarea>
+                            >Supply Chain and Operations professional portfolio for Dennis Ndwigah Njeru.</textarea>
 
 
 
-                            <small>
+                            <small>
 
-                                Used as the portfolio description and browser metadata where supported.
+                                Used as the portfolio description and browser metadata where supported.
 
-                            </small>
+                            </small>
 
-                        </div>
+                        </div>
 
 
 
-                    </div>
+                    </div>
 
 
 
-                </section>
+                </section>
 
 
 
-                <!-- =================================
+                <!-- =================================
 
-                     PUBLIC VISIBILITY
+                     PUBLIC VISIBILITY
 
-                     ================================= -->
+                     ================================= -->
 
 
 
-                <section class="dashboard-card">
+                <section class="dashboard-card">
 
 
 
-                    <div class="card-header">
+                    <div class="card-header">
 
-                        <h2>Public visibility</h2>
+                        <h2>Public visibility</h2>
 
-                    </div>
+                    </div>
 
 
 
-                    <div class="settings-list">
+                    <div class="settings-list">
 
 
 
-                        <div class="settings-row">
+                        <div class="settings-row">
 
-                            <div class="settings-row-content">
+                            <div class="settings-row-content">
 
-                                <strong>Show professional profile</strong>
+                                <strong>Show professional profile</strong>
 
-                                <span>
+                                <span>
 
-                                    Display your profile information on the public portfolio.
+                                    Display your profile information on the public portfolio.
 
-                                </span>
+                                </span>
 
-                            </div>
+                            </div>
 
 
 
-                            <label class="toggle-control">
+                            <label class="toggle-control">
 
-                                <input
+                                <input
 
-                                    type="checkbox"
+                                    type="checkbox"
 
-                                    id="showProfile"
+                                    id="showProfile"
 
-                                    name="showProfile"
+                                    name="showProfile"
 
-                                    checked
+                                    checked
 
-                                >
+                                >
 
-                                <span class="toggle-slider"></span>
+                                <span class="toggle-slider"></span>
 
-                            </label>
+                            </label>
 
-                        </div>
+                        </div>
 
 
 
-                        <div class="settings-row">
+                        <div class="settings-row">
 
-                            <div class="settings-row-content">
+                            <div class="settings-row-content">
 
-                                <strong>Show experience</strong>
+                                <strong>Show experience</strong>
 
-                                <span>
+                                <span>
 
-                                    Display your professional experience timeline.
+                                    Display your professional experience timeline.
 
-                                </span>
+                                </span>
 
-                            </div>
+                            </div>
 
 
 
-                            <label class="toggle-control">
+                            <label class="toggle-control">
 
-                                <input
+                                <input
 
-                                    type="checkbox"
+                                    type="checkbox"
 
-                                    id="showExperience"
+                                    id="showExperience"
 
-                                    name="showExperience"
+                                    name="showExperience"
 
-                                    checked
+                                    checked
 
-                                >
+                                >
 
-                                <span class="toggle-slider"></span>
+                                <span class="toggle-slider"></span>
 
-                            </label>
+                            </label>
 
-                        </div>
+                        </div>
 
 
 
-                        <div class="settings-row">
+                        <div class="settings-row">
 
-                            <div class="settings-row-content">
+                            <div class="settings-row-content">
 
-                                <strong>Show selected work</strong>
+                                <strong>Show selected work</strong>
 
-                                <span>
+                                <span>
 
-                                    Display public projects and case studies.
+                                    Display public projects and case studies.
 
-                                </span>
+                                </span>
 
-                            </div>
+                            </div>
 
 
 
-                            <label class="toggle-control">
+                            <label class="toggle-control">
 
-                                <input
+                                <input
 
-                                    type="checkbox"
+                                    type="checkbox"
 
-                                    id="showProjects"
+                                    id="showProjects"
 
-                                    name="showProjects"
+                                    name="showProjects"
 
-                                    checked
+                                    checked
 
-                                >
+                                >
 
-                                <span class="toggle-slider"></span>
+                                <span class="toggle-slider"></span>
 
-                            </label>
+                            </label>
 
-                        </div>
+                        </div>
 
 
 
-                        <div class="settings-row">
+                        <div class="settings-row">
 
-                            <div class="settings-row-content">
+                            <div class="settings-row-content">
 
-                                <strong>Show contact information</strong>
+                                <strong>Show contact information</strong>
 
-                                <span>
+                                <span>
 
-                                    Display approved contact channels on the public site.
+                                    Display approved contact channels on the public site.
 
-                                </span>
+                                </span>
 
-                            </div>
+                            </div>
 
 
 
-                            <label class="toggle-control">
+                            <label class="toggle-control">
 
-                                <input
+                                <input
 
-                                    type="checkbox"
+                                    type="checkbox"
 
-                                    id="showContact"
+                                    id="showContact"
 
-                                    name="showContact"
+                                    name="showContact"
 
-                                    checked
+                                    checked
 
-                                >
+                                >
 
-                                <span class="toggle-slider"></span>
+                                <span class="toggle-slider"></span>
 
-                            </label>
+                            </label>
 
-                        </div>
+                        </div>
 
 
 
-                    </div>
+                    </div>
 
 
 
-                </section>
+                </section>
 
 
 
-                <!-- =================================
+                <!-- =================================
 
-                     ADMIN PREFERENCES
+                     ADMIN PREFERENCES
 
-                     ================================= -->
+                     ================================= -->
 
 
 
-                <section class="dashboard-card">
+                <section class="dashboard-card">
 
 
 
-                    <div class="card-header">
+                    <div class="card-header">
 
-                        <h2>Administrative preferences</h2>
+                        <h2>Administrative preferences</h2>
 
-                    </div>
+                    </div>
 
 
 
-                    <div class="form-grid">
+                    <div class="form-grid">
 
 
 
-                        <div class="form-group">
+                        <div class="form-group">
 
-                            <label for="defaultVisibility">Default content visibility</label>
+                            <label for="defaultVisibility">Default content visibility</label>
 
 
 
-                            <select
+                            <select
 
-                                id="defaultVisibility"
+                                id="defaultVisibility"
 
-                                name="defaultVisibility"
+                                name="defaultVisibility"
 
-                            >
+                            >
 
-                                <option value="public" selected>Public</option>
+                                <option value="public" selected>Public</option>
 
-                                <option value="employer">Employer only</option>
+                                <option value="employer">Employer only</option>
 
-                                <option value="private">Private</option>
+                                <option value="private">Private</option>
 
-                            </select>
+                            </select>
 
 
 
-                            <small>
+                            <small>
 
-                                Used when creating new portfolio content.
+                                Used when creating new portfolio content.
 
-                            </small>
+                            </small>
 
-                        </div>
+                        </div>
 
 
 
-                        <div class="form-group">
+                        <div class="form-group">
 
-                            <label for="dateFormat">Date format</label>
+                            <label for="dateFormat">Date format</label>
 
 
 
-                            <select id="dateFormat" name="dateFormat">
+                            <select id="dateFormat" name="dateFormat">
 
-                                <option value="month-year" selected>Month Year</option>
+                                <option value="month-year" selected>Month Year</option>
 
-                                <option value="year">Year only</option>
+                                <option value="year">Year only</option>
 
-                                <option value="full">Month Year with duration</option>
+                                <option value="full">Month Year with duration</option>
 
-                            </select>
+                            </select>
 
 
 
-                            <small>
+                            <small>
 
-                                Controls how experience dates are presented.
+                                Controls how experience dates are presented.
 
-                            </small>
+                            </small>
 
-                        </div>
+                        </div>
 
 
 
-                    </div>
+                    </div>
 
 
 
-                </section>
+                </section>
 
 
 
-                <!-- =================================
+                <!-- =================================
 
-                     DATA MANAGEMENT
+                     DATA MANAGEMENT
 
-                     ================================= -->
+                     ================================= -->
 
 
 
-                <section class="dashboard-card">
+                <section class="dashboard-card">
 
 
 
-                    <div class="card-header">
+                    <div class="card-header">
 
-                        <h2>Data management</h2>
+                        <h2>Data management</h2>
 
-                    </div>
+                    </div>
 
 
 
-                    <div class="settings-list">
+                    <div class="settings-list">
 
 
 
-                        <div class="settings-row data-row settings-data-row">
+                        <div class="settings-row data-row settings-data-row">
 
-                            <div class="settings-row-content">
+                            <div class="settings-row-content">
 
-                                <strong>Portfolio data</strong>
+                                <strong>Portfolio data</strong>
 
-                                <span>
+                                <span>
 
-                                    Portfolio content is currently stored locally in this browser.
+                                    Portfolio content is currently stored locally in this browser.
 
-                                    Production deployment should use secure server-side storage.
+                                    Production deployment should use secure server-side storage.
 
-                                </span>
+                                </span>
 
-                            </div>
+                            </div>
 
 
 
-                            <span class="status-badge data-status-badge">
+                            <span class="status-badge data-status-badge">
 
-                                <i data-lucide="database" aria-hidden="true"></i>
+                                <i data-lucide="database" aria-hidden="true"></i>
 
-                                Local
+                                Local
 
-                            </span>
+                            </span>
 
-                        </div>
+                        </div>
 
 
 
-                        <div class="settings-row data-row settings-data-row">
+                        <div class="settings-row data-row settings-data-row">
 
-                            <div class="settings-row-content">
+                            <div class="settings-row-content">
 
-                                <strong>Authentication</strong>
+                                <strong>Authentication</strong>
 
-                                <span>
+                                <span>
 
-                                    Administrator authentication will be handled by the backend
+                                    Administrator authentication will be handled by the backend
 
-                                    when the Django system is connected.
+                                    when the Django system is connected.
 
-                                </span>
+                                </span>
 
-                            </div>
+                            </div>
 
 
 
-                            <span class="status-badge data-status-badge">
+                            <span class="status-badge data-status-badge">
 
-                                <i data-lucide="lock-keyhole" aria-hidden="true"></i>
+                                <i data-lucide="lock-keyhole" aria-hidden="true"></i>
 
-                                Backend ready
+                                Backend ready
 
-                            </span>
+                            </span>
 
-                        </div>
+                        </div>
 
 
 
-                    </div>
+                    </div>
 
 
 
-                </section>
+                </section>
 
 
 
-                <!-- Save bar -->
+                <!-- Save bar -->
 
 
 
-                <div class="form-actions">
+                <div class="form-actions">
 
 
 
-                    <span
+                    <span
 
-                        class="save-message"
+                        class="save-message"
 
-                        id="saveMessage"
+                        id="saveMessage"
 
-                        role="status"
+                        role="status"
 
-                        aria-live="polite"
+                        aria-live="polite"
 
-                    ></span>
+                    ></span>
 
 
 
-                    <button
+                    <button
 
-                        type="button"
+                        type="button"
 
-                        class="secondary-button"
+                        class="secondary-button"
 
-                        id="resetSettings"
+                        id="resetSettings"
 
-                    >
+                    >
 
-                        <i data-lucide="rotate-ccw" aria-hidden="true"></i>
+                        <i data-lucide="rotate-ccw" aria-hidden="true"></i>
 
-                        <span>Reset</span>
+                        <span>Reset</span>
 
-                    </button>
+                    </button>
 
 
 
-                    <button type="submit" class="primary-button">
+                    <button type="submit" class="primary-button">
 
-                        <i data-lucide="check" aria-hidden="true"></i>
+                        <i data-lucide="check" aria-hidden="true"></i>
 
-                        <span>Save settings</span>
+                        <span>Save settings</span>
 
-                    </button>
+                    </button>
 
 
 
-                </div>
+                </div>
 
 
 
-            </form>
+            </form>
 
 
 
-            <footer class="admin-footer">
+            <footer class="admin-footer">
 
 
 
-                <span>
+                <span>
 
-                    &copy; <span id="currentYear"></span>
+                    &copy; <span id="currentYear"></span>
 
-                    Dennis Ndwigah
+                    Dennis Ndwigah
 
-                </span>
+                </span>
 
 
 
-                <span>Administrator access only</span>
+                <span>Administrator access only</span>
 
 
 
-            </footer>
+            </footer>
 
 
 
-        </div>
+        </div>
 
 
 
-    </main>
+    </main>
 
 
 
@@ -954,43 +954,43 @@
 
 <script>
 
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", () => {
 
 
 
-        const yearEl = document.getElementById("currentYear");
+        const yearEl = document.getElementById("currentYear");
 
 
 
-        if (yearEl) {
+        if (yearEl) {
 
-            yearEl.textContent = new Date().getFullYear();
+            yearEl.textContent = new Date().getFullYear();
 
-        }
-
-
-
-        if (!window.lucide) {
-
-            return;
-
-        }
+        }
 
 
 
-        window.lucide.createIcons({
+        if (!window.lucide) {
 
-            attrs: {
+            return;
 
-                "stroke-width": 1.8
-
-            }
-
-        });
+        }
 
 
 
-    });
+        window.lucide.createIcons({
+
+            attrs: {
+
+                "stroke-width": 1.8
+
+            }
+
+        });
+
+
+
+    });
 
 </script>
 
