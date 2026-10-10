@@ -117,7 +117,7 @@
   }
 
   function renderStats() {
-    $("statSaved").textContent = jobs.filter(job => ["Saved", "To Apply"].includes(job.status)).length;
+    $("statSaved").textContent = jobs.filter(job => ["Discovered", "Saved", "To Apply"].includes(job.status)).length;
     $("statApplied").textContent = jobs.filter(job => ["Applied", "Interview", "Offer", "Rejected", "Withdrawn"].includes(job.status)).length;
     $("statInterviews").textContent = jobs.filter(job => job.status === "Interview" || job.interviewDate).length;
     $("statFollowups").textContent = jobs.filter(dueFollowUp).length;
