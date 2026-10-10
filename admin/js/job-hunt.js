@@ -359,7 +359,33 @@
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload.detail || "The job-search service could not complete the scan.");
 
-      const incoming = Array.isArray(payload.jobs) ? payload.jobs : [];
+      const reportedSources = Array.isArray(payload.sources) ? payload.sources : [];
+      const has48HourBackend = Number(payload.recencyWindowHours) === 48;
+      const hasCareerPointFeed = reportedSources.some(source =>
+        /career point kenya/i.test(String(source?.name || ""))
+      );
+
+      // Never label old results as fresh if Render is serving an older backend build.
+      if (!has48HourBackend || !hasCareerPointFeed) {
+        const reportedNames = reportedSources.map(source => source?.name).filter(Boolean).join(", ") || "none";
+        setMessage(
+          "The job-search backend is still running an older version. Expected a 48-hour scan with Career Point Kenya and Dev Global Jobs; received: " +
+          reportedNames + ". No vacancies were refreshed. Redeploy the latest main branch on Render, then scan again.",
+          "error"
+        );
+        return;
+      }
+
+      const fetchedJobs = Array.isArray(payload.jobs) ? payload.jobs : [];
+      const scanTime = Date.now();
+      const incoming = fetchedJobs.filter(found => {
+        if (!found || !found.title || !found.jobUrl) return false;
+        const posted = parseDate(found.datePosted);
+        if (!posted) return false;
+        const age = scanTime - posted.getTime();
+        return age >= 0 && age <= 48 * 60 * 60 * 1000;
+      });
+      const ignoredOutside48Hours = fetchedJobs.length - incoming.length;
       const next = [...jobs];
       let added = 0;
       let updated = 0;
@@ -407,7 +433,8 @@
         message = "Job search is temporarily unavailable. " + failedSources.map(item => item.name + ": " + (item.error || "unavailable")).join("; ");
         setMessage(message, "error");
       } else if (added || updated) {
-        message = "Search complete: " + added + " new and " + updated + " refreshed vacancy records. Sources: " + (sourceSummary.join(", ") || "public job feeds") + ".";
+        message = "Search complete: " + added + " new and " + updated + " refreshed vacancy records within 48 hours. Sources: " + (sourceSummary.join(", ") || "public job feeds") + ".";
+        if (ignoredOutside48Hours) message += " Ignored " + ignoredOutside48Hours + " older or undated listings.";
         if (failedSources.length) message += " Some sources were unavailable (" + failedSources.map(item => item.name).join(", ") + ").";
         setMessage(message, "success");
       } else {
@@ -433,9 +460,9 @@
             .slice(0, 2)
             .map(([key, count]) => Number(count) + " " + (labels[key] || key.replaceAll("_", " ")));
           message = "Search complete: " + scanned + " source records checked across " +
-            checked + "/" + attempts + " searches; no vacancies matched all filters." +
+            checked + "/" + attempts + " searches; no vacancies matched the last 48 hours and your role/location rules." +
             (topReasons.length ? " Main exclusions: " + topReasons.join("; ") + "." : "") +
-            " Try the 7-day or 30-day filter, or browse all Kenya listings at Dev Global Jobs.";
+            " Try another keyword or browse the connected source feeds.";
         }
         if (failedSources.length) message += " Unavailable sources: " + failedSources.map(item => item.name).join(", ") + ".";
         setMessage(message, failedSources.length && !sourceSummary.length ? "error" : "success");
