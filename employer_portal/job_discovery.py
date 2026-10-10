@@ -190,7 +190,7 @@ FOREIGN_COUNTRY_CODES = {
 
 def is_kenya_country(country: str) -> bool:
     normalized = re.sub(r"[^a-z]", "", (country or "").lower())
-    return normalized in {"ke", "ken", "kenya", "republicofkenya"}
+    return normalized in {"ke", "ken", "kenya", "republicofkenya"} or "kenya" in normalized
 
 
 def is_kenyan_location(location: str) -> bool:
@@ -204,16 +204,20 @@ def is_kenyan_location(location: str) -> bool:
 def _explicit_foreign_country(location: str, country: str) -> bool:
     country_value = (country or "").strip().lower()
     compact_country = re.sub(r"[^a-z]", "", country_value)
-    if is_kenya_country(country_value):
-        return False
-    if compact_country in FOREIGN_COUNTRY_CODES:
-        return True
+    location_value = (location or "").strip().lower()
 
+    # A foreign place in the actual location always wins over contradictory
+    # or stale country metadata returned by a provider.
     for term in FOREIGN_COUNTRY_TERMS:
         pattern = r"\b" + re.escape(term) + r"\b"
-        if re.search(pattern, country_value, re.IGNORECASE):
+        if re.search(pattern, location_value, re.IGNORECASE):
             return True
-        if re.search(pattern, (location or ""), re.IGNORECASE):
+
+    # Only reject country codes that explicitly identify another country.
+    if compact_country in FOREIGN_COUNTRY_CODES:
+        return True
+    for term in FOREIGN_COUNTRY_TERMS:
+        if re.search(r"\b" + re.escape(term) + r"\b", country_value, re.IGNORECASE):
             return True
     return False
 
