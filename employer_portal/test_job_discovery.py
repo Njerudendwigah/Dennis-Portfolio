@@ -233,3 +233,22 @@ class JobDiscoveryNormalizationTests(SimpleTestCase):
             description="Warehouse, inventory and stock control.",
         )
         self.assertIsNone(record)
+
+    def test_foreign_location_wins_over_contradictory_country_metadata(self):
+        record = self.make_job(
+            country="Kenya",
+            location="Kampala, Uganda",
+            title="Warehouse Supervisor",
+            description="Manage warehouse, stock control and dispatch.",
+        )
+        self.assertIsNone(record)
+
+    def test_accepts_city_name_from_any_kenyan_county_with_unknown_country_metadata(self):
+        record = self.make_job(
+            country="Global",
+            location="Kisumu",
+            title="Distribution Supervisor",
+            description="Distribution, warehousing and inventory management.",
+        )
+        self.assertIsNotNone(record)
+        self.assertEqual(record["location"], "Kisumu, Kenya")
