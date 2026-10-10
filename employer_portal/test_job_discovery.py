@@ -191,3 +191,64 @@ class JobDiscoveryNormalizationTests(SimpleTestCase):
             description="Warehouse stock control and dispatch.",
         )
         self.assertIsNone(record)
+
+
+    def test_accepts_nakuru_from_kenya_scoped_query(self):
+        item = {
+            "title": "Warehouse Supervisor",
+            "companyName": "Example Logistics",
+            "location": "Nakuru",
+            "country": "",
+            "datePosted": "2026-10-10T08:00:00Z",
+            "url": "https://devglobaljobs.com/jobs/nakuru-supervisor",
+            "description": "Manage warehouse, stock control and dispatch teams.",
+        }
+        record = normalize_external_job(item, now=self.now, allow_country_only_location=True)
+        self.assertIsNotNone(record)
+        self.assertEqual(record["location"], "Nakuru, Kenya")
+
+    def test_accepts_nationwide_location_when_provider_country_field_is_generic(self):
+        item = {
+            "title": "Distribution Manager",
+            "companyName": "Example Logistics",
+            "location": "Eldoret",
+            "country": "Global",
+            "datePosted": "2026-10-10T08:00:00Z",
+            "url": "https://devglobaljobs.com/jobs/eldoret-distribution-manager",
+            "description": "Manage distribution, warehousing and inventory.",
+        }
+        record = normalize_external_job(item, now=self.now)
+        self.assertIsNotNone(record)
+        self.assertEqual(record["location"], "Eldoret, Kenya")
+
+    def test_rejects_iso_foreign_country_code(self):
+        record = self.make_job(country="UG", location="Kampala")
+        self.assertIsNone(record)
+
+    def test_rejects_foreign_location_even_if_search_was_kenya_scoped(self):
+        record = self.make_job(
+            country="Uganda",
+            location="Kampala",
+            title="Warehouse Supervisor",
+            description="Warehouse, inventory and stock control.",
+        )
+        self.assertIsNone(record)
+
+    def test_foreign_location_wins_over_contradictory_country_metadata(self):
+        record = self.make_job(
+            country="Kenya",
+            location="Kampala, Uganda",
+            title="Warehouse Supervisor",
+            description="Manage warehouse, stock control and dispatch.",
+        )
+        self.assertIsNone(record)
+
+    def test_accepts_city_name_from_any_kenyan_county_with_unknown_country_metadata(self):
+        record = self.make_job(
+            country="Global",
+            location="Kisumu",
+            title="Distribution Supervisor",
+            description="Distribution, warehousing and inventory management.",
+        )
+        self.assertIsNotNone(record)
+        self.assertEqual(record["location"], "Kisumu, Kenya")
