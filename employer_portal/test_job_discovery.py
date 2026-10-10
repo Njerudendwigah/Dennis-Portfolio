@@ -306,3 +306,16 @@ class JobDiscoveryNormalizationTests(SimpleTestCase):
         self.assertEqual(records[0]["title"], "E-Commerce Operations & Logistics Associate")
         self.assertEqual(records[0]["companyName"], "Example Recruitment Ltd")
         self.assertEqual(records[0]["url"], "https://www.myjobmag.co.ke/p/123456")
+
+    def test_global_rss_does_not_mark_foreign_job_as_kenyan(self):
+        feed = b"""<?xml version="1.0"?>
+        <rss version="2.0"><channel><item>
+          <title>Warehouse Supervisor at Example Inc</title>
+          <link>https://devglobaljobs.com/jobs/warehouse-supervisor</link>
+          <pubDate>Fri, 09 Oct 2026 08:30:00 +0000</pubDate>
+          <description><![CDATA[Warehouse and inventory management in Kampala, Uganda.]]></description>
+        </item></channel></rss>"""
+        records = parse_rss_jobs(feed, "https://devglobaljobs.com/jobs.rss")
+        self.assertEqual(len(records), 1)
+        self.assertEqual(records[0]["country"], "")
+        self.assertEqual(records[0]["location"], "")
