@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from django.test import SimpleTestCase
 from urllib.parse import parse_qs, urlparse
-from .job_discovery import build_search_urls, normalize_external_job
+from .job_discovery import build_search_urls, normalize_external_job, parse_rss_jobs
 
 
 class JobDiscoveryNormalizationTests(SimpleTestCase):
@@ -127,3 +127,39 @@ class JobDiscoveryNormalizationTests(SimpleTestCase):
         record = normalize_external_job(item, now=self.now)
         self.assertIsNotNone(record)
         self.assertEqual(record["jobUrl"], "https://devglobaljobs.com/jobs/detail/123456")
+
+
+    def test_rejects_job_older_than_48_hours(self):
+        record = self.make_job(datePosted="2026-10-08T08:59:00Z")
+        self.assertIsNone(record)
+
+    def test_accepts_job_posted_within_48_hours(self):
+        record = self.make_job(datePosted="2026-10-08T09:01:00Z")
+        self.assertIsNotNone(record)
+
+    def test_parses_career_point_rss_job_and_relative_link(self):
+        feed = b"""<?xml version="1.0"?>
+        <rss version="2.0"><channel><item>
+          <title>Procurement Specialist - IT Job Techminds Technologies</title>
+          <link>/2026/10/09/procurement-specialist/</link>
+          <pubDate>Fri, 09 Oct 2026 11:00:00 +0300</pubDate>
+          <description><![CDATA[Procurement and supplier management based in Nairobi.]]></description>
+        </item></channel></rss>"""
+        records = parse_rss_jobs(
+            feed,
+            "https://www.careerpointkenya.co.ke/category/jobs-in-nairobi/feed/",
+            "Nairobi, Kenya",
+        )
+        self.assertEqual(len(records), 1)
+        self.assertEqual(records[0]["title"], "Procurement Specialist - IT")
+        self.assertEqual(records[0]["companyName"], "Techminds Technologies")
+        self.assertEqual(records[0]["url"], "https://www.careerpointkenya.co.ke/2026/10/09/procurement-specialist/")
+        self.assertEqual(records[0]["datePosted"], "Fri, 09 Oct 2026 11:00:00 +0300")
+
+    def test_rss_entries_without_post_dates_are_skipped(self):
+        feed = b"""<rss version="2.0"><channel><item>
+          <title>Warehouse Supervisor Job Example Ltd</title>
+          <link>https://www.careerpointkenya.co.ke/jobs/example/</link>
+          <description>Warehouse role in Nairobi.</description>
+        </item></channel></rss>"""
+        self.assertEqual(parse_rss_jobs(feed, "https://www.careerpointkenya.co.ke/feed/"), [])
