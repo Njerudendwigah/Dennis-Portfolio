@@ -26,6 +26,7 @@ ALLOWED_KEYS = frozenset(
         "dennis_skills",
         "dennis_certifications",
         "portfolioSettings",
+        "jobHuntApplications",
     }
 )
 

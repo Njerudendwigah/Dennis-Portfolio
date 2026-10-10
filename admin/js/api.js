@@ -10,7 +10,8 @@ const portfolioApi = (() => {
         projects: "dennis_projects",
         skills: "dennis_skills",
         certifications: "dennis_certifications",
-        settings: "portfolioSettings"
+        settings: "portfolioSettings",
+        jobHunt: "jobHuntApplications"
     });
 
     const ALLOWED_SECTION_KEYS = new Set(Object.values(SECTION_KEYS));
