@@ -1,1 +1,0 @@
-Job discovery response cache invalidation is handled by the versioned key job_discovery_results_v2 in portfolio_api.py.
