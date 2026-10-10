@@ -99,8 +99,16 @@
       if (recency !== "All" && job.status === "Discovered") {
         const posted = parseDate(job.datePosted);
         if (!posted) return false;
-        const age = (now.getTime() - posted.getTime()) / 86400000;
-        if (age < 0 || age > Number(recency)) return false;
+        const ageHours = (now.getTime() - posted.getTime()) / 3600000;
+        if (ageHours < 0) return false;
+
+        if (recency === "48") {
+          // This option is hours, not days.
+          if (ageHours > 48) return false;
+        } else {
+          const ageDays = ageHours / 24;
+          if (ageDays > Number(recency)) return false;
+        }
       }
       return true;
     }).sort((a, b) => {
