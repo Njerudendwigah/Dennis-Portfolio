@@ -66,219 +66,205 @@
 
         <aside class="admin-sidebar" id="adminSidebar">
 
+            <div class="sidebar-header">
 
+                <a href="dashboard.html" class="admin-logo">
 
-            <div class="sidebar-header">
+                    <span class="brand-mark">DN</span>
 
+                    <span class="brand-text">
 
+                        <strong>DN Portfolio</strong>
 
-                <a href="dashboard.html" class="admin-logo">
+                        <small>Admin console</small>
 
-                    <span class="brand-mark">DN</span>
+                    </span>
 
+                </a>
 
+                <button
+                    type="button"
+                    class="mobile-close"
+                    id="closeSidebar"
+                    aria-label="Close navigation"
+                >
 
-                    <span class="brand-text">
+                    <i data-lucide="x" aria-hidden="true"></i>
 
-                        <strong>DN Portfolio</strong>
+                </button>
 
-                        <small>Admin console</small>
+            </div>
 
-                    </span>
+            <nav class="admin-navigation" aria-label="Admin navigation">
 
-                </a>
+                <div class="nav-section">
 
+                    <span class="nav-section-title">Workspace</span>
 
+                    <a
+                        href="dashboard.html"
+                        class="nav-link"
+                    >
 
-                <button
+                        <span class="nav-icon">
 
-                    type="button"
+                            <i data-lucide="layout-dashboard" aria-hidden="true"></i>
 
-                    class="mobile-close"
+                        </span>
 
-                    id="closeSidebar"
+                        <span>Dashboard</span>
 
-                    aria-label="Close navigation"
+                    </a>
 
-                >
+                    <a href="profile.html" class="nav-link">
 
-                    <i data-lucide="x" aria-hidden="true"></i>
+                        <span class="nav-icon">
 
-                </button>
+                            <i data-lucide="user-round" aria-hidden="true"></i>
 
+                        </span>
 
+                        <span>Profile</span>
 
-            </div>
+                    </a>
 
+                    <a href="experience.html" class="nav-link">
 
+                        <span class="nav-icon">
 
+                            <i data-lucide="briefcase" aria-hidden="true"></i>
 
+                        </span>
 
-            <nav class="admin-navigation" aria-label="Admin navigation">
+                        <span>Experience</span>
 
+                    </a>
 
+                    <a href="projects.html" class="nav-link">
 
-                <div class="nav-section">
+                        <span class="nav-icon">
 
-                    <span class="nav-section-title">Workspace</span>
+                            <i data-lucide="folder-kanban" aria-hidden="true"></i>
 
+                        </span>
 
+                        <span>Projects</span>
 
-                    <a href="dashboard.html" class="nav-link">
+                    </a>
 
-                        <span class="nav-icon"><i data-lucide="layout-dashboard" aria-hidden="true"></i></span>
+                    <a href="skills.html" class="nav-link active" aria-current="page">
 
-                        <span>Dashboard</span>
+                        <span class="nav-icon">
 
-                    </a>
+                            <i data-lucide="sparkles" aria-hidden="true"></i>
 
+                        </span>
 
+                        <span>Skills</span>
 
-                    <a href="profile.html" class="nav-link">
+                    </a>
 
-                        <span class="nav-icon"><i data-lucide="user-round" aria-hidden="true"></i></span>
+                </div>
 
-                        <span>Profile</span>
+                <div class="nav-section">
 
-                    </a>
+                    <span class="nav-section-title">Credentials</span>
 
+                    <a href="certifications.html" class="nav-link">
 
+                        <span class="nav-icon">
 
-                    <a href="experience.html" class="nav-link">
+                            <i data-lucide="award" aria-hidden="true"></i>
 
-                        <span class="nav-icon"><i data-lucide="briefcase" aria-hidden="true"></i></span>
+                        </span>
 
-                        <span>Experience</span>
+                        <span>Certifications</span>
 
-                    </a>
+                    </a>
 
+                    <a href="documents.html" class="nav-link">
 
+                        <span class="nav-icon">
 
-                    <a href="projects.html" class="nav-link">
+                            <i data-lucide="file-text" aria-hidden="true"></i>
 
-                        <span class="nav-icon"><i data-lucide="folder-kanban" aria-hidden="true"></i></span>
+                        </span>
 
-                        <span>Projects</span>
+                        <span>Documents</span>
 
-                    </a>
+                        <span class="nav-badge" id="documentCount">0</span>
 
+                    </a>
 
+                </div>
 
-                    <a href="skills.html" class="nav-link active" aria-current="page">
+                <div class="nav-section">
 
-                        <span class="nav-icon"><i data-lucide="sparkles" aria-hidden="true"></i></span>
+                    <span class="nav-section-title">System</span>
 
-                        <span>Skills</span>
+                    <a href="settings.html" class="nav-link">
 
-                    </a>
+                        <span class="nav-icon">
 
-                </div>
+                            <i data-lucide="settings-2" aria-hidden="true"></i>
 
+                        </span>
 
+                        <span>Settings</span>
 
+                    </a>
 
+                    <a href="employer-access.html" class="nav-link">
 
-                <div class="nav-section">
+                        <span class="nav-icon">
 
-                    <span class="nav-section-title">Credentials</span>
+                            <i data-lucide="shield-check" aria-hidden="true"></i>
 
+                        </span>
 
+                        <span>Employer Access</span>
 
-                    <a href="certifications.html" class="nav-link">
+                    </a>
 
-                        <span class="nav-icon"><i data-lucide="award" aria-hidden="true"></i></span>
+                </div>
 
-                        <span>Certifications</span>
+            </nav>
 
-                    </a>
+            <div class="sidebar-footer">
 
+                <div class="admin-user">
 
+                    <div class="user-avatar" aria-hidden="true">
 
-                    <a href="documents.html" class="nav-link">
+                        DN
 
-                        <span class="nav-icon"><i data-lucide="file-text" aria-hidden="true"></i></span>
+                    </div>
 
-                        <span>Documents</span>
+                    <div class="user-details">
 
-                    </a>
+                        <strong>Dennis Ndwigah</strong>
 
-                </div>
+                        <span>Administrator</span>
 
+                    </div>
 
+                </div>
 
+                <button
+                    type="button"
+                    class="logout-button"
+                    id="logoutButton"
+                >
 
+                    <i data-lucide="log-out" aria-hidden="true"></i>
 
-                <div class="nav-section">
+                    <span>Sign out</span>
 
-                    <span class="nav-section-title">System</span>
+                </button>
 
+            </div>
 
-
-                    <a href="settings.html" class="nav-link">
-
-                        <span class="nav-icon"><i data-lucide="settings-2" aria-hidden="true"></i></span>
-
-                        <span>Settings</span>
-
-                    </a>
-
-
-
-                    <a href="employer-access.html" class="nav-link">
-
-                        <span class="nav-icon"><i data-lucide="shield-check" aria-hidden="true"></i></span>
-
-                        <span>Employer Access</span>
-
-                    </a>
-
-                </div>
-
-
-
-            </nav>
-
-
-
-
-
-            <div class="sidebar-footer">
-
-
-
-                <div class="admin-user">
-
-                    <div class="user-avatar" aria-hidden="true">DN</div>
-
-
-
-                    <div class="user-details">
-
-                        <strong>Dennis Ndwigah</strong>
-
-                        <span>Administrator</span>
-
-                    </div>
-
-                </div>
-
-
-
-                <button type="button" class="logout-button" id="logoutButton">
-
-                    <i data-lucide="log-out" aria-hidden="true"></i>
-
-                    <span>Sign out</span>
-
-                </button>
-
-
-
-            </div>
-
-
-
-        </aside>
+        </aside>
 
 
 

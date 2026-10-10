@@ -32,97 +32,205 @@
 
     <aside class="admin-sidebar" id="adminSidebar">
 
-        <div class="sidebar-header">
+            <div class="sidebar-header">
 
-            <a href="dashboard.html" class="admin-logo">
+                <a href="dashboard.html" class="admin-logo">
 
-                <span class="brand-mark">DN</span>
+                    <span class="brand-mark">DN</span>
 
-                <span class="brand-text">
+                    <span class="brand-text">
 
-                    <strong>Dennis</strong>
+                        <strong>DN Portfolio</strong>
 
-                    <small>Portfolio Admin</small>
+                        <small>Admin console</small>
 
-                </span>
+                    </span>
 
-            </a>
+                </a>
 
-            <button type="button" class="mobile-close" id="closeSidebar" aria-label="Close navigation">×</button>
+                <button
+                    type="button"
+                    class="mobile-close"
+                    id="closeSidebar"
+                    aria-label="Close navigation"
+                >
 
-        </div>
+                    <i data-lucide="x" aria-hidden="true"></i>
 
+                </button>
 
+            </div>
 
-        <nav class="admin-navigation" aria-label="Admin navigation">
+            <nav class="admin-navigation" aria-label="Admin navigation">
 
-            <div class="nav-section">
+                <div class="nav-section">
 
-                <span class="nav-section-title">Workspace</span>
+                    <span class="nav-section-title">Workspace</span>
 
-                <a href="dashboard.html" class="nav-link"><span class="nav-icon">⌂</span><span>Dashboard</span></a>
+                    <a
+                        href="dashboard.html"
+                        class="nav-link"
+                    >
 
-                <a href="profile.html" class="nav-link"><span class="nav-icon">◯</span><span>Profile</span></a>
+                        <span class="nav-icon">
 
-                <a href="experience.html" class="nav-link active" aria-current="page"><span class="nav-icon">▣</span><span>Experience</span></a>
+                            <i data-lucide="layout-dashboard" aria-hidden="true"></i>
 
-                <a href="projects.html" class="nav-link"><span class="nav-icon">◆</span><span>Projects</span></a>
+                        </span>
 
-                <a href="skills.html" class="nav-link"><span class="nav-icon">◇</span><span>Skills</span></a>
+                        <span>Dashboard</span>
 
-            </div>
+                    </a>
 
+                    <a href="profile.html" class="nav-link">
 
+                        <span class="nav-icon">
 
-            <div class="nav-section">
+                            <i data-lucide="user-round" aria-hidden="true"></i>
 
-                <span class="nav-section-title">Credentials</span>
+                        </span>
 
-                <a href="certifications.html" class="nav-link"><span class="nav-icon">✓</span><span>Certifications</span></a>
+                        <span>Profile</span>
 
-                <a href="documents.html" class="nav-link"><span class="nav-icon">▤</span><span>Documents</span></a>
+                    </a>
 
-                <a href="employer-access.html" class="nav-link"><span class="nav-icon">↗</span><span>Employer Access</span></a>
+                    <a href="experience.html" class="nav-link active" aria-current="page">
 
-            </div>
+                        <span class="nav-icon">
 
+                            <i data-lucide="briefcase" aria-hidden="true"></i>
 
+                        </span>
 
-            <div class="nav-section">
+                        <span>Experience</span>
 
-                <span class="nav-section-title">System</span>
+                    </a>
 
-                <a href="settings.html" class="nav-link"><span class="nav-icon">⚙</span><span>Settings</span></a>
+                    <a href="projects.html" class="nav-link">
 
-                <a href="../index.html" class="nav-link" target="_blank" rel="noopener"><span class="nav-icon">↗</span><span>View Website</span></a>
+                        <span class="nav-icon">
 
-            </div>
+                            <i data-lucide="folder-kanban" aria-hidden="true"></i>
 
-        </nav>
+                        </span>
 
+                        <span>Projects</span>
 
+                    </a>
 
-        <div class="sidebar-footer">
+                    <a href="skills.html" class="nav-link">
 
-            <div class="admin-user">
+                        <span class="nav-icon">
 
-                <div class="user-avatar">DN</div>
+                            <i data-lucide="sparkles" aria-hidden="true"></i>
 
-                <div class="user-details">
+                        </span>
 
-                    <strong>Dennis Ndwigah</strong>
+                        <span>Skills</span>
 
-                    <span>Administrator</span>
+                    </a>
 
-                </div>
+                </div>
 
-            </div>
+                <div class="nav-section">
 
-            <button type="button" class="logout-button" id="logoutButton">Sign out</button>
+                    <span class="nav-section-title">Credentials</span>
 
-        </div>
+                    <a href="certifications.html" class="nav-link">
 
-    </aside>
+                        <span class="nav-icon">
+
+                            <i data-lucide="award" aria-hidden="true"></i>
+
+                        </span>
+
+                        <span>Certifications</span>
+
+                    </a>
+
+                    <a href="documents.html" class="nav-link">
+
+                        <span class="nav-icon">
+
+                            <i data-lucide="file-text" aria-hidden="true"></i>
+
+                        </span>
+
+                        <span>Documents</span>
+
+                        <span class="nav-badge" id="documentCount">0</span>
+
+                    </a>
+
+                </div>
+
+                <div class="nav-section">
+
+                    <span class="nav-section-title">System</span>
+
+                    <a href="settings.html" class="nav-link">
+
+                        <span class="nav-icon">
+
+                            <i data-lucide="settings-2" aria-hidden="true"></i>
+
+                        </span>
+
+                        <span>Settings</span>
+
+                    </a>
+
+                    <a href="employer-access.html" class="nav-link">
+
+                        <span class="nav-icon">
+
+                            <i data-lucide="shield-check" aria-hidden="true"></i>
+
+                        </span>
+
+                        <span>Employer Access</span>
+
+                    </a>
+
+                </div>
+
+            </nav>
+
+            <div class="sidebar-footer">
+
+                <div class="admin-user">
+
+                    <div class="user-avatar" aria-hidden="true">
+
+                        DN
+
+                    </div>
+
+                    <div class="user-details">
+
+                        <strong>Dennis Ndwigah</strong>
+
+                        <span>Administrator</span>
+
+                    </div>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="logout-button"
+                    id="logoutButton"
+                >
+
+                    <i data-lucide="log-out" aria-hidden="true"></i>
+
+                    <span>Sign out</span>
+
+                </button>
+
+            </div>
+
+        </aside>
 
 
 
@@ -387,6 +495,14 @@
 <script src="js/admin.js"></script>
 <script src="js/experience.js"></script>
 
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    if (window.lucide) {
+        window.lucide.createIcons({ attrs: { "stroke-width": 1.8 } });
+    }
+});
+</script>
 </body>
 
 </html>
