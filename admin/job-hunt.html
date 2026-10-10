@@ -67,9 +67,9 @@
           <div>
             <span class="eyebrow">Career workspace</span>
             <h1>Job search tracker</h1>
-            <p>Keep opportunities, salary ranges, deadlines, applications and recruiter follow-ups in one private place.</p>
+            <p>Automatically find fresh vacancies that match your warehouse, supply-chain, procurement and logistics experience. Review each listing before applying.</p>
           </div>
-          <div class="page-heading-actions"><button type="button" class="secondary-button" id="exportCsvButton"><i data-lucide="download" aria-hidden="true"></i><span>Export CSV</span></button><button type="button" class="primary-button" id="newJobButton"><i data-lucide="plus" aria-hidden="true"></i><span>Add opportunity</span></button></div>
+          <div class="page-heading-actions"><button type="button" class="secondary-button" id="discoverJobsButton"><i data-lucide="refresh-cw" aria-hidden="true"></i><span>Find new jobs</span></button><button type="button" class="secondary-button" id="exportCsvButton"><i data-lucide="download" aria-hidden="true"></i><span>Export CSV</span></button><button type="button" class="primary-button" id="newJobButton"><i data-lucide="plus" aria-hidden="true"></i><span>Add opportunity</span></button></div>
         </section>
 
         <div id="jobHuntStatus" class="job-hunt-status" role="status" aria-live="polite">Connecting to your private job tracker…</div>
@@ -92,7 +92,7 @@
               <div class="form-group"><label for="workMode">Work arrangement</label><select id="workMode" name="workMode"><option value="On-site">On-site</option><option value="Hybrid">Hybrid</option><option value="Remote">Remote</option><option value="Not specified">Not specified</option></select></div>
               <div class="form-group"><label for="datePosted">Date posted and time (for 48-hour filter)</label><input id="datePosted" name="datePosted" type="datetime-local"></div>
               <div class="form-group"><label for="closingDate">Closing date</label><input id="closingDate" name="closingDate" type="date"></div>
-              <div class="form-group"><label for="status">Application status</label><select id="status" name="status"><option value="Saved">Saved</option><option value="To Apply">To Apply</option><option value="Applied">Applied</option><option value="Interview">Interview</option><option value="Offer">Offer</option><option value="Rejected">Rejected</option><option value="Withdrawn">Withdrawn</option></select></div>
+              <div class="form-group"><label for="status">Application status</label><select id="status" name="status"><option value="Discovered">Discovered</option><option value="Saved">Saved</option><option value="To Apply">To Apply</option><option value="Applied">Applied</option><option value="Interview">Interview</option><option value="Offer">Offer</option><option value="Rejected">Rejected</option><option value="Withdrawn">Withdrawn</option></select></div>
               <div class="form-group"><label for="source">Found via</label><select id="source" name="source"><option value="LinkedIn">LinkedIn</option><option value="Company website">Company website</option><option value="Recruiter">Recruiter</option><option value="Job board">Job board</option><option value="Referral">Referral</option><option value="Other">Other</option></select></div>
               <div class="form-group"><label for="salaryMin">Expected salary min (KES/month)</label><input id="salaryMin" name="salaryMin" type="number" min="0" step="1000" inputmode="numeric" placeholder="e.g. 60000"></div>
               <div class="form-group"><label for="salaryMax">Expected salary max (KES/month)</label><input id="salaryMax" name="salaryMax" type="number" min="0" step="1000" inputmode="numeric" placeholder="e.g. 100000"></div>
@@ -109,11 +109,11 @@
         </section>
 
         <section class="dashboard-card jobs-list-card">
-          <div class="card-header"><div><h2>Opportunities</h2><p class="job-form-subtitle">Search and update your pipeline as you apply.</p></div><span id="jobCountBadge" class="status-pill">0 records</span></div>
+          <div class="card-header"><div><h2>Opportunities</h2><p class="job-form-subtitle">Fresh listings are checked automatically when this page opens. Discovered roles remain separate until you choose an application status.</p></div><span id="jobCountBadge" class="status-pill">0 records</span></div>
           <div class="job-filters">
             <div class="form-group"><label for="jobSearch">Search</label><input id="jobSearch" type="search" placeholder="Title, company, location or keyword"></div>
-            <div class="form-group"><label for="statusFilter">Status</label><select id="statusFilter"><option value="All">All statuses</option><option>Saved</option><option>To Apply</option><option>Applied</option><option>Interview</option><option>Offer</option><option>Rejected</option><option>Withdrawn</option></select></div>
-            <div class="form-group"><label for="recencyFilter">Posting date</label><select id="recencyFilter"><option value="All">Any date</option><option value="48">Last 48 hours</option><option value="7">Last 7 days</option><option value="30">Last 30 days</option></select></div>
+            <div class="form-group"><label for="statusFilter">Status</label><select id="statusFilter"><option value="All">All statuses</option><option>Discovered</option><option>Saved</option><option>To Apply</option><option>Applied</option><option>Interview</option><option>Offer</option><option>Rejected</option><option>Withdrawn</option></select></div>
+            <div class="form-group"><label for="recencyFilter">Posting date</label><select id="recencyFilter"><option value="All">Any date</option><option value="48" selected>Last 48 hours</option><option value="7">Last 7 days</option><option value="30">Last 30 days</option></select></div>
           </div>
           <div id="jobList" class="job-list" aria-live="polite"><div class="empty-state"><div class="empty-state-icon"><i data-lucide="briefcase-business" aria-hidden="true"></i></div><h3>Loading opportunities</h3><p>Your saved applications will appear here.</p></div></div>
         </section>

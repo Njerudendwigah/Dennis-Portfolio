@@ -79,6 +79,11 @@ path(
      portfolio_api.section,
      name="portfolio_api_section",
     ),
+path(
+    "api/job-discovery/",
+    portfolio_api.job_discovery,
+    name="portfolio_api_job_discovery",
+),
 
     # -----------------------------------------------------------------------
     # Public employer access request flow

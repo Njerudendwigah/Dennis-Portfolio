@@ -8,6 +8,7 @@ from functools import wraps
 from typing import Any, Callable
 
 from django.conf import settings
+from django.core.cache import cache
 from django.contrib.auth import authenticate, get_user_model
 from django.core import signing
 from django.http import HttpRequest, JsonResponse
@@ -342,3 +343,33 @@ def section(request: HttpRequest, key: str) -> JsonResponse:
             "created": created,
         },
     )
+
+
+@csrf_exempt
+@require_http_methods(["OPTIONS", "POST"])
+@staff_api_required
+def job_discovery(request: HttpRequest) -> JsonResponse:
+    """Discover fresh vacancies through public, source-attributed job feeds."""
+    if request.method == "OPTIONS":
+        return _json_response(request, {"ok": True})
+    try:
+        body = json.loads(request.body or b"{}")
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return _json_response(request, {"detail": "Invalid JSON."}, status=400)
+
+    force_refresh = isinstance(body, dict) and body.get("refresh") is True
+    cache_key = "job_discovery_results_v1"
+    cached = cache.get(cache_key)
+    if cached and not force_refresh:
+        return _json_response(request, {**cached, "cached": True})
+
+    from .job_discovery import collect_opportunities
+    result = collect_opportunities()
+    cache.set(cache_key, result, timeout=15 * 60)
+    if not any(source.get("ok") for source in result.get("sources", [])):
+        return _json_response(
+            request,
+            {**result, "detail": "No job source responded. Please try again shortly.", "cached": False},
+            status=502,
+        )
+    return _json_response(request, {**result, "cached": False})

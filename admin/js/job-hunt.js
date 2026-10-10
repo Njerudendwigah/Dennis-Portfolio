@@ -2,7 +2,7 @@
 
 (() => {
   const SECTION_KEY = "jobHuntApplications";
-  const STATUSES = ["Saved", "To Apply", "Applied", "Interview", "Offer", "Rejected", "Withdrawn"];
+  const STATUSES = ["Discovered", "Saved", "To Apply", "Applied", "Interview", "Offer", "Rejected", "Withdrawn"];
   const MATCH_TERMS = [
     "supply chain", "warehouse", "inventory", "procurement", "purchasing",
     "distribution", "logistics", "transport", "fulfillment", "fulfilment",
@@ -216,7 +216,9 @@
     if (salaryMin && salaryMax && Number(salaryMin) > Number(salaryMax)) throw new Error("Minimum salary cannot be greater than maximum salary.");
     const url = formValue("jobUrl");
     if (url && !safeUrl(url)) throw new Error("Enter a valid http or https job advert URL.");
+    const existingJob = jobs.find(job => job.id === formValue("jobId")) || {};
     return {
+      ...existingJob,
       id: formValue("jobId") || (window.crypto?.randomUUID ? crypto.randomUUID() : `job-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`),
       title: formValue("jobTitle"), company: formValue("company"),
       location: formValue("location"), workMode: formValue("workMode"),
@@ -308,6 +310,99 @@
     setMessage(`Exported ${jobs.length} tracked ${jobs.length === 1 ? "opportunity" : "opportunities"}.`, "success");
   }
 
+  async function discoverJobs(forceRefresh = false) {
+    if (!isReady) {
+      setMessage("Connect to the private tracker before searching for jobs.", "error");
+      return;
+    }
+
+    const button = $("discoverJobsButton");
+    const priorLabel = button.querySelector("span")?.textContent || "Find new jobs";
+    button.disabled = true;
+    button.setAttribute("aria-busy", "true");
+    if (button.querySelector("span")) button.querySelector("span").textContent = "Searching…";
+    setMessage("Searching public job feeds and matching vacancies to your CV keywords…");
+
+    try {
+      const token = window.portfolioAuth?.getStoredToken?.() || "";
+      if (!token) throw new Error("Your admin session has expired. Sign in again.");
+      const response = await fetch("https://dennis-portfolio-oaus.onrender.com/employer/api/job-discovery/", {
+        method: "POST",
+        headers: { "Authorization": \`Bearer \${token}\`, "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({ refresh: forceRefresh })
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.detail || "The job-search service could not complete the scan.");
+
+      const incoming = Array.isArray(payload.jobs) ? payload.jobs : [];
+      const next = [...jobs];
+      let added = 0;
+      let updated = 0;
+      const canonicalUrl = value => safeUrl(value).replace(/\/+$/, "").toLowerCase();
+      const sameRecord = (a, b) => {
+        const aUrl = canonicalUrl(a.jobUrl || a.sourceUrl);
+        const bUrl = canonicalUrl(b.jobUrl || b.sourceUrl);
+        if (aUrl && bUrl) return aUrl === bUrl;
+        return String(a.title || "").trim().toLowerCase() === String(b.title || "").trim().toLowerCase()
+          && String(a.company || "").trim().toLowerCase() === String(b.company || "").trim().toLowerCase();
+      };
+
+      for (const found of incoming) {
+        if (!found || !found.title || !found.jobUrl) continue;
+        const existingIndex = next.findIndex(item => sameRecord(item, found));
+        const normalized = {
+          ...found,
+          status: STATUSES.includes(found.status) ? found.status : "Discovered",
+          updatedAt: new Date().toISOString()
+        };
+        if (existingIndex < 0) {
+          next.unshift(normalized);
+          added += 1;
+        } else if (next[existingIndex].status === "Discovered") {
+          next[existingIndex] = {
+            ...normalized,
+            ...next[existingIndex],
+            ...found,
+            id: next[existingIndex].id || found.id,
+            status: "Discovered",
+            createdAt: next[existingIndex].createdAt || found.createdAt,
+            updatedAt: new Date().toISOString()
+          };
+          updated += 1;
+        }
+        // Do not overwrite or downgrade vacancies the user has acted on.
+      }
+
+      if (added || updated) await persist(next, "Saving discovered vacancies…");
+
+      const failedSources = (payload.sources || []).filter(item => !item.ok);
+      const sourceSummary = (payload.sources || []).filter(item => item.ok).map(item => item.name).filter(Boolean);
+      let message;
+      if (!incoming.length && failedSources.length && !sourceSummary.length) {
+        message = "Job search is temporarily unavailable. " + failedSources.map(item => item.name + ": " + (item.error || "unavailable")).join("; ");
+        setMessage(message, "error");
+      } else if (added || updated) {
+        message = \`Search complete: \${added} new and \${updated} refreshed vacancy records. Sources: \${sourceSummary.join(", ") || "public job feeds"}.\`;
+        if (failedSources.length) message += \` Some sources were unavailable (\${failedSources.map(item => item.name).join(", ")}).\`;
+        setMessage(message, "success");
+      } else {
+        message = incoming.length
+          ? "Search complete. No new records; matching vacancies already exist in your tracker."
+          : "Search complete. No new matching vacancies were found in the connected feeds.";
+        if (failedSources.length) message += \` Unavailable sources: \${failedSources.map(item => item.name).join(", ")}.\`;
+        setMessage(message, failedSources.length && !sourceSummary.length ? "error" : "success");
+      }
+      if (added || updated) render();
+    } catch (error) {
+      setMessage(error?.message || "Could not search for vacancies.", "error");
+    } finally {
+      button.disabled = false;
+      button.removeAttribute("aria-busy");
+      if (button.querySelector("span")) button.querySelector("span").textContent = priorLabel;
+      renderIcons();
+    }
+  }
+
   async function init() {
     if (!window.portfolioApi) {
       setMessage("Portfolio API script did not load. Refresh the page or check the scripts.", "error");
@@ -326,6 +421,8 @@
       isReady = true;
       setMessage("Connected. Changes save to your authenticated portfolio backend.", "success");
       render();
+      // Automatically refresh public vacancy feeds after the private tracker loads.
+      discoverJobs(false);
     } catch (error) {
       setMessage(error?.message || "Could not load the job tracker from the server.", "error");
       list.innerHTML = `<div class="job-empty-state"><h3>Unable to load tracker</h3><p>${escapeHtml(error?.message || "Check your connection and sign in again.")}</p></div>`;
@@ -334,6 +431,7 @@
 
   form.addEventListener("submit", onSubmit);
   $("newJobButton").addEventListener("click", () => showForm());
+  $("discoverJobsButton").addEventListener("click", () => discoverJobs(true));
   $("closeJobForm").addEventListener("click", hideForm);
   $("cancelJobButton").addEventListener("click", hideForm);
   $("exportCsvButton").addEventListener("click", exportCsv);
