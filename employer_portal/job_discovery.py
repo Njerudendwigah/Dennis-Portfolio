@@ -555,9 +555,10 @@ def _request_rss(url: str, default_location: str = "", timeout: int = 8) -> list
 
 
 def build_search_urls() -> list[str]:
-    """Build ISO-country and unfiltered fallback queries for each search term."""
+    """Search both country-name and ISO-slug forms, then try a validated fallback."""
     urls = []
     for term in SEARCH_TERMS:
+        urls.append(f"{API_ROOT}?{urlencode({'limit': 100, 'country': 'Kenya', 'search': term})}")
         urls.append(f"{API_ROOT}?{urlencode({'limit': 100, 'country': 'ke', 'search': term})}")
         urls.append(f"{API_ROOT}?{urlencode({'limit': 100, 'search': term})}")
     return urls
@@ -587,7 +588,7 @@ def collect_opportunities() -> dict[str, Any]:
             items, error = future.result()
             params = parse_qs(urlparse(url).query)
             term = params.get("search", [""])[0]
-            country_scope = params.get("country", [""])[0].lower() == "ke"
+            country_scope = params.get("country", [""])[0].strip().lower() in {"ke", "kenya", "ken"}
             query_row: dict[str, Any] = {
                 "source": "Dev Global Jobs",
                 "term": term,

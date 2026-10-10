@@ -77,11 +77,13 @@ class JobDiscoveryNormalizationTests(SimpleTestCase):
         self.assertEqual(record["location"], "Kenya (city not specified)")
         self.assertIn("verify location", record["locationConfidence"].lower())
 
-    def test_search_urls_use_iso_country_and_unfiltered_fallback(self):
+    def test_search_urls_use_country_name_iso_slug_and_unfiltered_fallback(self):
         urls = build_search_urls()
-        self.assertEqual(len(urls), 20)
+        self.assertEqual(len(urls), 30)
         queries = [parse_qs(urlparse(url).query) for url in urls]
-        self.assertIn("ke", [query.get("country", [""])[0] for query in queries])
+        country_values = [query.get("country", [""])[0] for query in queries]
+        self.assertIn("ke", country_values)
+        self.assertIn("Kenya", country_values)
         self.assertTrue(any("country" not in query for query in queries))
 
     def test_infers_nairobi_from_an_explicit_location_label(self):
