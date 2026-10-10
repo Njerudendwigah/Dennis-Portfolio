@@ -13,9 +13,30 @@ from urllib.request import Request, urlopen
 import hashlib
 import json
 import re
+import xml.etree.ElementTree as ET
 from typing import Any
 
 API_ROOT = "https://devglobaljobs.com/api/v1/jobs"
+CAREER_POINT_FEEDS = (
+    {
+        "name": "Career Point Kenya · Nairobi jobs",
+        "url": "https://www.careerpointkenya.co.ke/category/jobs-in-nairobi/feed/",
+        "default_location": "Nairobi, Kenya",
+        "allow_country_only": False,
+    },
+    {
+        "name": "Career Point Kenya · Nairobi tag",
+        "url": "https://www.careerpointkenya.co.ke/tag/jobs-in-nairobi/feed/",
+        "default_location": "Nairobi, Kenya",
+        "allow_country_only": False,
+    },
+    {
+        "name": "Career Point Kenya · latest jobs",
+        "url": "https://www.careerpointkenya.co.ke/feed/",
+        "default_location": "",
+        "allow_country_only": True,
+    },
+)
 SEARCH_TERMS = ("warehouse", "storekeeper", "procurement", "supply chain", "inventory", "logistics", "distribution", "transport", "operations", "purchasing")
 MATCH_TERMS = (
     "supply chain", "warehouse", "storekeeper", "stores", "inventory",
@@ -252,18 +273,24 @@ def normalize_external_job(
     if current.tzinfo is None:
         current = current.replace(tzinfo=timezone.utc)
     age = current.astimezone(timezone.utc) - posted
-    # Keep a modest ingestion window; the dashboard defaults to the requested last 48 hours.
-    if age < timedelta(days=-1) or age > timedelta(days=30):
-        return reject("posting_date_outside_30_day_window")
+    # Only return vacancies posted in the rolling 48 hours before this scan.
+    # Existing older records remain in the private tracker, but are not refreshed as "new".
+    if age < timedelta(0) or age > timedelta(hours=48):
+        return reject("posting_date_outside_48_hour_window")
 
     closes = parse_date(first(item, "validThrough", "valid_through", "expiryDate", "expiry_date",
                               "closingDate", "closing_date", "deadline", "expiresAt", "expires_at"))
     url = clean(first(item, "url", "jobUrl", "job_url", "jobPageUrl", "job_page_url",
                       "permalink", "detailUrl", "detail_url", "link", "applicationLink", "application_link"))
+    allowed_hosts = {
+        "Dev Global Jobs": {"devglobaljobs.com", "www.devglobaljobs.com"},
+        "Career Point Kenya": {"careerpointkenya.co.ke", "www.careerpointkenya.co.ke"},
+    }.get(source, set())
     if url.startswith("/") and not url.startswith("//"):
-        url = urljoin("https://devglobaljobs.com", url)
+        base = "https://www.careerpointkenya.co.ke" if source == "Career Point Kenya" else "https://devglobaljobs.com"
+        url = urljoin(base, url)
     parsed = urlparse(url)
-    if parsed.scheme != "https" or parsed.hostname not in {"devglobaljobs.com", "www.devglobaljobs.com"}:
+    if parsed.scheme != "https" or parsed.hostname not in allowed_hosts:
         return reject("missing_or_unapproved_detail_url")
 
     salary_min, salary_max = monthly_kes(item)
@@ -327,6 +354,88 @@ def _payload_items(payload: Any) -> list[dict[str, Any]]:
     return []
 
 
+def _xml_child_text(node: ET.Element, *names: str) -> str:
+    desired = {name.lower() for name in names}
+    for child in node.iter():
+        tag = child.tag.rsplit("}", 1)[-1].lower()
+        if tag in desired:
+            value = " ".join(part.strip() for part in child.itertext() if part.strip())
+            if value:
+                return value
+    return ""
+
+
+def parse_rss_jobs(
+    raw_xml: bytes,
+    feed_url: str,
+    default_location: str = "",
+) -> list[dict[str, Any]]:
+    """Parse standard RSS 2.0 or Atom feed entries into the common job schema."""
+    root = ET.fromstring(raw_xml)
+    entries = [
+        node for node in root.iter()
+        if node.tag.rsplit("}", 1)[-1].lower() in {"item", "entry"}
+    ]
+    records: list[dict[str, Any]] = []
+    for entry in entries:
+        title = clean(_xml_child_text(entry, "title"))
+        link = ""
+        for child in entry.iter():
+            if child.tag.rsplit("}", 1)[-1].lower() != "link":
+                continue
+            link = (child.attrib.get("href") or (child.text or "")).strip()
+            if link:
+                break
+        link = urljoin(feed_url, link) if link else ""
+        description = _xml_child_text(entry, "description", "summary", "encoded", "content")
+        posted = _xml_child_text(entry, "pubdate", "published", "updated", "date")
+        if not title or not link or not posted:
+            continue
+
+        company = ""
+        # Career Point commonly appends "Job <employer>" to job titles.
+        split_title = re.match(r"^(?P<title>.+?)\s+Job\s+(?P<company>.+)$", title, re.IGNORECASE)
+        if split_title:
+            title = split_title.group("title").strip()
+            company = re.sub(r"^\s*(?:at\s+)", "", split_title.group("company")).strip()
+
+        location = default_location
+        if not location:
+            location_match = re.search(
+                r"(?:job\s+location|work\s+location|location)\s*[:\-]\s*"
+                r"(Nairobi(?: County)?|Kiambu(?: County)?|Thika|Ruiru|Juja|Limuru|Kikuyu|Kahawa|Ruai)",
+                description,
+                re.IGNORECASE,
+            )
+            if location_match:
+                location = location_match.group(1) + ", Kenya"
+        records.append({
+            "title": title,
+            "companyName": company or "Employer not specified",
+            "location": location,
+            "country": "Kenya",
+            "datePosted": posted,
+            "url": link,
+            "description": description,
+        })
+    return records
+
+
+def _request_rss(url: str, default_location: str = "", timeout: int = 8) -> list[dict[str, Any]]:
+    parsed = urlparse(url)
+    if parsed.scheme != "https" or parsed.hostname not in {
+        "careerpointkenya.co.ke", "www.careerpointkenya.co.ke"
+    }:
+        raise ValueError("Blocked non-approved RSS source URL.")
+    request = Request(url, headers={
+        "User-Agent": "DennisPortfolioJobSearch/1.0 (personal job alerts; RSS reader)",
+        "Accept": "application/rss+xml,application/atom+xml,application/xml,text/xml;q=0.9,*/*;q=0.8",
+    })
+    with urlopen(request, timeout=timeout) as response:
+        raw = response.read(1_500_000)
+    return parse_rss_jobs(raw, url, default_location)
+
+
 def build_search_urls() -> list[str]:
     """Build ISO-country and unfiltered fallback queries for each search term."""
     urls = []
@@ -337,7 +446,7 @@ def build_search_urls() -> list[str]:
 
 
 def collect_opportunities() -> dict[str, Any]:
-    """Collect, normalize, location-filter and deduplicate recent vacancies."""
+    """Collect vacancies posted in the last 48 hours from the API and public RSS feeds."""
     queries = build_search_urls()
     jobs_by_url: dict[str, dict[str, Any]] = {}
     errors: list[str] = []
@@ -351,7 +460,7 @@ def collect_opportunities() -> dict[str, Any]:
         except Exception as exc:
             return [], str(exc)[:220]
 
-    succeeded = 0
+    api_succeeded = 0
     futures_by_url = {}
     with ThreadPoolExecutor(max_workers=min(6, len(queries))) as executor:
         futures_by_url = {executor.submit(request_jobs, url): url for url in queries}
@@ -362,6 +471,7 @@ def collect_opportunities() -> dict[str, Any]:
             term = params.get("search", [""])[0]
             country_scope = params.get("country", [""])[0].lower() == "ke"
             query_row: dict[str, Any] = {
+                "source": "Dev Global Jobs",
                 "term": term,
                 "countryScoped": country_scope,
                 "received": len(items),
@@ -373,12 +483,54 @@ def collect_opportunities() -> dict[str, Any]:
                 query_diagnostics.append(query_row)
                 continue
 
-            succeeded += 1
+            api_succeeded += 1
             records_received += len(items)
             for item in items:
                 job = normalize_external_job(
                     item,
+                    source="Dev Global Jobs",
                     allow_country_only_location=country_scope,
+                    diagnostics=reject_reasons,
+                )
+                if job:
+                    query_row["accepted"] += 1
+                    jobs_by_url.setdefault(job["jobUrl"].lower().rstrip("/"), job)
+            query_diagnostics.append(query_row)
+
+    rss_succeeded = 0
+    rss_errors: list[str] = []
+
+    def fetch_feed(feed: dict[str, Any]) -> tuple[dict[str, Any], list[dict[str, Any]], str | None]:
+        try:
+            rows = _request_rss(feed["url"], feed.get("default_location", ""))
+            return feed, rows, None
+        except Exception as exc:
+            return feed, [], str(exc)[:220]
+
+    with ThreadPoolExecutor(max_workers=len(CAREER_POINT_FEEDS)) as executor:
+        futures = [executor.submit(fetch_feed, feed) for feed in CAREER_POINT_FEEDS]
+        for future in as_completed(futures):
+            feed, items, error = future.result()
+            query_row = {
+                "source": "Career Point Kenya",
+                "feed": feed["name"],
+                "received": len(items),
+                "accepted": 0,
+                "error": error or "",
+            }
+            if error:
+                rss_errors.append(error)
+                errors.append(error)
+                query_diagnostics.append(query_row)
+                continue
+
+            rss_succeeded += 1
+            records_received += len(items)
+            for item in items:
+                job = normalize_external_job(
+                    item,
+                    source="Career Point Kenya",
+                    allow_country_only_location=bool(feed.get("allow_country_only")),
                     diagnostics=reject_reasons,
                 )
                 if job:
@@ -390,34 +542,56 @@ def collect_opportunities() -> dict[str, Any]:
         jobs_by_url.values(),
         key=lambda row: parse_date(row["datePosted"]) or datetime.min.replace(tzinfo=timezone.utc),
         reverse=True,
-    )[:120]
+    )[:250]
+
+    counts = {"Dev Global Jobs": 0, "Career Point Kenya": 0}
+    for job in jobs:
+        counts[job["source"]] = counts.get(job["source"], 0) + 1
+
+    source_status = [
+        {
+            "name": "Dev Global Jobs",
+            "ok": api_succeeded > 0,
+            "count": counts["Dev Global Jobs"],
+            "error": "" if api_succeeded else (errors[0] if errors else "No API request succeeded."),
+            "requestsSucceeded": api_succeeded,
+            "requestsAttempted": len(queries),
+        },
+        {
+            "name": "Career Point Kenya",
+            "ok": rss_succeeded > 0,
+            "count": counts["Career Point Kenya"],
+            "error": "" if rss_succeeded else (rss_errors[0] if rss_errors else "No RSS feed returned data."),
+            "feedsSucceeded": rss_succeeded,
+            "feedsAttempted": len(CAREER_POINT_FEEDS),
+        },
+    ]
+
     return {
         "jobs": jobs,
-        "sources": [{
-            "name": "Dev Global Jobs",
-            "ok": succeeded > 0,
-            "count": len(jobs),
-            "error": "" if succeeded else (errors[0] if errors else "No provider request succeeded."),
-            "requestsSucceeded": succeeded,
-            "requestsAttempted": len(queries),
-        }],
+        "sources": source_status,
         "diagnostics": {
-            "queriesAttempted": len(queries),
-            "queriesSucceeded": succeeded,
+            "queriesAttempted": len(queries) + len(CAREER_POINT_FEEDS),
+            "queriesSucceeded": api_succeeded + rss_succeeded,
+            "apiQueriesAttempted": len(queries),
+            "apiQueriesSucceeded": api_succeeded,
+            "feedsAttempted": len(CAREER_POINT_FEEDS),
+            "feedsSucceeded": rss_succeeded,
             "recordsReceived": records_received,
             "recordsMatched": len(jobs),
             "recordsRejectedByFilters": sum(
-                count for key, count in reject_reasons.items() if key != "accepted_country_only_location"
+                count for key, count in reject_reasons.items()
+                if key != "accepted_country_only_location"
             ),
             "rejectReasons": reject_reasons,
             "queries": query_diagnostics,
         },
         "scannedAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-        "recencyWindowDays": 30,
+        "recencyWindowHours": 48,
         "targetAreas": ["Nairobi County", "Kiambu County", "remote roles available in Kenya"],
         "disclaimer": (
-            "Country-only vacancies are marked for location verification. Confirm vacancy dates, salary, "
-            "eligibility and instructions on the original advert. Salary appears only when the source "
-            "identifies KES and a monthly or annual pay period. No application is submitted automatically."
+            "Only vacancies with a source posting time within the last 48 hours are returned. "
+            "Country-only vacancies are marked for location verification. Confirm exact dates, salary, "
+            "eligibility and instructions on the original advert. No application is submitted automatically."
         ),
     }

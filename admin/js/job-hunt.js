@@ -127,7 +127,14 @@
   }
 
   function renderStats() {
-    $("statSaved").textContent = jobs.filter(job => ["Discovered", "Saved", "To Apply"].includes(job.status)).length;
+    const statNow = Date.now();
+    $("statSaved").textContent = jobs.filter(job => {
+      if (["Rejected", "Withdrawn"].includes(job.status)) return false;
+      const posted = parseDate(job.datePosted);
+      if (!posted) return false;
+      const age = statNow - posted.getTime();
+      return age >= 0 && age <= 48 * 60 * 60 * 1000;
+    }).length;
     $("statApplied").textContent = jobs.filter(job => ["Applied", "Interview", "Offer", "Rejected", "Withdrawn"].includes(job.status)).length;
     $("statInterviews").textContent = jobs.filter(job => job.status === "Interview" || job.interviewDate).length;
     $("statFollowups").textContent = jobs.filter(dueFollowUp).length;
@@ -417,7 +424,7 @@
             location_not_target: "location not confirmed for Nairobi/Kiambu",
             no_profile_keyword_match: "no matching role keywords",
             missing_or_unparseable_posting_date: "missing/unreadable posting date",
-            posting_date_outside_30_day_window: "outside the 30-day scan window",
+            posting_date_outside_48_hour_window: "outside the last 48 hours",
             missing_or_unapproved_detail_url: "missing/invalid advert link"
           };
           const topReasons = Object.entries(reasons)
