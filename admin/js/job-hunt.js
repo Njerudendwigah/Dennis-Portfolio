@@ -453,6 +453,7 @@
           const reasons = diagnostics.rejectReasons || {};
           const labels = {
             missing_title: "missing title",
+            outside_kenya_or_country_unconfirmed: "outside Kenya or country not confirmed",
             location_not_target: "outside Kenya or country not confirmed",
             no_profile_keyword_match: "no matching role keywords",
             missing_or_unparseable_posting_date: "missing/unreadable posting date",
