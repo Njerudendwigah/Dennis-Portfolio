@@ -75,3 +75,12 @@
   .job-form-actions { flex-wrap: wrap; }
   .job-form-actions .save-message { flex-basis: 100%; }
 }
+
+
+/* Automatic vacancy discovery states */
+#discoverJobsButton[disabled] { opacity: .68; cursor: progress; }
+#discoverJobsButton[aria-busy="true"] svg { animation: job-hunt-spin 1.2s linear infinite; }
+@keyframes job-hunt-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  #discoverJobsButton[aria-busy="true"] svg { animation: none; }
+}

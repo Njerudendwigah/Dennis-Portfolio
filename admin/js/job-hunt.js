@@ -2,7 +2,7 @@
 
 (() => {
   const SECTION_KEY = "jobHuntApplications";
-  const STATUSES = ["Saved", "To Apply", "Applied", "Interview", "Offer", "Rejected", "Withdrawn"];
+  const STATUSES = ["Discovered", "Saved", "To Apply", "Applied", "Interview", "Offer", "Rejected", "Withdrawn"];
   const MATCH_TERMS = [
     "supply chain", "warehouse", "inventory", "procurement", "purchasing",
     "distribution", "logistics", "transport", "fulfillment", "fulfilment",
@@ -94,7 +94,9 @@
         const haystack = [job.title, job.company, job.location, job.jobDescription, job.notes, job.contactName].join(" ").toLowerCase();
         if (!haystack.includes(query)) return false;
       }
-      if (recency !== "All") {
+      // Keep existing saved/applied pipeline records visible; recency filters
+      // are for unreviewed auto-discovered listings.
+      if (recency !== "All" && job.status === "Discovered") {
         const posted = parseDate(job.datePosted);
         if (!posted) return false;
         const age = (now.getTime() - posted.getTime()) / 86400000;
@@ -117,7 +119,7 @@
   }
 
   function renderStats() {
-    $("statSaved").textContent = jobs.filter(job => ["Saved", "To Apply"].includes(job.status)).length;
+    $("statSaved").textContent = jobs.filter(job => ["Discovered", "Saved", "To Apply"].includes(job.status)).length;
     $("statApplied").textContent = jobs.filter(job => ["Applied", "Interview", "Offer", "Rejected", "Withdrawn"].includes(job.status)).length;
     $("statInterviews").textContent = jobs.filter(job => job.status === "Interview" || job.interviewDate).length;
     $("statFollowups").textContent = jobs.filter(dueFollowUp).length;
@@ -140,6 +142,7 @@
       const shortNotes = String(job.notes || "").trim();
       const details = [
         `<p><strong>Expected salary:</strong> ${escapeHtml(salaryRange(job))}</p>`,
+        job.matchLevel ? `<p><strong>Profile keyword match:</strong> ${escapeHtml(job.matchLevel)} · ${escapeHtml((job.matchTerms || []).slice(0, 8).join(", "))}</p>` : "",
         `<p><strong>Posted:</strong> ${escapeHtml(fmtPosted(job.datePosted))} &nbsp; <strong>Closes:</strong> ${escapeHtml(fmtDate(job.closingDate))}</p>`,
         job.dateApplied ? `<p><strong>Applied:</strong> ${escapeHtml(fmtDate(job.dateApplied))}</p>` : "",
         job.followUpDate ? `<p class="${dueFollowUp(job) ? "job-followup-due" : ""}"><strong>Follow-up:</strong> ${escapeHtml(fmtDate(job.followUpDate))}${dueFollowUp(job) ? " · Due" : ""}</p>` : "",
@@ -152,7 +155,7 @@
       return `<article class="job-card" data-job-id="${escapeHtml(job.id)}">
         <div class="job-card-top"><div class="job-card-title"><h3>${escapeHtml(job.title)}</h3><div class="job-card-company">${escapeHtml(job.company)}</div><div class="job-card-meta"><span><i data-lucide="map-pin" aria-hidden="true"></i>${escapeHtml(job.location || "Location not specified")}</span><span><i data-lucide="building-2" aria-hidden="true"></i>${escapeHtml(job.workMode || "Not specified")}</span><span><i data-lucide="radio-tower" aria-hidden="true"></i>${escapeHtml(job.source || "Other")}</span></div></div><span class="job-status" data-status="${escapeHtml(job.status)}">${escapeHtml(job.status)}</span></div>
         <div class="job-keyword-fit">Keyword overlap: <strong>${fits.length} relevant terms</strong>${fits.length ? ` · ${escapeHtml(fits.slice(0, 7).join(", "))}${fits.length > 7 ? "…" : ""}` : " · Add a job description for a better comparison"}</div>
-        <div class="job-card-main"><div class="job-card-detail">${details || "<p>No extra details added yet.</p>"}</div><div class="job-card-actions">${url ? `<a class="secondary-button" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">Open advert</a>` : ""}<button type="button" class="secondary-button" data-action="edit" data-id="${escapeHtml(job.id)}">Edit</button>${job.status !== "Applied" && job.status !== "Interview" && job.status !== "Offer" ? `<button type="button" class="secondary-button" data-action="mark-applied" data-id="${escapeHtml(job.id)}">Mark applied</button>` : ""}<button type="button" class="danger-button" data-action="delete" data-id="${escapeHtml(job.id)}">Delete</button></div></div>
+        <div class="job-card-main"><div class="job-card-detail">${details || "<p>No extra details added yet.</p>"}</div><div class="job-card-actions">${url ? `<a class="secondary-button" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">Open advert</a>` : ""}${job.status === "Discovered" ? `<button type="button" class="primary-button" data-action="save-for-later" data-id="${escapeHtml(job.id)}">Save for later</button>` : ""}<button type="button" class="secondary-button" data-action="edit" data-id="${escapeHtml(job.id)}">Edit</button>${job.status !== "Applied" && job.status !== "Interview" && job.status !== "Offer" ? `<button type="button" class="secondary-button" data-action="mark-applied" data-id="${escapeHtml(job.id)}">Mark applied</button>` : ""}<button type="button" class="danger-button" data-action="delete" data-id="${escapeHtml(job.id)}">Delete</button></div></div>
       </article>`;
     }).join("");
     renderIcons();
@@ -216,7 +219,9 @@
     if (salaryMin && salaryMax && Number(salaryMin) > Number(salaryMax)) throw new Error("Minimum salary cannot be greater than maximum salary.");
     const url = formValue("jobUrl");
     if (url && !safeUrl(url)) throw new Error("Enter a valid http or https job advert URL.");
+    const existingJob = jobs.find(job => job.id === formValue("jobId")) || {};
     return {
+      ...existingJob,
       id: formValue("jobId") || (window.crypto?.randomUUID ? crypto.randomUUID() : `job-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`),
       title: formValue("jobTitle"), company: formValue("company"),
       location: formValue("location"), workMode: formValue("workMode"),
@@ -275,6 +280,12 @@
     const job = jobs.find(item => item.id === id);
     if (!job) return;
     if (action === "edit") { showForm(job); return; }
+    if (action === "save-for-later") {
+      const updated = { ...job, status: "Saved", updatedAt: new Date().toISOString() };
+      try { await persist(jobs.map(item => item.id === id ? updated : item), "Vacancy saved to your shortlist."); }
+      catch { /* The status banner already explains the error. */ }
+      return;
+    }
     if (action === "mark-applied") {
       const updated = { ...job, status: "Applied", dateApplied: job.dateApplied || todayIso(), updatedAt: new Date().toISOString() };
       try { await persist(jobs.map(item => item.id === id ? updated : item), "Application status updated."); }
@@ -308,6 +319,99 @@
     setMessage(`Exported ${jobs.length} tracked ${jobs.length === 1 ? "opportunity" : "opportunities"}.`, "success");
   }
 
+  async function discoverJobs(forceRefresh = false) {
+    if (!isReady) {
+      setMessage("Connect to the private tracker before searching for jobs.", "error");
+      return;
+    }
+
+    const button = $("discoverJobsButton");
+    const priorLabel = button.querySelector("span")?.textContent || "Find new jobs";
+    button.disabled = true;
+    button.setAttribute("aria-busy", "true");
+    if (button.querySelector("span")) button.querySelector("span").textContent = "Searching…";
+    setMessage("Searching public job feeds and matching vacancies to your work-profile keywords…");
+
+    try {
+      const token = window.portfolioAuth?.getStoredToken?.() || "";
+      if (!token) throw new Error("Your admin session has expired. Sign in again.");
+      const response = await fetch("https://dennis-portfolio-oaus.onrender.com/employer/api/job-discovery/", {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({ refresh: forceRefresh })
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.detail || "The job-search service could not complete the scan.");
+
+      const incoming = Array.isArray(payload.jobs) ? payload.jobs : [];
+      const next = [...jobs];
+      let added = 0;
+      let updated = 0;
+      const canonicalUrl = value => safeUrl(value).replace(/\/+$/, "").toLowerCase();
+      const sameRecord = (a, b) => {
+        const aUrl = canonicalUrl(a.jobUrl || a.sourceUrl);
+        const bUrl = canonicalUrl(b.jobUrl || b.sourceUrl);
+        if (aUrl && bUrl) return aUrl === bUrl;
+        return String(a.title || "").trim().toLowerCase() === String(b.title || "").trim().toLowerCase()
+          && String(a.company || "").trim().toLowerCase() === String(b.company || "").trim().toLowerCase();
+      };
+
+      for (const found of incoming) {
+        if (!found || !found.title || !found.jobUrl) continue;
+        const existingIndex = next.findIndex(item => sameRecord(item, found));
+        const normalized = {
+          ...found,
+          status: STATUSES.includes(found.status) ? found.status : "Discovered",
+          updatedAt: new Date().toISOString()
+        };
+        if (existingIndex < 0) {
+          next.unshift(normalized);
+          added += 1;
+        } else if (next[existingIndex].status === "Discovered") {
+          next[existingIndex] = {
+            ...normalized,
+            ...next[existingIndex],
+            ...found,
+            id: next[existingIndex].id || found.id,
+            status: "Discovered",
+            createdAt: next[existingIndex].createdAt || found.createdAt,
+            updatedAt: new Date().toISOString()
+          };
+          updated += 1;
+        }
+        // Do not overwrite or downgrade vacancies the user has acted on.
+      }
+
+      if (added || updated) await persist(next, "Saving discovered vacancies…");
+
+      const failedSources = (payload.sources || []).filter(item => !item.ok);
+      const sourceSummary = (payload.sources || []).filter(item => item.ok).map(item => item.name).filter(Boolean);
+      let message;
+      if (!incoming.length && failedSources.length && !sourceSummary.length) {
+        message = "Job search is temporarily unavailable. " + failedSources.map(item => item.name + ": " + (item.error || "unavailable")).join("; ");
+        setMessage(message, "error");
+      } else if (added || updated) {
+        message = "Search complete: " + added + " new and " + updated + " refreshed vacancy records. Sources: " + (sourceSummary.join(", ") || "public job feeds") + ".";
+        if (failedSources.length) message += " Some sources were unavailable (" + failedSources.map(item => item.name).join(", ") + ").";
+        setMessage(message, "success");
+      } else {
+        message = incoming.length
+          ? "Search complete. No new records; matching vacancies already exist in your tracker."
+          : "Search complete. No new matching vacancies were found in the connected feeds.";
+        if (failedSources.length) message += " Unavailable sources: " + failedSources.map(item => item.name).join(", ") + ".";
+        setMessage(message, failedSources.length && !sourceSummary.length ? "error" : "success");
+      }
+      if (added || updated) render();
+    } catch (error) {
+      setMessage(error?.message || "Could not search for vacancies.", "error");
+    } finally {
+      button.disabled = false;
+      button.removeAttribute("aria-busy");
+      if (button.querySelector("span")) button.querySelector("span").textContent = priorLabel;
+      renderIcons();
+    }
+  }
+
   async function init() {
     if (!window.portfolioApi) {
       setMessage("Portfolio API script did not load. Refresh the page or check the scripts.", "error");
@@ -326,6 +430,8 @@
       isReady = true;
       setMessage("Connected. Changes save to your authenticated portfolio backend.", "success");
       render();
+      // Automatically refresh public vacancy feeds after the private tracker loads.
+      discoverJobs(false);
     } catch (error) {
       setMessage(error?.message || "Could not load the job tracker from the server.", "error");
       list.innerHTML = `<div class="job-empty-state"><h3>Unable to load tracker</h3><p>${escapeHtml(error?.message || "Check your connection and sign in again.")}</p></div>`;
@@ -334,6 +440,7 @@
 
   form.addEventListener("submit", onSubmit);
   $("newJobButton").addEventListener("click", () => showForm());
+  $("discoverJobsButton").addEventListener("click", () => discoverJobs(true));
   $("closeJobForm").addEventListener("click", hideForm);
   $("cancelJobButton").addEventListener("click", hideForm);
   $("exportCsvButton").addEventListener("click", exportCsv);
