@@ -143,6 +143,7 @@
       const details = [
         `<p><strong>Expected salary:</strong> ${escapeHtml(salaryRange(job))}</p>`,
         job.matchLevel ? `<p><strong>Profile keyword match:</strong> ${escapeHtml(job.matchLevel)} · ${escapeHtml((job.matchTerms || []).slice(0, 8).join(", "))}</p>` : "",
+        job.locationConfidence ? `<p><strong>Location check:</strong> ${escapeHtml(job.locationConfidence)}</p>` : "",
         `<p><strong>Posted:</strong> ${escapeHtml(fmtPosted(job.datePosted))} &nbsp; <strong>Closes:</strong> ${escapeHtml(fmtDate(job.closingDate))}</p>`,
         job.dateApplied ? `<p><strong>Applied:</strong> ${escapeHtml(fmtDate(job.dateApplied))}</p>` : "",
         job.followUpDate ? `<p class="${dueFollowUp(job) ? "job-followup-due" : ""}"><strong>Follow-up:</strong> ${escapeHtml(fmtDate(job.followUpDate))}${dueFollowUp(job) ? " · Due" : ""}</p>` : "",
@@ -402,9 +403,24 @@
           const checked = Number(diagnostics.queriesSucceeded || 0);
           const attempts = Number(diagnostics.queriesAttempted || 0);
           const scanned = Number(diagnostics.recordsReceived || 0);
+          const reasons = diagnostics.rejectReasons || {};
+          const labels = {
+            missing_title: "missing title",
+            location_not_target: "location not confirmed for Nairobi/Kiambu",
+            no_profile_keyword_match: "no matching role keywords",
+            missing_or_unparseable_posting_date: "missing/unreadable posting date",
+            posting_date_outside_30_day_window: "outside the 30-day scan window",
+            missing_or_unapproved_detail_url: "missing/invalid advert link"
+          };
+          const topReasons = Object.entries(reasons)
+            .filter(([key, count]) => key !== "accepted_country_only_location" && Number(count) > 0)
+            .sort((a, b) => Number(b[1]) - Number(a[1]))
+            .slice(0, 2)
+            .map(([key, count]) => Number(count) + " " + (labels[key] || key.replaceAll("_", " ")));
           message = "Search complete: " + scanned + " source records checked across " +
-            checked + "/" + attempts + " searches; none matched your location, role and date rules. " +
-            "Try the 7-day or 30-day filter, or browse all Kenya listings at Dev Global Jobs.";
+            checked + "/" + attempts + " searches; no vacancies matched all filters." +
+            (topReasons.length ? " Main exclusions: " + topReasons.join("; ") + "." : "") +
+            " Try the 7-day or 30-day filter, or browse all Kenya listings at Dev Global Jobs.";
         }
         if (failedSources.length) message += " Unavailable sources: " + failedSources.map(item => item.name).join(", ") + ".";
         setMessage(message, failedSources.length && !sourceSummary.length ? "error" : "success");

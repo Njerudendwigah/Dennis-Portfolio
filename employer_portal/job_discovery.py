@@ -8,7 +8,7 @@ from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from html import unescape
-from urllib.parse import urlencode, urlparse
+from urllib.parse import parse_qs, urlencode, urljoin, urlparse
 from urllib.request import Request, urlopen
 import hashlib
 import json
@@ -51,6 +51,28 @@ def parse_date(value: Any) -> datetime | None:
         value = first(value, "datePosted", "value", "startDate")
     if value in (None, ""):
         return None
+    if isinstance(value, str):
+        relative = re.fullmatch(
+            r"\s*(?:about\s+)?(just now|today|yesterday|\d+\s+(?:minutes?|hours?|days?|weeks?)\s+ago)\s*",
+            value,
+            re.IGNORECASE,
+        )
+        if relative:
+            label = relative.group(1).lower()
+            current = datetime.now(timezone.utc)
+            if label == "just now" or label == "today":
+                return current
+            if label == "yesterday":
+                return current - timedelta(days=1)
+            amount, unit = re.match(r"(\d+)\s+(minutes?|hours?|days?|weeks?)\s+ago", label).groups()
+            count = int(amount)
+            delta = (
+                timedelta(minutes=count) if unit.startswith("minute") else
+                timedelta(hours=count) if unit.startswith("hour") else
+                timedelta(days=count) if unit.startswith("day") else
+                timedelta(weeks=count)
+            )
+            return current - delta
     if isinstance(value, (int, float)) or (isinstance(value, str) and value.strip().isdigit()):
         try:
             stamp = float(value)
@@ -164,8 +186,18 @@ def monthly_kes(item: dict[str, Any]) -> tuple[int | None, int | None]:
     )
 
 
-def normalize_external_job(item: dict[str, Any], source: str = "Dev Global Jobs",
-                           now: datetime | None = None) -> dict[str, Any] | None:
+def normalize_external_job(
+    item: dict[str, Any],
+    source: str = "Dev Global Jobs",
+    now: datetime | None = None,
+    allow_country_only_location: bool = False,
+    diagnostics: dict[str, int] | None = None,
+) -> dict[str, Any] | None:
+    def reject(reason: str) -> None:
+        if diagnostics is not None:
+            diagnostics[reason] = diagnostics.get(reason, 0) + 1
+        return None
+
     title = clean(first(item, "title", "jobTitle", "job_title", "position", "name"))
     company = clean(first(item, "company", "companyName", "company_name", "organisation",
                           "organization", "employer", "hiringOrganization")) or "Employer not specified"
@@ -177,13 +209,26 @@ def normalize_external_job(item: dict[str, Any], source: str = "Dev Global Jobs"
     description = clean(first(item, "description", "jobDescription", "job_description",
                               "excerpt", "summary", "snippet"))
     if not title:
-        return None
+        return reject("missing_title")
+
+    location_confidence = "City or remote location matched target"
+    location_lower = location.strip().lower()
     if not allowed_location(location, country, mode):
         inferred_location = infer_target_location(description)
-        if inferred_location and (not location or location.strip().lower() in {"kenya", "ke", "ken"}):
+        if inferred_location and (not location or location_lower in {"kenya", "ke", "ken"}):
             location = f"{inferred_location}, Kenya"
+            location_confidence = "Inferred from labelled advert text"
+        elif allow_country_only_location and (
+            country.lower() in {"ke", "kenya", "ken"}
+            or location_lower in {"kenya", "ke", "ken"}
+        ):
+            # Keep country-level leads without pretending their city is Nairobi/Kiambu.
+            location = "Kenya (city not specified)"
+            location_confidence = "City unconfirmed — verify location before applying"
+            if diagnostics is not None:
+                diagnostics["accepted_country_only_location"] = diagnostics.get("accepted_country_only_location", 0) + 1
         else:
-            return None
+            return reject("location_not_target")
 
     terms = []
     score = 0
@@ -194,7 +239,7 @@ def normalize_external_job(item: dict[str, Any], source: str = "Dev Global Jobs"
             terms.append(term)
             score += 3 if in_title else 1
     if not terms:
-        return None
+        return reject("no_profile_keyword_match")
 
     posted = parse_date(first(item, "datePosted", "date_posted", "postedDate", "posted_date",
                               "pubDate", "pub_date", "datePublished", "date_published",
@@ -202,22 +247,24 @@ def normalize_external_job(item: dict[str, Any], source: str = "Dev Global Jobs"
                               "postingDate", "posting_date", "createdAt", "created_at",
                               "publishedAt", "published_at", "date_created"))
     if posted is None:
-        return None
+        return reject("missing_or_unparseable_posting_date")
     current = now or datetime.now(timezone.utc)
     if current.tzinfo is None:
         current = current.replace(tzinfo=timezone.utc)
     age = current.astimezone(timezone.utc) - posted
     # Keep a modest ingestion window; the dashboard defaults to the requested last 48 hours.
     if age < timedelta(days=-1) or age > timedelta(days=30):
-        return None
+        return reject("posting_date_outside_30_day_window")
 
     closes = parse_date(first(item, "validThrough", "valid_through", "expiryDate", "expiry_date",
                               "closingDate", "closing_date", "deadline", "expiresAt", "expires_at"))
     url = clean(first(item, "url", "jobUrl", "job_url", "jobPageUrl", "job_page_url",
                       "permalink", "detailUrl", "detail_url", "link", "applicationLink", "application_link"))
+    if url.startswith("/") and not url.startswith("//"):
+        url = urljoin("https://devglobaljobs.com", url)
     parsed = urlparse(url)
     if parsed.scheme != "https" or parsed.hostname not in {"devglobaljobs.com", "www.devglobaljobs.com"}:
-        return None
+        return reject("missing_or_unapproved_detail_url")
 
     salary_min, salary_max = monthly_kes(item)
     current_iso = current.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
@@ -227,6 +274,7 @@ def normalize_external_job(item: dict[str, Any], source: str = "Dev Global Jobs"
     return {
         "id": record_id, "title": title[:180], "company": company[:180],
         "location": locationsource[:180],
+        "locationConfidence": location_confidence,
         "workMode": "Remote" if "remote" in (location + " " + mode).lower()
                     else "Hybrid" if "hybrid" in mode.lower()
                     else "On-site" if "on-site" in mode.lower() or "onsite" in mode.lower()
@@ -238,7 +286,12 @@ def normalize_external_job(item: dict[str, Any], source: str = "Dev Global Jobs"
         "salaryMax": salary_max if salary_max is not None else "",
         "dateApplied": "", "followUpDate": "", "interviewDate": "", "contactName": "",
         "jobUrl": url, "sourceUrl": url, "jobDescription": description[:15000],
-        "notes": f"Automatically discovered via {source}. Profile keyword overlap: {', '.join(terms[:8])}. Confirm requirements and instructions on the source advert.",
+        "notes": (
+            f"Automatically discovered via {source}. Profile keyword overlap: {', '.join(terms[:8])}. "
+            + ("The source specifies Kenya but not a city; verify that this role is based in Nairobi/Kiambu or is remote before applying. "
+               if location_confidence == "City unconfirmed — verify location before applying" else "")
+            + "Confirm requirements and instructions on the source advert."
+        ),
         "matchScore": score, "matchLevel": score_band, "matchTerms": terms,
         "createdAt": current_iso, "updatedAt": current_iso,
     }
@@ -285,13 +338,12 @@ def build_search_urls() -> list[str]:
 
 def collect_opportunities() -> dict[str, Any]:
     """Collect, normalize, location-filter and deduplicate recent vacancies."""
-    # The provider's country page uses the ISO-style "ke" slug. The unfiltered
-    # fallback ensures a country-parameter mismatch cannot silently return zero.
     queries = build_search_urls()
     jobs_by_url: dict[str, dict[str, Any]] = {}
-    errors = []
+    errors: list[str] = []
+    reject_reasons: dict[str, int] = {}
     records_received = 0
-    rejected_matches = 0
+    query_diagnostics: list[dict[str, Any]] = []
 
     def request_jobs(url: str) -> tuple[list[dict[str, Any]], str | None]:
         try:
@@ -300,21 +352,39 @@ def collect_opportunities() -> dict[str, Any]:
             return [], str(exc)[:220]
 
     succeeded = 0
+    futures_by_url = {}
     with ThreadPoolExecutor(max_workers=min(6, len(queries))) as executor:
-        futures = [executor.submit(request_jobs, url) for url in queries]
-        for future in as_completed(futures):
+        futures_by_url = {executor.submit(request_jobs, url): url for url in queries}
+        for future in as_completed(futures_by_url):
+            url = futures_by_url[future]
             items, error = future.result()
+            params = parse_qs(urlparse(url).query)
+            term = params.get("search", [""])[0]
+            country_scope = params.get("country", [""])[0].lower() == "ke"
+            query_row: dict[str, Any] = {
+                "term": term,
+                "countryScoped": country_scope,
+                "received": len(items),
+                "accepted": 0,
+                "error": error or "",
+            }
             if error:
                 errors.append(error)
+                query_diagnostics.append(query_row)
                 continue
+
             succeeded += 1
             records_received += len(items)
             for item in items:
-                job = normalize_external_job(item)
+                job = normalize_external_job(
+                    item,
+                    allow_country_only_location=country_scope,
+                    diagnostics=reject_reasons,
+                )
                 if job:
+                    query_row["accepted"] += 1
                     jobs_by_url.setdefault(job["jobUrl"].lower().rstrip("/"), job)
-                else:
-                    rejected_matches += 1
+            query_diagnostics.append(query_row)
 
     jobs = sorted(
         jobs_by_url.values(),
@@ -336,10 +406,18 @@ def collect_opportunities() -> dict[str, Any]:
             "queriesSucceeded": succeeded,
             "recordsReceived": records_received,
             "recordsMatched": len(jobs),
-            "recordsRejectedByFilters": rejected_matches,
+            "recordsRejectedByFilters": sum(
+                count for key, count in reject_reasons.items() if key != "accepted_country_only_location"
+            ),
+            "rejectReasons": reject_reasons,
+            "queries": query_diagnostics,
         },
         "scannedAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "recencyWindowDays": 30,
         "targetAreas": ["Nairobi County", "Kiambu County", "remote roles available in Kenya"],
-        "disclaimer": "Confirm vacancy dates, salary, eligibility and instructions on the original advert. Salary appears only when the source identifies KES and a monthly or annual pay period. No application is submitted automatically.",
+        "disclaimer": (
+            "Country-only vacancies are marked for location verification. Confirm vacancy dates, salary, "
+            "eligibility and instructions on the original advert. Salary appears only when the source "
+            "identifies KES and a monthly or annual pay period. No application is submitted automatically."
+        ),
     }

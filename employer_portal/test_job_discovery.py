@@ -87,3 +87,43 @@ class JobDiscoveryNormalizationTests(SimpleTestCase):
         )
         self.assertIsNotNone(record)
         self.assertEqual(record["location"], "Nairobi, Kenya")
+
+
+    def test_includes_country_only_role_as_unconfirmed_only_for_kenya_scoped_search(self):
+        item = {
+            "title": "Procurement Assistant",
+            "companyName": "Example Organisation",
+            "location": "Kenya",
+            "country": "Kenya",
+            "datePosted": "2026-10-09T08:30:00Z",
+            "url": "https://devglobaljobs.com/jobs/detail/123456",
+            "description": "Procurement, purchasing, stock records and supplier management.",
+        }
+        country_scoped = normalize_external_job(
+            item, now=self.now, allow_country_only_location=True
+        )
+        unfiltered = normalize_external_job(item, now=self.now)
+        self.assertIsNotNone(country_scoped)
+        self.assertEqual(country_scoped["location"], "Kenya (city not specified)")
+        self.assertIn("verify location", country_scoped["locationConfidence"].lower())
+        self.assertIsNone(unfiltered)
+
+    def test_converts_relative_posting_age(self):
+        from .job_discovery import parse_date
+        parsed = parse_date("2 days ago")
+        self.assertIsNotNone(parsed)
+        self.assertLess((datetime.now(timezone.utc) - parsed).total_seconds(), 3 * 86400)
+
+    def test_accepts_relative_provider_detail_path(self):
+        item = {
+            "title": "Warehouse Supervisor",
+            "companyName": "Example Organisation",
+            "location": "Nairobi, Kenya",
+            "country": "Kenya",
+            "datePosted": "2026-10-09T08:30:00Z",
+            "url": "/jobs/detail/123456",
+            "description": "Warehouse, inventory, dispatch and stock control.",
+        }
+        record = normalize_external_job(item, now=self.now)
+        self.assertIsNotNone(record)
+        self.assertEqual(record["jobUrl"], "https://devglobaljobs.com/jobs/detail/123456")
