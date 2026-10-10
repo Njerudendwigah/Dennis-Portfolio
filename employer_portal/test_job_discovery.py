@@ -20,13 +20,14 @@ class JobDiscoveryNormalizationTests(SimpleTestCase):
         item.update(extra)
         return normalize_external_job(item, now=self.now)
 
-    def test_normalizes_fresh_nairobi_warehouse_role(self):
+    def test_normalizes_recent_nairobi_role_with_monthly_kes(self):
         record = self.make_job(currency="KES", salaryMin=65000, salaryMax=95000, salaryPeriod="monthly")
         self.assertIsNotNone(record)
         self.assertEqual(record["status"], "Discovered")
         self.assertEqual(record["source"], "Dev Global Jobs")
         self.assertEqual((record["salaryMin"], record["salaryMax"]), (65000, 95000))
         self.assertIn("warehouse", record["matchTerms"])
+        self.assertEqual(record["matchLevel"], "Strong")
 
     def test_rejects_role_outside_target_counties(self):
         self.assertIsNone(self.make_job(location="Mombasa, Kenya"))
@@ -42,5 +43,30 @@ class JobDiscoveryNormalizationTests(SimpleTestCase):
         self.assertIsNotNone(record)
         self.assertEqual((record["salaryMin"], record["salaryMax"]), ("", ""))
 
+    def test_rejects_salary_without_explicit_monthly_or_annual_period(self):
+        record = self.make_job(currency="KES", salaryMin=3000, salaryMax=5000)
+        self.assertIsNotNone(record)
+        self.assertEqual((record["salaryMin"], record["salaryMax"]), ("", ""))
+
     def test_rejects_job_without_known_posting_date(self):
         self.assertIsNone(self.make_job(datePosted=""))
+
+    def test_does_not_assert_on_site_work_without_source_evidence(self):
+        record = self.make_job()
+        self.assertIsNotNone(record)
+        self.assertEqual(record["workMode"], "Not specified")
+
+    def test_accepts_remote_role_for_kenya(self):
+        record = self.make_job(
+            title="Inventory Systems Manager",
+            location="",
+            country="Kenya",
+            workMode="Remote",
+            description="Manage ERP, supply chain and inventory systems.",
+        )
+        self.assertIsNotNone(record)
+        self.assertEqual(record["location"], "Remote, Kenya")
+        self.assertEqual(record["workMode"], "Remote")
+
+    def test_rejects_generic_country_only_location(self):
+        self.assertIsNone(self.make_job(location="Kenya", title="Procurement Officer", description="Supplier management and stock control."))

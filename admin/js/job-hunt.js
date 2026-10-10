@@ -140,6 +140,7 @@
       const shortNotes = String(job.notes || "").trim();
       const details = [
         `<p><strong>Expected salary:</strong> ${escapeHtml(salaryRange(job))}</p>`,
+        job.matchLevel ? `<p><strong>Profile keyword match:</strong> ${escapeHtml(job.matchLevel)} · ${escapeHtml((job.matchTerms || []).slice(0, 8).join(", "))}</p>` : "",
         `<p><strong>Posted:</strong> ${escapeHtml(fmtPosted(job.datePosted))} &nbsp; <strong>Closes:</strong> ${escapeHtml(fmtDate(job.closingDate))}</p>`,
         job.dateApplied ? `<p><strong>Applied:</strong> ${escapeHtml(fmtDate(job.dateApplied))}</p>` : "",
         job.followUpDate ? `<p class="${dueFollowUp(job) ? "job-followup-due" : ""}"><strong>Follow-up:</strong> ${escapeHtml(fmtDate(job.followUpDate))}${dueFollowUp(job) ? " · Due" : ""}</p>` : "",
@@ -321,7 +322,7 @@
     button.disabled = true;
     button.setAttribute("aria-busy", "true");
     if (button.querySelector("span")) button.querySelector("span").textContent = "Searching…";
-    setMessage("Searching public job feeds and matching vacancies to your CV keywords…");
+    setMessage("Searching public job feeds and matching vacancies to your work-profile keywords…");
 
     try {
       const token = window.portfolioAuth?.getStoredToken?.() || "";
