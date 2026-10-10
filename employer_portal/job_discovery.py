@@ -652,8 +652,9 @@ def parse_rss_jobs(
         if feed_source in {"Career Point Kenya", "MyJobMag Kenya"}:
             item_country = "Kenya"
         else:
-            item_country = "Kenya" if re.search(
-                r"\bKenya\b", " ".join((title, location, description)), re.IGNORECASE
+            item_country = "Kenya" if (
+                re.search(r"\bKenya\b", location, re.IGNORECASE)
+                or is_kenyan_location(location)
             ) else ""
         records.append({
             "title": title,
