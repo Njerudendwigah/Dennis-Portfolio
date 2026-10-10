@@ -16,7 +16,7 @@ import re
 from typing import Any
 
 API_ROOT = "https://devglobaljobs.com/api/v1/jobs"
-SEARCH_TERMS = ("warehouse", "storekeeper", "procurement", "supply chain", "inventory", "logistics")
+SEARCH_TERMS = ("warehouse", "storekeeper", "procurement", "supply chain", "inventory", "logistics", "distribution", "transport", "operations", "purchasing")
 MATCH_TERMS = (
     "supply chain", "warehouse", "storekeeper", "stores", "inventory",
     "procurement", "purchasing", "distribution", "logistics", "transport",
@@ -77,8 +77,9 @@ def parse_date(value: Any) -> datetime | None:
 
 
 def location_text(item: dict[str, Any]) -> str:
-    value = first(item, "location", "jobLocation", "city", "town", "workplace",
-                  "workPlace", "officeLocation", "locationName", "location_name")
+    value = first(item, "location", "jobLocation", "job_location", "work_location",
+                  "workLocation", "city", "city_name", "town", "town_name",
+                  "workplace", "workPlace", "officeLocation", "locationName", "location_name")
     if isinstance(value, dict):
         address = value.get("address", value)
         if isinstance(address, dict):
@@ -92,10 +93,24 @@ def location_text(item: dict[str, Any]) -> str:
     return clean(value)
 
 
+def infer_target_location(description: str) -> str:
+    """Read a city/county only when the job text explicitly labels it as a location."""
+    places = r"Nairobi(?: County)?|Kiambu(?: County)?|Thika|Ruiru|Juja|Limuru|Kikuyu|Kahawa|Ruai"
+    pattern = re.compile(
+        rf"(?:job\s+location|work\s+location|location|based\s+in|located\s+in|"
+        rf"position\s+based\s+in|office\s+in)\s*[:\-]?\s*({places})",
+        re.IGNORECASE,
+    )
+    match = pattern.search(description or "")
+    if not match:
+        return ""
+    return re.sub(r"\s+County$", "", match.group(1), flags=re.IGNORECASE)
+
+
 def allowed_location(location: str, country: str, mode: str = "") -> bool:
     value = f"{location} {country} {mode}".lower()
     # Do not silently widen the user's county preference to any Kenyan county.
-    if any(city in location.lower() for city in OTHER_CITIES):
+    if re.search(r"\b(?:" + "|".join(re.escape(city) for city in OTHER_CITIES) + r")\b", location, re.IGNORECASE):
         return False
     if any(place in value for place in (
         "nairobi", "kiambu", "thika", "ruiru", "juja", "limuru", "kikuyu", "kahawa", "ruai",
@@ -161,8 +176,14 @@ def normalize_external_job(item: dict[str, Any], source: str = "Dev Global Jobs"
         location = "Remote, Kenya"
     description = clean(first(item, "description", "jobDescription", "job_description",
                               "excerpt", "summary", "snippet"))
-    if not title or not allowed_location(location, country, mode):
+    if not title:
         return None
+    if not allowed_location(location, country, mode):
+        inferred_location = infer_target_location(description)
+        if inferred_location and (not location or location.strip().lower() in {"kenya", "ke", "ken"}):
+            location = f"{inferred_location}, Kenya"
+        else:
+            return None
 
     terms = []
     score = 0
@@ -175,9 +196,11 @@ def normalize_external_job(item: dict[str, Any], source: str = "Dev Global Jobs"
     if not terms:
         return None
 
-    posted = parse_date(first(item, "datePosted", "date_posted", "pubDate", "pub_date",
-                              "postedAt", "posted_at", "postingDate", "posting_date",
-                              "createdAt", "created_at", "publishedAt", "published_at"))
+    posted = parse_date(first(item, "datePosted", "date_posted", "postedDate", "posted_date",
+                              "pubDate", "pub_date", "datePublished", "date_published",
+                              "publishedDate", "published_date", "postedAt", "posted_at",
+                              "postingDate", "posting_date", "createdAt", "created_at",
+                              "publishedAt", "published_at", "date_created"))
     if posted is None:
         return None
     current = now or datetime.now(timezone.utc)
@@ -251,15 +274,24 @@ def _payload_items(payload: Any) -> list[dict[str, Any]]:
     return []
 
 
+def build_search_urls() -> list[str]:
+    """Build ISO-country and unfiltered fallback queries for each search term."""
+    urls = []
+    for term in SEARCH_TERMS:
+        urls.append(f"{API_ROOT}?{urlencode({'limit': 100, 'country': 'ke', 'search': term})}")
+        urls.append(f"{API_ROOT}?{urlencode({'limit': 100, 'search': term})}")
+    return urls
+
+
 def collect_opportunities() -> dict[str, Any]:
     """Collect, normalize, location-filter and deduplicate recent vacancies."""
-    queries = []
-    for term in SEARCH_TERMS:
-        query = urlencode({"limit": 100, "country": "Kenya", "search": term})
-        queries.append(f"{API_ROOT}?{query}")
-
+    # The provider's country page uses the ISO-style "ke" slug. The unfiltered
+    # fallback ensures a country-parameter mismatch cannot silently return zero.
+    queries = build_search_urls()
     jobs_by_url: dict[str, dict[str, Any]] = {}
     errors = []
+    records_received = 0
+    rejected_matches = 0
 
     def request_jobs(url: str) -> tuple[list[dict[str, Any]], str | None]:
         try:
@@ -276,10 +308,13 @@ def collect_opportunities() -> dict[str, Any]:
                 errors.append(error)
                 continue
             succeeded += 1
+            records_received += len(items)
             for item in items:
                 job = normalize_external_job(item)
                 if job:
                     jobs_by_url.setdefault(job["jobUrl"].lower().rstrip("/"), job)
+                else:
+                    rejected_matches += 1
 
     jobs = sorted(
         jobs_by_url.values(),
@@ -296,6 +331,13 @@ def collect_opportunities() -> dict[str, Any]:
             "requestsSucceeded": succeeded,
             "requestsAttempted": len(queries),
         }],
+        "diagnostics": {
+            "queriesAttempted": len(queries),
+            "queriesSucceeded": succeeded,
+            "recordsReceived": records_received,
+            "recordsMatched": len(jobs),
+            "recordsRejectedByFilters": rejected_matches,
+        },
         "scannedAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "recencyWindowDays": 30,
         "targetAreas": ["Nairobi County", "Kiambu County", "remote roles available in Kenya"],
