@@ -94,7 +94,7 @@ class JobDiscoveryNormalizationTests(SimpleTestCase):
         self.assertEqual(record["location"], "Nairobi, Kenya")
 
 
-    def test_includes_country_only_role_as_unconfirmed_only_for_kenya_scoped_search(self):
+    def test_includes_country_only_role_when_source_country_is_kenya(self):
         item = {
             "title": "Procurement Assistant",
             "companyName": "Example Organisation",
@@ -107,11 +107,11 @@ class JobDiscoveryNormalizationTests(SimpleTestCase):
         country_scoped = normalize_external_job(
             item, now=self.now, allow_country_only_location=True
         )
-        unfiltered = normalize_external_job(item, now=self.now)
+        general = normalize_external_job(item, now=self.now)
         self.assertIsNotNone(country_scoped)
-        self.assertEqual(country_scoped["location"], "Kenya (city not specified)")
-        self.assertIn("verify location", country_scoped["locationConfidence"].lower())
-        self.assertIsNone(unfiltered)
+        self.assertIsNotNone(general)
+        self.assertEqual(general["location"], "Kenya (city not specified)")
+        self.assertIn("verify location", general["locationConfidence"].lower())
 
     def test_converts_relative_posting_age(self):
         from .job_discovery import parse_date
