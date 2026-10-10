@@ -434,7 +434,12 @@
       if (added || updated) await persist(next, "Saving discovered vacancies…");
 
       const failedSources = (payload.sources || []).filter(item => !item.ok);
-      const sourceSummary = (payload.sources || []).filter(item => item.ok).map(item => item.name).filter(Boolean);
+      const sourceSummary = (payload.sources || []).map(item => {
+        const name = item?.name || "Unknown source";
+        const accepted = Number(item?.count || 0);
+        const received = Number(item?.recordsReceived || 0);
+        return name + ": " + accepted + " fresh / " + received + " received" + (item?.ok ? "" : " (unavailable)");
+      }).filter(Boolean);
       let message;
       if (!incoming.length && failedSources.length && !sourceSummary.length) {
         message = "Job search is temporarily unavailable. " + failedSources.map(item => item.name + ": " + (item.error || "unavailable")).join("; ");
