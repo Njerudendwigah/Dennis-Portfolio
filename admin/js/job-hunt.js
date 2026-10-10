@@ -329,7 +329,7 @@
       if (!token) throw new Error("Your admin session has expired. Sign in again.");
       const response = await fetch("https://dennis-portfolio-oaus.onrender.com/employer/api/job-discovery/", {
         method: "POST",
-        headers: { "Authorization": \`Bearer \${token}\`, "Content-Type": "application/json", "Accept": "application/json" },
+        headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json", "Accept": "application/json" },
         body: JSON.stringify({ refresh: forceRefresh })
       });
       const payload = await response.json().catch(() => ({}));
@@ -383,14 +383,14 @@
         message = "Job search is temporarily unavailable. " + failedSources.map(item => item.name + ": " + (item.error || "unavailable")).join("; ");
         setMessage(message, "error");
       } else if (added || updated) {
-        message = \`Search complete: \${added} new and \${updated} refreshed vacancy records. Sources: \${sourceSummary.join(", ") || "public job feeds"}.\`;
-        if (failedSources.length) message += \` Some sources were unavailable (\${failedSources.map(item => item.name).join(", ")}).\`;
+        message = "Search complete: " + added + " new and " + updated + " refreshed vacancy records. Sources: " + (sourceSummary.join(", ") || "public job feeds") + ".";
+        if (failedSources.length) message += " Some sources were unavailable (" + failedSources.map(item => item.name).join(", ") + ").";
         setMessage(message, "success");
       } else {
         message = incoming.length
           ? "Search complete. No new records; matching vacancies already exist in your tracker."
           : "Search complete. No new matching vacancies were found in the connected feeds.";
-        if (failedSources.length) message += \` Unavailable sources: \${failedSources.map(item => item.name).join(", ")}.\`;
+        if (failedSources.length) message += " Unavailable sources: " + failedSources.map(item => item.name).join(", ") + ".";
         setMessage(message, failedSources.length && !sourceSummary.length ? "error" : "success");
       }
       if (added || updated) render();
