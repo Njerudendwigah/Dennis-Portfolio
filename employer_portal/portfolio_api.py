@@ -358,7 +358,7 @@ def job_discovery(request: HttpRequest) -> JsonResponse:
         return _json_response(request, {"detail": "Invalid JSON."}, status=400)
 
     force_refresh = isinstance(body, dict) and body.get("refresh") is True
-    cache_key = "job_discovery_results_v1"
+    cache_key = "job_discovery_results_v2"
     cached = cache.get(cache_key)
     if cached and not force_refresh:
         return _json_response(request, {**cached, "cached": True})
