@@ -8,6 +8,7 @@ from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from html import unescape
+from html.parser import HTMLParser
 from urllib.parse import parse_qs, urlencode, urljoin, urlparse
 from urllib.request import Request, urlopen
 import hashlib
@@ -17,6 +18,13 @@ import xml.etree.ElementTree as ET
 from typing import Any
 
 API_ROOT = "https://devglobaljobs.com/api/v1/jobs"
+MYJOBMAG_FEEDS_INDEX = "https://www.myjobmag.co.ke/feeds/"
+DEV_GLOBAL_RSS_FEED = {
+    "name": "Dev Global Jobs RSS",
+    "url": "https://devglobaljobs.com/jobs.rss",
+    "default_location": "",
+    "allow_country_only": False,
+}
 CAREER_POINT_FEEDS = (
     {
         "name": "Career Point Kenya · Nairobi jobs",
@@ -401,15 +409,22 @@ def normalize_external_job(
                               "closingDate", "closing_date", "deadline", "expiresAt", "expires_at"))
     url = clean(first(item, "url", "jobUrl", "job_url", "jobPageUrl", "job_page_url",
                       "permalink", "detailUrl", "detail_url", "link", "applicationLink", "application_link"))
-    allowed_hosts = {
-        "Dev Global Jobs": {"devglobaljobs.com", "www.devglobaljobs.com"},
-        "Career Point Kenya": {"careerpointkenya.co.ke", "www.careerpointkenya.co.ke"},
-    }.get(source, set())
+    source_domains = {
+        "Dev Global Jobs": DEV_GLOBAL_ALLOWED_DOMAINS,
+        "Career Point Kenya": CAREER_POINT_ALLOWED_DOMAINS,
+        "MyJobMag Kenya": MYJOBMAG_ALLOWED_DOMAINS,
+        "Dev Global Jobs RSS": DEV_GLOBAL_ALLOWED_DOMAINS,
+    }.get(source, ())
     if url.startswith("/") and not url.startswith("//"):
-        base = "https://www.careerpointkenya.co.ke" if source == "Career Point Kenya" else "https://devglobaljobs.com"
+        if source == "Career Point Kenya":
+            base = "https://www.careerpointkenya.co.ke"
+        elif source == "MyJobMag Kenya":
+            base = "https://www.myjobmag.co.ke"
+        else:
+            base = "https://devglobaljobs.com"
         url = urljoin(base, url)
     parsed = urlparse(url)
-    if parsed.scheme != "https" or parsed.hostname not in allowed_hosts:
+    if parsed.scheme != "https" or not _host_matches(parsed.hostname, source_domains):
         return reject("missing_or_unapproved_detail_url")
 
     salary_min, salary_max = monthly_kes(item)
@@ -484,6 +499,103 @@ def _xml_child_text(node: ET.Element, *names: str) -> str:
     return ""
 
 
+MYJOBMAG_ALLOWED_DOMAINS = ("myjobmag.co.ke", "myjobmag.com")
+CAREER_POINT_ALLOWED_DOMAINS = ("careerpointkenya.co.ke",)
+DEV_GLOBAL_ALLOWED_DOMAINS = ("devglobaljobs.com",)
+
+
+def _host_matches(host: str | None, domains: tuple[str, ...]) -> bool:
+    value = (host or "").lower().rstrip(".")
+    return any(value == domain or value.endswith("." + domain) for domain in domains)
+
+
+class _MyJobMagFeedIndexParser(HTMLParser):
+    """Find RSS/XML feed URLs published by MyJobMag's official feed directory."""
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.candidates: list[str] = []
+
+    def _extract(self, value: str) -> None:
+        for match in re.findall(
+            r"https?://[^\s\"'<>]+|/(?:[^\s\"'<>]*?(?:feed|rss|xml)[^\s\"'<>]*)",
+            value,
+            re.IGNORECASE,
+        ):
+            cleaned = match.rstrip("),;.]")
+            if cleaned:
+                self.candidates.append(cleaned)
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        for key, value in attrs:
+            if value and key.lower() in {
+                "href", "src", "value", "data-url", "data-feed", "onclick", "data-rss", "data-xml"
+            }:
+                self._extract(value)
+
+    def handle_data(self, data: str) -> None:
+        self._extract(data)
+
+
+def extract_myjobmag_feed_urls(
+    html: str,
+    index_url: str = MYJOBMAG_FEEDS_INDEX,
+) -> list[str]:
+    """Return only RSS/XML URLs published by MyJobMag on its feed-index page."""
+    parser = _MyJobMagFeedIndexParser()
+    parser.feed(html)
+    selected: list[str] = []
+    seen = set()
+    for candidate in parser.candidates:
+        url = urljoin(index_url, unescape(candidate))
+        parsed = urlparse(url)
+        if parsed.scheme == "http" and _host_matches(parsed.hostname, MYJOBMAG_ALLOWED_DOMAINS):
+            url = parsed._replace(scheme="https").geturl()
+            parsed = urlparse(url)
+        if parsed.scheme != "https" or not _host_matches(parsed.hostname, MYJOBMAG_ALLOWED_DOMAINS):
+            continue
+        path = (parsed.path or "").lower()
+        if path.rstrip("/") == "/feeds":
+            continue
+        if not any(token in (path + " " + parsed.query.lower()) for token in ("feed", "rss", "xml")):
+            continue
+        normalized = parsed._replace(fragment="").geturl()
+        if normalized not in seen:
+            seen.add(normalized)
+            selected.append(normalized)
+        if len(selected) >= 4:
+            break
+    return selected
+
+
+def _request_text(url: str, allowed_domains: tuple[str, ...], timeout: int = 8) -> str:
+    parsed = urlparse(url)
+    if parsed.scheme != "https" or not _host_matches(parsed.hostname, allowed_domains):
+        raise ValueError("Blocked non-approved job source URL.")
+    request = Request(url, headers={
+        "User-Agent": "DennisPortfolioJobSearch/1.0 (personal job-feed reader)",
+        "Accept": "text/html,application/xhtml+xml,application/xml,text/xml;q=0.9,*/*;q=0.8",
+    })
+    with urlopen(request, timeout=timeout) as response:
+        final = urlparse(response.geturl())
+        if final.scheme != "https" or not _host_matches(final.hostname, allowed_domains):
+            raise ValueError("Feed request redirected outside the approved source domain.")
+        raw = response.read(1_500_000)
+        charset = response.headers.get_content_charset() or "utf-8"
+    return raw.decode(charset, errors="replace")
+
+
+def discover_myjobmag_feed_urls() -> tuple[list[str], str | None]:
+    """Discover feeds from MyJobMag's official public RSS/XML index."""
+    try:
+        index_html = _request_text(MYJOBMAG_FEEDS_INDEX, MYJOBMAG_ALLOWED_DOMAINS)
+        feeds = extract_myjobmag_feed_urls(index_html)
+        if not feeds:
+            return [], "The official feed directory returned no discoverable RSS/XML URLs."
+        return feeds, None
+    except Exception as exc:
+        return [], str(exc)[:220]
+
+
 def parse_rss_jobs(
     raw_xml: bytes,
     feed_url: str,
@@ -507,32 +619,48 @@ def parse_rss_jobs(
                 break
         link = urljoin(feed_url, link) if link else ""
         description = _xml_child_text(entry, "description", "summary", "encoded", "content")
-        posted = _xml_child_text(entry, "pubdate", "published", "updated", "date")
+        posted = _xml_child_text(entry, "pubdate", "published", "updated", "date", "datecreated", "created", "issued")
         if not title or not link or not posted:
             continue
 
         company = ""
-        # Career Point commonly appends "Job <employer>" to job titles.
+        # Career Point commonly appends "Job <employer>"; MyJobMag uses "at <employer>".
         split_title = re.match(r"^(?P<title>.+?)\s+Job\s+(?P<company>.+)$", title, re.IGNORECASE)
         if split_title:
             title = split_title.group("title").strip()
             company = re.sub(r"^\s*(?:at\s+)", "", split_title.group("company")).strip()
+        elif _host_matches(urlparse(feed_url).hostname, MYJOBMAG_ALLOWED_DOMAINS):
+            at_match = re.match(r"^(?P<title>.+?)\s+at\s+(?P<company>.+)$", title, re.IGNORECASE)
+            if at_match:
+                title = at_match.group("title").strip()
+                company = at_match.group("company").strip()
 
         location = default_location
         if not location:
             location_match = re.search(
                 r"(?:job\s+location|work\s+location|location)\s*[:\-]\s*"
-                r"(Nairobi(?: County)?|Kiambu(?: County)?|Thika|Ruiru|Juja|Limuru|Kikuyu|Kahawa|Ruai)",
+                r"(Nairobi(?: County)?|Kiambu(?: County)?|Thika|Ruiru|Juja|Limuru|Kikuyu|Kahawa|Ruai|Mombasa|Nakuru|Kisumu|Eldoret|Nyeri|Meru|Machakos|Kitui|Embu|Kakamega|Bungoma|Garissa|Kilifi|Kajiado|Narok|Kericho|Kisii|Busia|Voi|Taveta|Nyahururu|Nanyuki|Naivasha|Kitale|Mtwapa)",
                 description,
                 re.IGNORECASE,
             )
             if location_match:
                 location = location_match.group(1) + ", Kenya"
+        # Career Point and MyJobMag are Kenya-specific feeds. Dev Global Jobs'
+        # RSS is international, so only label it Kenyan when the item text provides
+        # Kenya-specific evidence; never turn an unknown/global item into a Kenya job.
+        feed_source = source_label_for_feed_url(feed_url)
+        if feed_source in {"Career Point Kenya", "MyJobMag Kenya"}:
+            item_country = "Kenya"
+        else:
+            item_country = "Kenya" if (
+                re.search(r"\bKenya\b", location, re.IGNORECASE)
+                or is_kenyan_location(location)
+            ) else ""
         records.append({
             "title": title,
             "companyName": company or "Employer not specified",
             "location": location,
-            "country": "Kenya",
+            "country": item_country,
             "datePosted": posted,
             "url": link,
             "description": description,
@@ -540,17 +668,23 @@ def parse_rss_jobs(
     return records
 
 
-def _request_rss(url: str, default_location: str = "", timeout: int = 8) -> list[dict[str, Any]]:
+def _request_rss(
+    url: str,
+    default_location: str = "",
+    timeout: int = 8,
+    allowed_domains: tuple[str, ...] = CAREER_POINT_ALLOWED_DOMAINS,
+) -> list[dict[str, Any]]:
     parsed = urlparse(url)
-    if parsed.scheme != "https" or parsed.hostname not in {
-        "careerpointkenya.co.ke", "www.careerpointkenya.co.ke"
-    }:
+    if parsed.scheme != "https" or not _host_matches(parsed.hostname, allowed_domains):
         raise ValueError("Blocked non-approved RSS source URL.")
     request = Request(url, headers={
-        "User-Agent": "DennisPortfolioJobSearch/1.0 (personal job alerts; RSS reader)",
+        "User-Agent": "DennisPortfolioJobSearch/1.0 (personal job-feed reader)",
         "Accept": "application/rss+xml,application/atom+xml,application/xml,text/xml;q=0.9,*/*;q=0.8",
     })
     with urlopen(request, timeout=timeout) as response:
+        final = urlparse(response.geturl())
+        if final.scheme != "https" or not _host_matches(final.hostname, allowed_domains):
+            raise ValueError("RSS request redirected outside the approved source domain.")
         raw = response.read(1_500_000)
     return parse_rss_jobs(raw, url, default_location)
 
@@ -625,38 +759,65 @@ def collect_opportunities() -> dict[str, Any]:
 
     rss_succeeded = 0
     rss_errors: list[str] = []
+    myjob_feed_errors: list[str] = []
 
     def fetch_feed(feed: dict[str, Any]) -> tuple[dict[str, Any], list[dict[str, Any]], str | None]:
         try:
-            rows = _request_rss(feed["url"], feed.get("default_location", ""))
+            source = str(feed.get("source") or "Career Point Kenya")
+            if source == "MyJobMag Kenya":
+                rows = _request_rss(feed["url"], feed.get("default_location", ""), allowed_domains=MYJOBMAG_ALLOWED_DOMAINS)
+            elif source == "Dev Global Jobs RSS":
+                rows = _request_rss(feed["url"], feed.get("default_location", ""), allowed_domains=DEV_GLOBAL_ALLOWED_DOMAINS)
+            else:
+                rows = _request_rss(feed["url"], feed.get("default_location", ""))
             return feed, rows, None
         except Exception as exc:
             return feed, [], str(exc)[:220]
 
-    with ThreadPoolExecutor(max_workers=len(CAREER_POINT_FEEDS)) as executor:
-        futures = [executor.submit(fetch_feed, feed) for feed in CAREER_POINT_FEEDS]
+    feeds_to_fetch = [{**feed, "source": "Career Point Kenya"} for feed in CAREER_POINT_FEEDS]
+    feeds_to_fetch.append({**DEV_GLOBAL_RSS_FEED, "source": "Dev Global Jobs RSS"})
+
+    myjob_urls, myjob_index_error = discover_myjobmag_feed_urls()
+    if myjob_index_error:
+        myjob_feed_errors.append(myjob_index_error)
+    for index, url in enumerate(myjob_urls, start=1):
+        feeds_to_fetch.append({
+            "name": "MyJobMag Kenya · published feed " + str(index),
+            "url": url,
+            "default_location": "",
+            "allow_country_only": True,
+            "source": "MyJobMag Kenya",
+        })
+
+    feed_successes: dict[str, int] = {
+        "Career Point Kenya": 0,
+        "Dev Global Jobs RSS": 0,
+        "MyJobMag Kenya": 0,
+    }
+    feed_errors_by_source: dict[str, list[str]] = {
+        "Career Point Kenya": rss_errors,
+        "Dev Global Jobs RSS": [],
+        "MyJobMag Kenya": myjob_feed_errors,
+    }
+    with ThreadPoolExecutor(max_workers=max(1, len(feeds_to_fetch))) as executor:
+        futures = [executor.submit(fetch_feed, feed) for feed in feeds_to_fetch]
         for future in as_completed(futures):
             feed, items, error = future.result()
-            query_row = {
-                "source": "Career Point Kenya",
-                "feed": feed["name"],
-                "received": len(items),
-                "accepted": 0,
-                "error": error or "",
-            }
+            source = str(feed.get("source") or "Career Point Kenya")
+            query_row = {"source": source, "feed": feed["name"], "received": len(items), "accepted": 0, "error": error or ""}
             if error:
-                rss_errors.append(error)
+                feed_errors_by_source.setdefault(source, []).append(error)
                 errors.append(error)
                 query_diagnostics.append(query_row)
                 continue
 
-            rss_succeeded += 1
+            feed_successes[source] = feed_successes.get(source, 0) + 1
             records_received += len(items)
             for item in items:
                 job = normalize_external_job(
                     item,
-                    source="Career Point Kenya",
-                    allow_country_only_location=bool(feed.get("allow_country_only")),
+                    source=source,
+                    allow_country_only_location=bool(feed.get("allow_country_only", source == "MyJobMag Kenya")),
                     diagnostics=reject_reasons,
                 )
                 if job:
@@ -664,32 +825,50 @@ def collect_opportunities() -> dict[str, Any]:
                     jobs_by_url.setdefault(job["jobUrl"].lower().rstrip("/"), job)
             query_diagnostics.append(query_row)
 
+    rss_succeeded = feed_successes["Career Point Kenya"]
     jobs = sorted(
         jobs_by_url.values(),
         key=lambda row: parse_date(row["datePosted"]) or datetime.min.replace(tzinfo=timezone.utc),
         reverse=True,
     )[:250]
 
-    counts = {"Dev Global Jobs": 0, "Career Point Kenya": 0}
+    counts = {"Dev Global Jobs": 0, "Career Point Kenya": 0, "MyJobMag Kenya": 0, "Dev Global Jobs RSS": 0}
     for job in jobs:
-        counts[job["source"]] = counts.get(job["source"], 0) + 1
+        label = "Dev Global Jobs" if job["source"] == "Dev Global Jobs RSS" else job["source"]
+        counts[label] = counts.get(label, 0) + 1
 
+    received_by_source = {
+        "Dev Global Jobs": sum(int(row.get("received", 0)) for row in query_diagnostics if row.get("source") in {"Dev Global Jobs", "Dev Global Jobs RSS"}),
+        "Career Point Kenya": sum(int(row.get("received", 0)) for row in query_diagnostics if row.get("source") == "Career Point Kenya"),
+        "MyJobMag Kenya": sum(int(row.get("received", 0)) for row in query_diagnostics if row.get("source") == "MyJobMag Kenya"),
+    }
     source_status = [
         {
             "name": "Dev Global Jobs",
-            "ok": api_succeeded > 0,
+            "ok": api_succeeded > 0 or feed_successes["Dev Global Jobs RSS"] > 0,
             "count": counts["Dev Global Jobs"],
-            "error": "" if api_succeeded else (errors[0] if errors else "No API request succeeded."),
+            "recordsReceived": received_by_source["Dev Global Jobs"],
+            "error": "" if api_succeeded or feed_successes["Dev Global Jobs RSS"] else (errors[0] if errors else "No API/RSS request succeeded."),
             "requestsSucceeded": api_succeeded,
             "requestsAttempted": len(queries),
         },
         {
             "name": "Career Point Kenya",
-            "ok": rss_succeeded > 0,
+            "ok": feed_successes["Career Point Kenya"] > 0,
             "count": counts["Career Point Kenya"],
-            "error": "" if rss_succeeded else (rss_errors[0] if rss_errors else "No RSS feed returned data."),
-            "feedsSucceeded": rss_succeeded,
+            "recordsReceived": received_by_source["Career Point Kenya"],
+            "error": "" if feed_successes["Career Point Kenya"] else (rss_errors[0] if rss_errors else "No RSS feed returned data."),
+            "feedsSucceeded": feed_successes["Career Point Kenya"],
             "feedsAttempted": len(CAREER_POINT_FEEDS),
+        },
+        {
+            "name": "MyJobMag Kenya",
+            "ok": feed_successes["MyJobMag Kenya"] > 0,
+            "count": counts["MyJobMag Kenya"],
+            "recordsReceived": received_by_source["MyJobMag Kenya"],
+            "error": "" if feed_successes["MyJobMag Kenya"] else (myjob_feed_errors[0] if myjob_feed_errors else "No published MyJobMag feed returned data."),
+            "feedsSucceeded": feed_successes["MyJobMag Kenya"],
+            "feedsDiscovered": len(myjob_urls),
         },
     ]
 
@@ -697,12 +876,14 @@ def collect_opportunities() -> dict[str, Any]:
         "jobs": jobs,
         "sources": source_status,
         "diagnostics": {
-            "queriesAttempted": len(queries) + len(CAREER_POINT_FEEDS),
-            "queriesSucceeded": api_succeeded + rss_succeeded,
+            "queriesAttempted": len(queries) + len(feeds_to_fetch) + 1,
+            "queriesSucceeded": api_succeeded + sum(feed_successes.values()) + (1 if myjob_urls and not myjob_index_error else 0),
             "apiQueriesAttempted": len(queries),
             "apiQueriesSucceeded": api_succeeded,
-            "feedsAttempted": len(CAREER_POINT_FEEDS),
-            "feedsSucceeded": rss_succeeded,
+            "feedsAttempted": len(feeds_to_fetch),
+            "feedsSucceeded": sum(feed_successes.values()),
+            "myJobMagFeedIndexError": myjob_index_error or "",
+            "myJobMagFeedsDiscovered": len(myjob_urls),
             "recordsReceived": records_received,
             "recordsMatched": len(jobs),
             "recordsRejectedByFilters": sum(

@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from django.test import SimpleTestCase
 from urllib.parse import parse_qs, urlparse
-from .job_discovery import build_search_urls, normalize_external_job, parse_rss_jobs
+from .job_discovery import build_search_urls, extract_myjobmag_feed_urls, normalize_external_job, parse_rss_jobs
 
 
 class JobDiscoveryNormalizationTests(SimpleTestCase):
@@ -276,3 +276,46 @@ class JobDiscoveryNormalizationTests(SimpleTestCase):
         self.assertEqual(record["matchTerms"], [])
         self.assertEqual(record["matchLevel"], "Not scored")
         self.assertEqual(record["location"], "Kisumu, Kenya")
+
+
+    def test_extracts_only_published_myjobmag_feed_urls(self):
+        html = """
+        <html><body>
+          <input id="summary" value="https://www.myjobmag.co.ke/rss/summary.xml" />
+          <a href="https://www.myjobmag.co.ke/rss/detailed.xml">Detailed RSS</a>
+          <input value="https://evil.example/jobs.xml" />
+          <a href="/feeds/">This index page is not a feed</a>
+        </body></html>
+        """
+        feeds = extract_myjobmag_feed_urls(html)
+        self.assertIn("https://www.myjobmag.co.ke/rss/summary.xml", feeds)
+        self.assertIn("https://www.myjobmag.co.ke/rss/detailed.xml", feeds)
+        self.assertNotIn("https://evil.example/jobs.xml", feeds)
+        self.assertTrue(all("rss" in url.lower() or "xml" in url.lower() for url in feeds))
+
+    def test_parses_myjobmag_title_company_and_relative_url(self):
+        feed = b"""<?xml version="1.0"?>
+        <rss version="2.0"><channel><item>
+          <title>E-Commerce Operations &amp; Logistics Associate at Example Recruitment Ltd</title>
+          <link>/p/123456</link>
+          <pubDate>Fri, 09 Oct 2026 08:30:00 +0000</pubDate>
+          <description><![CDATA[Operations, logistics, dispatch and warehouse support.]]></description>
+        </item></channel></rss>"""
+        records = parse_rss_jobs(feed, "https://www.myjobmag.co.ke/rss/detailed.xml")
+        self.assertEqual(len(records), 1)
+        self.assertEqual(records[0]["title"], "E-Commerce Operations & Logistics Associate")
+        self.assertEqual(records[0]["companyName"], "Example Recruitment Ltd")
+        self.assertEqual(records[0]["url"], "https://www.myjobmag.co.ke/p/123456")
+
+    def test_global_rss_does_not_mark_foreign_job_as_kenyan(self):
+        feed = b"""<?xml version="1.0"?>
+        <rss version="2.0"><channel><item>
+          <title>Warehouse Supervisor at Example Inc</title>
+          <link>https://devglobaljobs.com/jobs/warehouse-supervisor</link>
+          <pubDate>Fri, 09 Oct 2026 08:30:00 +0000</pubDate>
+          <description><![CDATA[Warehouse and inventory management in Kampala, Uganda.]]></description>
+        </item></channel></rss>"""
+        records = parse_rss_jobs(feed, "https://devglobaljobs.com/jobs.rss")
+        self.assertEqual(len(records), 1)
+        self.assertEqual(records[0]["country"], "")
+        self.assertEqual(records[0]["location"], "")
