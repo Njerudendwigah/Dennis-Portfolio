@@ -136,19 +136,22 @@ def location_text(item: dict[str, Any]) -> str:
     return clean(value)
 
 
-def infer_target_location(description: str) -> str:
-    """Read a city/county only when the job text explicitly labels it as a location."""
-    places = r"Nairobi(?: County)?|Kiambu(?: County)?|Thika|Ruiru|Juja|Limuru|Kikuyu|Kahawa|Ruai"
-    pattern = re.compile(
-        rf"(?:job\s+location|work\s+location|location|based\s+in|located\s+in|"
-        rf"position\s+based\s+in|office\s+in)\s*[:\-]?\s*({places})",
-        re.IGNORECASE,
-    )
-    match = pattern.search(description or "")
-    if not match:
-        return ""
-    return re.sub(r"\s+County$", "", match.group(1), flags=re.IGNORECASE)
-
+KENYA_LOCATIONS = (
+    "Nairobi", "Mombasa", "Kwale", "Kilifi", "Tana River", "Lamu",
+    "Taita Taveta", "Taita-Taveta", "Garissa", "Wajir", "Mandera",
+    "Marsabit", "Isiolo", "Meru", "Tharaka Nithi", "Tharaka-Nithi",
+    "Embu", "Kitui", "Machakos", "Makueni", "Nyandarua", "Nyeri",
+    "Kirinyaga", "Murang'a", "Muranga", "Kiambu", "Turkana",
+    "West Pokot", "Samburu", "Trans Nzoia", "Trans-Nzoia", "Uasin Gishu",
+    "Elgeyo Marakwet", "Elgeyo-Marakwet", "Nandi", "Baringo", "Laikipia",
+    "Nakuru", "Narok", "Kajiado", "Kericho", "Bomet", "Kakamega",
+    "Vihiga", "Bungoma", "Busia", "Siaya", "Kisumu", "Homa Bay",
+    "Homa-Bay", "Migori", "Kisii", "Nyamira", "Thika", "Ruiru", "Juja",
+    "Limuru", "Kikuyu", "Kahawa", "Ruai", "Eldoret", "Kitale", "Naivasha",
+    "Malindi", "Kilgoris", "Voi", "Taveta", "Wundanyi", "Nanyuki",
+    "Lodwar", "Kapenguria", "Mtwapa", "Webuye", "Kapsabet", "Mumias",
+    "Kerugoya", "Nyahururu", "Isiolo Town", "Marsabit Town", "Bungoma Town",
+)
 
 FOREIGN_COUNTRY_TERMS = (
     "uganda", "tanzania", "rwanda", "burundi", "ethiopia", "somalia",
@@ -157,12 +160,79 @@ FOREIGN_COUNTRY_TERMS = (
     "singapore", "philippines", "australia", "new zealand", "germany",
     "france", "netherlands", "ireland", "dubai", "united arab emirates",
     "saudi arabia", "qatar", "egypt", "china", "japan", "switzerland",
+    "zambia", "zimbabwe", "malawi", "mozambique", "senegal", "cameroon",
+    "angola", "botswana", "namibia", "lesotho", "eswatini", "liberia",
+    "sierra leone", "ivory coast", "cote d'ivoire", "mali", "niger",
+    "chad", "sudan", "south sudan", "libya", "algeria", "morocco",
+    "tunisia", "turkey", "türkiye", "brazil", "mexico", "argentina",
+    "colombia", "peru", "chile", "venezuela", "poland", "sweden",
+    "norway", "denmark", "finland", "belgium", "austria", "portugal",
+    "spain", "italy", "greece", "czech republic", "czechia", "romania",
+    "hungary", "serbia", "croatia", "slovenia", "slovakia", "bulgaria",
+    "south korea", "north korea", "taiwan", "thailand", "vietnam",
+    "indonesia", "malaysia", "nepal", "afghanistan", "iraq", "iran",
+    "israel", "palestine", "jordan", "lebanon", "kuwait", "bahrain",
+    "oman", "yemen", "haiti", "cuba", "jamaica", "greenland",
 )
+
+FOREIGN_COUNTRY_CODES = {
+    "us", "usa", "gb", "uk", "ug", "tz", "rw", "bi", "et", "so", "ng", "gh",
+    "za", "ca", "in", "pk", "bd", "lk", "sg", "ph", "au", "nz", "de", "fr",
+    "nl", "ie", "ae", "sa", "qa", "eg", "cn", "jp", "ch", "zm", "zw", "mw",
+    "mz", "sn", "cm", "ao", "bw", "na", "ls", "sz", "lr", "sl", "ml", "ne",
+    "td", "sd", "ss", "ly", "dz", "ma", "tn", "tr", "br", "mx", "ar", "co",
+    "pe", "cl", "ve", "pl", "se", "no", "dk", "fi", "be", "at", "pt", "es",
+    "it", "gr", "cz", "ro", "hu", "rs", "hr", "si", "sk", "bg", "kr", "kp",
+    "tw", "th", "vn", "id", "my", "np", "af", "iq", "ir", "il", "ps", "jo",
+    "lb", "kw", "bh", "om", "ye", "ht", "cu", "jm",
+}
 
 
 def is_kenya_country(country: str) -> bool:
     normalized = re.sub(r"[^a-z]", "", (country or "").lower())
     return normalized in {"ke", "ken", "kenya", "republicofkenya"}
+
+
+def is_kenyan_location(location: str) -> bool:
+    value = (location or "").strip()
+    return any(
+        re.search(r"\b" + re.escape(place) + r"\b", value, re.IGNORECASE)
+        for place in KENYA_LOCATIONS
+    )
+
+
+def _explicit_foreign_country(location: str, country: str) -> bool:
+    country_value = (country or "").strip().lower()
+    compact_country = re.sub(r"[^a-z]", "", country_value)
+    if is_kenya_country(country_value):
+        return False
+    if compact_country in FOREIGN_COUNTRY_CODES:
+        return True
+
+    for term in FOREIGN_COUNTRY_TERMS:
+        pattern = r"\b" + re.escape(term) + r"\b"
+        if re.search(pattern, country_value, re.IGNORECASE):
+            return True
+        if re.search(pattern, (location or ""), re.IGNORECASE):
+            return True
+    return False
+
+
+def infer_target_location(description: str) -> str:
+    """Infer a place only when the advert explicitly labels it as the job location."""
+    places = "|".join(
+        re.escape(place)
+        for place in sorted(KENYA_LOCATIONS, key=len, reverse=True)
+    )
+    pattern = re.compile(
+        rf"(?:job\s+location|work\s+location|location|based\s+in|located\s+in|"
+        rf"position\s+based\s+in|office\s+in)\s*[:\-]?\s*({places})(?:\s+County)?",
+        re.IGNORECASE,
+    )
+    match = pattern.search(description or "")
+    if not match:
+        return ""
+    return re.sub(r"\s+County$", "", match.group(1), flags=re.IGNORECASE)
 
 
 def allowed_location(
@@ -171,33 +241,25 @@ def allowed_location(
     mode: str = "",
     kenya_scoped_query: bool = False,
 ) -> bool:
-    """Accept Kenya-wide jobs; never impose a Nairobi/Kiambu-only restriction."""
-    location_text_value = (location or "").strip().lower()
-    country_text_value = (country or "").strip().lower()
-    combined = f"{location_text_value} {country_text_value} {mode}".lower()
-
-    # An explicit non-Kenyan country should never be admitted just because the
-    # provider query included a Kenya search term.
-    if country_text_value and not is_kenya_country(country_text_value):
-        return False
-    if any(
-        re.search(r"\b" + re.escape(place) + r"\b", location_text_value)
-        for place in FOREIGN_COUNTRY_TERMS
-    ):
+    """Accept relevant vacancies anywhere in Kenya, not only selected counties."""
+    if _explicit_foreign_country(location, country):
         return False
 
-    if is_kenya_country(country) or re.search(r"\bkenya\b", location_text_value):
+    if is_kenya_country(country):
+        return True
+    if re.search(r"\bkenya\b", (location or ""), re.IGNORECASE):
+        return True
+    if is_kenyan_location(location):
         return True
 
-    # The API's country=ke search and the Career Point Kenya RSS feeds are
-    # country-scoped sources. A city supplied by one of these sources is a
-    # Kenyan location even if the API omits a separate country field.
+    # The source query/feed itself is scoped to Kenya. When its schema omits a
+    # usable country or town, keep the vacancy and label the location unknown.
     if kenya_scoped_query:
         return True
 
-    return "remote" in combined and (
-        is_kenya_country(country) or "kenya" in location_text_value
-    )
+    # Explicitly remote jobs are in scope only when the source independently
+    # identifies Kenya; never assume all "remote" listings are available here.
+    return "remote" in f"{location} {country} {mode}".lower() and is_kenya_country(country)
 
 
 def monthly_kes(item: dict[str, Any]) -> tuple[int | None, int | None]:
@@ -276,19 +338,27 @@ def normalize_external_job(
         location, country, mode, kenya_scoped_query=allow_country_only_location
     ):
         inferred_location = infer_target_location(description)
-        if inferred_location and (not location or location_lower in {"kenya", "ke", "ken"}):
+        if inferred_location and (not location or location_lower in {
+            "kenya", "ke", "ken", "global", "worldwide", "international", "unknown", "not specified"
+        }):
             location = f"{inferred_location}, Kenya"
             location_confidence = "Inferred from labelled advert text"
         else:
             return reject("outside_kenya_or_country_unconfirmed")
-    elif not location or location_lower in {"kenya", "ke", "ken"}:
-        # A country-only listing is valid nationwide, but don't invent its town.
+    elif (
+        not location
+        or location_lower in {"kenya", "ke", "ken", "global", "worldwide", "international", "unknown", "not specified"}
+    ):
+        # A country-scoped source may omit the city; retain the lead without inventing a location.
         location = "Kenya (city not specified)"
         location_confidence = "City not specified — verify location before applying"
         if diagnostics is not None:
             diagnostics["accepted_country_only_location"] = diagnostics.get("accepted_country_only_location", 0) + 1
-    elif (allow_country_only_location or is_kenya_country(country)) and "kenya" not in location.lower():
-        # Add the country label when the source confirms Kenya but supplies only a city.
+    elif (
+        allow_country_only_location
+        or is_kenya_country(country)
+        or is_kenyan_location(location)
+    ) and "kenya" not in location.lower():
         if "," not in location:
             location = f"{location}, Kenya"
         location_confidence = "Location from a Kenya-wide feed; verify on the advert"
