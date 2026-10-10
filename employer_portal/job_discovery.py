@@ -287,8 +287,8 @@ def normalize_external_job(
         location_confidence = "City not specified — verify location before applying"
         if diagnostics is not None:
             diagnostics["accepted_country_only_location"] = diagnostics.get("accepted_country_only_location", 0) + 1
-    elif allow_country_only_location and "kenya" not in location.lower():
-        # The result came from a Kenya-filtered feed; make that provenance clear.
+    elif (allow_country_only_location or is_kenya_country(country)) and "kenya" not in location.lower():
+        # Add the country label when the source confirms Kenya but supplies only a city.
         if "," not in location:
             location = f"{location}, Kenya"
         location_confidence = "Location from a Kenya-wide feed; verify on the advert"
