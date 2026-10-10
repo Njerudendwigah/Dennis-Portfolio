@@ -112,9 +112,14 @@
       }
       return true;
     }).sort((a, b) => {
-      const left = a.datePosted || a.updatedAt || a.createdAt || "";
-      const right = b.datePosted || b.updatedAt || b.createdAt || "";
-      return right.localeCompare(left);
+      const leftPosted = parseDate(a.datePosted)?.getTime() ?? -Infinity;
+      const rightPosted = parseDate(b.datePosted)?.getTime() ?? -Infinity;
+      if (leftPosted !== rightPosted) return rightPosted - leftPosted;
+
+      // For equal or missing posting timestamps, the most recently updated record is next.
+      const leftUpdated = parseDate(a.updatedAt || a.createdAt)?.getTime() ?? -Infinity;
+      const rightUpdated = parseDate(b.updatedAt || b.createdAt)?.getTime() ?? -Infinity;
+      return rightUpdated - leftUpdated;
     });
   }
 
@@ -448,7 +453,7 @@
           const reasons = diagnostics.rejectReasons || {};
           const labels = {
             missing_title: "missing title",
-            location_not_target: "location not confirmed for Nairobi/Kiambu",
+            location_not_target: "outside Kenya or country not confirmed",
             no_profile_keyword_match: "no matching role keywords",
             missing_or_unparseable_posting_date: "missing/unreadable posting date",
             posting_date_outside_48_hour_window: "outside the last 48 hours",
@@ -460,7 +465,7 @@
             .slice(0, 2)
             .map(([key, count]) => Number(count) + " " + (labels[key] || key.replaceAll("_", " ")));
           message = "Search complete: " + scanned + " source records checked across " +
-            checked + "/" + attempts + " searches; no vacancies matched the last 48 hours and your role/location rules." +
+            checked + "/" + attempts + " searches; no vacancies matched the last 48 hours and your role keywords and Kenya location rules." +
             (topReasons.length ? " Main exclusions: " + topReasons.join("; ") + "." : "") +
             " Try another keyword or browse the connected source feeds.";
         }

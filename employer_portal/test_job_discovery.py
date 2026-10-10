@@ -30,8 +30,10 @@ class JobDiscoveryNormalizationTests(SimpleTestCase):
         self.assertIn("warehouse", record["matchTerms"])
         self.assertEqual(record["matchLevel"], "Strong")
 
-    def test_rejects_role_outside_target_counties(self):
-        self.assertIsNone(self.make_job(location="Mombasa, Kenya"))
+    def test_accepts_role_from_another_kenyan_county(self):
+        record = self.make_job(location="Mombasa, Kenya")
+        self.assertIsNotNone(record)
+        self.assertEqual(record["location"], "Mombasa, Kenya")
 
     def test_rejects_unrelated_job(self):
         self.assertIsNone(self.make_job(title="Social Media Designer", description="Create graphics and campaigns."))
@@ -69,8 +71,11 @@ class JobDiscoveryNormalizationTests(SimpleTestCase):
         self.assertEqual(record["location"], "Remote, Kenya")
         self.assertEqual(record["workMode"], "Remote")
 
-    def test_rejects_generic_country_only_location(self):
-        self.assertIsNone(self.make_job(location="Kenya", title="Procurement Officer", description="Supplier management and stock control."))
+    def test_accepts_country_only_role_with_location_warning(self):
+        record = self.make_job(location="Kenya", title="Procurement Officer", description="Supplier management and stock control.")
+        self.assertIsNotNone(record)
+        self.assertEqual(record["location"], "Kenya (city not specified)")
+        self.assertIn("verify location", record["locationConfidence"].lower())
 
     def test_search_urls_use_iso_country_and_unfiltered_fallback(self):
         urls = build_search_urls()
@@ -163,3 +168,26 @@ class JobDiscoveryNormalizationTests(SimpleTestCase):
           <description>Warehouse role in Nairobi.</description>
         </item></channel></rss>"""
         self.assertEqual(parse_rss_jobs(feed, "https://www.careerpointkenya.co.ke/feed/"), [])
+
+    def test_accepts_city_only_location_from_country_scoped_feed(self):
+        item = {
+            "title": "Warehouse Supervisor",
+            "companyName": "Example Logistics",
+            "location": "Nakuru",
+            "datePosted": "2026-10-10T08:00:00Z",
+            "url": "https://devglobaljobs.com/jobs/nakuru-warehouse-supervisor",
+            "description": "Manage warehouse stock control and dispatch teams.",
+        }
+        record = normalize_external_job(item, now=self.now, allow_country_only_location=True)
+        self.assertIsNotNone(record)
+        self.assertEqual(record["location"], "Nakuru, Kenya")
+        self.assertIn("Kenya-wide feed", record["locationConfidence"])
+
+    def test_rejects_explicit_foreign_country(self):
+        record = self.make_job(
+            title="Warehouse Supervisor",
+            location="Kampala, Uganda",
+            country="Uganda",
+            description="Warehouse stock control and dispatch.",
+        )
+        self.assertIsNone(record)
