@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from django.test import SimpleTestCase
-from .job_discovery import normalize_external_job
+from urllib.parse import parse_qs, urlparse
+from .job_discovery import build_search_urls, normalize_external_job
 
 
 class JobDiscoveryNormalizationTests(SimpleTestCase):
@@ -70,3 +71,19 @@ class JobDiscoveryNormalizationTests(SimpleTestCase):
 
     def test_rejects_generic_country_only_location(self):
         self.assertIsNone(self.make_job(location="Kenya", title="Procurement Officer", description="Supplier management and stock control."))
+
+    def test_search_urls_use_iso_country_and_unfiltered_fallback(self):
+        urls = build_search_urls()
+        self.assertEqual(len(urls), 20)
+        queries = [parse_qs(urlparse(url).query) for url in urls]
+        self.assertIn("ke", [query.get("country", [""])[0] for query in queries])
+        self.assertTrue(any("country" not in query for query in queries))
+
+    def test_infers_nairobi_from_an_explicit_location_label(self):
+        record = self.make_job(
+            location="Kenya",
+            title="Procurement Officer",
+            description="Job Location: Nairobi, Kenya. Manage stock control and supplier records.",
+        )
+        self.assertIsNotNone(record)
+        self.assertEqual(record["location"], "Nairobi, Kenya")

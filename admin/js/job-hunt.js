@@ -395,9 +395,17 @@
         if (failedSources.length) message += " Some sources were unavailable (" + failedSources.map(item => item.name).join(", ") + ").";
         setMessage(message, "success");
       } else {
-        message = incoming.length
-          ? "Search complete. No new records; matching vacancies already exist in your tracker."
-          : "Search complete. No new matching vacancies were found in the connected feeds.";
+        if (incoming.length) {
+          message = "Search complete. No new records; matching vacancies already exist in your tracker.";
+        } else {
+          const diagnostics = payload.diagnostics || {};
+          const checked = Number(diagnostics.queriesSucceeded || 0);
+          const attempts = Number(diagnostics.queriesAttempted || 0);
+          const scanned = Number(diagnostics.recordsReceived || 0);
+          message = "Search complete: " + scanned + " source records checked across " +
+            checked + "/" + attempts + " searches; none matched your location, role and date rules. " +
+            "Try the 7-day or 30-day filter, or browse all Kenya listings at Dev Global Jobs.";
+        }
         if (failedSources.length) message += " Unavailable sources: " + failedSources.map(item => item.name).join(", ") + ".";
         setMessage(message, failedSources.length && !sourceSummary.length ? "error" : "success");
       }
