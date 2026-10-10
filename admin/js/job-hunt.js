@@ -162,7 +162,9 @@
       const shortNotes = String(job.notes || "").trim();
       const details = [
         `<p><strong>Expected salary:</strong> ${escapeHtml(salaryRange(job))}</p>`,
-        job.matchLevel ? `<p><strong>Profile keyword match:</strong> ${escapeHtml(job.matchLevel)} · ${escapeHtml((job.matchTerms || []).slice(0, 8).join(", "))}</p>` : "",
+        job.matchLevel ? (job.matchTerms && job.matchTerms.length
+          ? `<p><strong>Profile keyword match:</strong> ${escapeHtml(job.matchLevel)} · ${escapeHtml(job.matchTerms.slice(0, 8).join(", "))}</p>`
+          : `<p><strong>Profile keyword overlap:</strong> None detected · use Search to filter this all-category listing</p>`) : "",
         job.locationConfidence ? `<p><strong>Location check:</strong> ${escapeHtml(job.locationConfidence)}</p>` : "",
         `<p><strong>Posted:</strong> ${escapeHtml(fmtPosted(job.datePosted))} &nbsp; <strong>Closes:</strong> ${escapeHtml(fmtDate(job.closingDate))}</p>`,
         job.dateApplied ? `<p><strong>Applied:</strong> ${escapeHtml(fmtDate(job.dateApplied))}</p>` : "",

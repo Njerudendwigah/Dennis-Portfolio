@@ -77,14 +77,16 @@ class JobDiscoveryNormalizationTests(SimpleTestCase):
         self.assertEqual(record["location"], "Kenya (city not specified)")
         self.assertIn("verify location", record["locationConfidence"].lower())
 
-    def test_search_urls_use_country_name_iso_slug_and_unfiltered_fallback(self):
+    def test_search_urls_fetch_all_categories_for_both_country_filters(self):
         urls = build_search_urls()
-        self.assertEqual(len(urls), 30)
+        self.assertEqual(len(urls), 9)
         queries = [parse_qs(urlparse(url).query) for url in urls]
         country_values = [query.get("country", [""])[0] for query in queries]
-        self.assertIn("ke", country_values)
-        self.assertIn("Kenya", country_values)
+        self.assertEqual(country_values.count("Kenya"), 4)
+        self.assertEqual(country_values.count("ke"), 4)
         self.assertTrue(any("country" not in query for query in queries))
+        self.assertTrue(all("search" not in query for query in queries))
+        self.assertTrue(any(query.get("offset") == ["300"] for query in queries))
 
     def test_infers_nairobi_from_an_explicit_location_label(self):
         record = self.make_job(
@@ -253,4 +255,21 @@ class JobDiscoveryNormalizationTests(SimpleTestCase):
             description="Distribution, warehousing and inventory management.",
         )
         self.assertIsNotNone(record)
+        self.assertEqual(record["location"], "Kisumu, Kenya")
+
+
+    def test_does_not_reject_all_category_job_without_profile_keywords(self):
+        item = {
+            "title": "Primary School Teacher",
+            "companyName": "Example School",
+            "location": "Kisumu",
+            "country": "",
+            "datePosted": "2026-10-10T08:00:00Z",
+            "url": "https://devglobaljobs.com/jobs/kisumu-teacher",
+            "description": "Teach primary school learners and prepare lesson plans.",
+        }
+        record = normalize_external_job(item, now=self.now, allow_country_only_location=True)
+        self.assertIsNotNone(record)
+        self.assertEqual(record["matchTerms"], [])
+        self.assertEqual(record["matchLevel"], "Not scored")
         self.assertEqual(record["location"], "Kisumu, Kenya")
