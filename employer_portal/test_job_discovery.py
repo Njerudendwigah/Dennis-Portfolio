@@ -35,8 +35,11 @@ class JobDiscoveryNormalizationTests(SimpleTestCase):
         self.assertIsNotNone(record)
         self.assertEqual(record["location"], "Mombasa, Kenya")
 
-    def test_rejects_unrelated_job(self):
-        self.assertIsNone(self.make_job(title="Social Media Designer", description="Create graphics and campaigns."))
+    def test_accepts_other_job_categories_for_local_keyword_filtering(self):
+        record = self.make_job(title="Social Media Designer", description="Create graphics and campaigns.")
+        self.assertIsNotNone(record)
+        self.assertEqual(record["matchTerms"], [])
+        self.assertEqual(record["matchLevel"], "Not scored")
 
     def test_rejects_old_job(self):
         self.assertIsNone(self.make_job(title="Procurement Officer", description="Procurement and supplier management.", datePosted="2026-08-01T08:30:00Z"))
