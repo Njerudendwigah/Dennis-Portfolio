@@ -94,7 +94,9 @@
         const haystack = [job.title, job.company, job.location, job.jobDescription, job.notes, job.contactName].join(" ").toLowerCase();
         if (!haystack.includes(query)) return false;
       }
-      if (recency !== "All") {
+      // Keep existing saved/applied pipeline records visible; recency filters
+      // are for unreviewed auto-discovered listings.
+      if (recency !== "All" && job.status === "Discovered") {
         const posted = parseDate(job.datePosted);
         if (!posted) return false;
         const age = (now.getTime() - posted.getTime()) / 86400000;
@@ -153,7 +155,7 @@
       return `<article class="job-card" data-job-id="${escapeHtml(job.id)}">
         <div class="job-card-top"><div class="job-card-title"><h3>${escapeHtml(job.title)}</h3><div class="job-card-company">${escapeHtml(job.company)}</div><div class="job-card-meta"><span><i data-lucide="map-pin" aria-hidden="true"></i>${escapeHtml(job.location || "Location not specified")}</span><span><i data-lucide="building-2" aria-hidden="true"></i>${escapeHtml(job.workMode || "Not specified")}</span><span><i data-lucide="radio-tower" aria-hidden="true"></i>${escapeHtml(job.source || "Other")}</span></div></div><span class="job-status" data-status="${escapeHtml(job.status)}">${escapeHtml(job.status)}</span></div>
         <div class="job-keyword-fit">Keyword overlap: <strong>${fits.length} relevant terms</strong>${fits.length ? ` · ${escapeHtml(fits.slice(0, 7).join(", "))}${fits.length > 7 ? "…" : ""}` : " · Add a job description for a better comparison"}</div>
-        <div class="job-card-main"><div class="job-card-detail">${details || "<p>No extra details added yet.</p>"}</div><div class="job-card-actions">${url ? `<a class="secondary-button" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">Open advert</a>` : ""}<button type="button" class="secondary-button" data-action="edit" data-id="${escapeHtml(job.id)}">Edit</button>${job.status !== "Applied" && job.status !== "Interview" && job.status !== "Offer" ? `<button type="button" class="secondary-button" data-action="mark-applied" data-id="${escapeHtml(job.id)}">Mark applied</button>` : ""}<button type="button" class="danger-button" data-action="delete" data-id="${escapeHtml(job.id)}">Delete</button></div></div>
+        <div class="job-card-main"><div class="job-card-detail">${details || "<p>No extra details added yet.</p>"}</div><div class="job-card-actions">${url ? `<a class="secondary-button" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">Open advert</a>` : ""}${job.status === "Discovered" ? `<button type="button" class="primary-button" data-action="save-for-later" data-id="${escapeHtml(job.id)}">Save for later</button>` : ""}<button type="button" class="secondary-button" data-action="edit" data-id="${escapeHtml(job.id)}">Edit</button>${job.status !== "Applied" && job.status !== "Interview" && job.status !== "Offer" ? `<button type="button" class="secondary-button" data-action="mark-applied" data-id="${escapeHtml(job.id)}">Mark applied</button>` : ""}<button type="button" class="danger-button" data-action="delete" data-id="${escapeHtml(job.id)}">Delete</button></div></div>
       </article>`;
     }).join("");
     renderIcons();
@@ -278,6 +280,12 @@
     const job = jobs.find(item => item.id === id);
     if (!job) return;
     if (action === "edit") { showForm(job); return; }
+    if (action === "save-for-later") {
+      const updated = { ...job, status: "Saved", updatedAt: new Date().toISOString() };
+      try { await persist(jobs.map(item => item.id === id ? updated : item), "Vacancy saved to your shortlist."); }
+      catch { /* The status banner already explains the error. */ }
+      return;
+    }
     if (action === "mark-applied") {
       const updated = { ...job, status: "Applied", dateApplied: job.dateApplied || todayIso(), updatedAt: new Date().toISOString() };
       try { await persist(jobs.map(item => item.id === id ? updated : item), "Application status updated."); }
