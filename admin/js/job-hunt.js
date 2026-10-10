@@ -520,6 +520,28 @@
   form.addEventListener("submit", onSubmit);
   $("newJobButton").addEventListener("click", () => showForm());
   $("discoverJobsButton").addEventListener("click", () => discoverJobs(true));
+  $("linkedinJobsButton").addEventListener("click", () => {
+    const typedKeyword = $("jobSearch").value.trim();
+    const keywords = typedKeyword || '"warehouse" OR storekeeper OR procurement OR purchasing OR "supply chain" OR inventory OR logistics OR transport OR distribution OR operations OR supervisor';
+    const recency = $("recencyFilter").value;
+    const params = new URLSearchParams({
+      keywords,
+      location: "Kenya",
+      sortBy: "DD"
+    });
+    const recencySeconds = { "48": 172800, "7": 604800, "30": 2592000 };
+    if (recencySeconds[recency]) {
+      params.set("f_TPR", "r" + recencySeconds[recency]);
+    }
+    const url = "https://www.linkedin.com/jobs/search/?" + params.toString();
+    window.open(url, "_blank", "noopener,noreferrer");
+    const label = recency === "All" ? "any posting date" : recency === "48" ? "the last 48 hours" : "the last " + recency + " days";
+    setMessage(
+      "LinkedIn search opened for " + (typedKeyword ? '"' + typedKeyword + '"' : "warehouse, supply-chain, procurement and operations roles") +
+      " in Kenya, sorted newest first (" + label + "). LinkedIn results are separate from the tracker; use Add opportunity to track a listing here.",
+      "info"
+    );
+  });
   $("closeJobForm").addEventListener("click", hideForm);
   $("cancelJobButton").addEventListener("click", hideForm);
   $("exportCsvButton").addEventListener("click", exportCsv);
