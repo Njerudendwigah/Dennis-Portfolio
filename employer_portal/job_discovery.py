@@ -645,11 +645,21 @@ def parse_rss_jobs(
             )
             if location_match:
                 location = location_match.group(1) + ", Kenya"
+        # Career Point and MyJobMag are Kenya-specific feeds. Dev Global Jobs'
+        # RSS is international, so only label it Kenyan when the item text provides
+        # Kenya-specific evidence; never turn an unknown/global item into a Kenya job.
+        feed_source = source_label_for_feed_url(feed_url)
+        if feed_source in {"Career Point Kenya", "MyJobMag Kenya"}:
+            item_country = "Kenya"
+        else:
+            item_country = "Kenya" if re.search(
+                r"\bKenya\b", " ".join((title, location, description)), re.IGNORECASE
+            ) else ""
         records.append({
             "title": title,
             "companyName": company or "Employer not specified",
             "location": location,
-            "country": "Kenya",
+            "country": item_country,
             "datePosted": posted,
             "url": link,
             "description": description,
@@ -866,7 +876,7 @@ def collect_opportunities() -> dict[str, Any]:
         "sources": source_status,
         "diagnostics": {
             "queriesAttempted": len(queries) + len(feeds_to_fetch) + 1,
-            "queriesSucceeded": api_succeeded + sum(feed_successes.values()),
+            "queriesSucceeded": api_succeeded + sum(feed_successes.values()) + (1 if myjob_urls and not myjob_index_error else 0),
             "apiQueriesAttempted": len(queries),
             "apiQueriesSucceeded": api_succeeded,
             "feedsAttempted": len(feeds_to_fetch),
