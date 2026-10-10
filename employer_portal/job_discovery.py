@@ -377,8 +377,9 @@ def normalize_external_job(
         if in_title or in_description:
             terms.append(term)
             score += 3 if in_title else 1
-    if not terms:
-        return reject("no_profile_keyword_match")
+    # Do not reject jobs based on the candidate's profile keywords.
+    # The dashboard's Search field is the user's filter across all fresh Kenyan jobs.
+
 
     posted = parse_date(first(item, "datePosted", "date_posted", "postedDate", "posted_date",
                               "pubDate", "pub_date", "datePublished", "date_published",
@@ -413,7 +414,7 @@ def normalize_external_job(
 
     salary_min, salary_max = monthly_kes(item)
     current_iso = current.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
-    score_band = "Strong" if score >= 8 else "Good" if score >= 4 else "Potential"
+    score_band = "Strong" if score >= 8 else "Good" if score >= 4 else "Potential" if score > 0 else "Not scored"
     record_id = "discovered-" + hashlib.sha256(url.lower().rstrip("/").encode()).hexdigest()[:20]
     locationsource = location or "Location not specified"
     return {
@@ -555,12 +556,16 @@ def _request_rss(url: str, default_location: str = "", timeout: int = 8) -> list
 
 
 def build_search_urls() -> list[str]:
-    """Search both country-name and ISO-slug forms, then try a validated fallback."""
+    """Fetch country-wide all-category pages; UI search applies keywords locally."""
     urls = []
-    for term in SEARCH_TERMS:
-        urls.append(f"{API_ROOT}?{urlencode({'limit': 100, 'country': 'Kenya', 'search': term})}")
-        urls.append(f"{API_ROOT}?{urlencode({'limit': 100, 'country': 'ke', 'search': term})}")
-        urls.append(f"{API_ROOT}?{urlencode({'limit': 100, 'search': term})}")
+    for country in ("Kenya", "ke"):
+        for offset in (0, 100, 200, 300):
+            urls.append(
+                f"{API_ROOT}?{urlencode({'limit': 100, 'offset': offset, 'country': country})}"
+            )
+    # One recent global page is a fallback for Kenyan city listings whose country
+    # metadata was omitted. The normalizer still rejects explicit foreign jobs.
+    urls.append(f"{API_ROOT}?{urlencode({'limit': 100, 'offset': 0})}")
     return urls
 
 
@@ -588,10 +593,12 @@ def collect_opportunities() -> dict[str, Any]:
             items, error = future.result()
             params = parse_qs(urlparse(url).query)
             term = params.get("search", [""])[0]
+            offset = params.get("offset", ["0"])[0]
             country_scope = params.get("country", [""])[0].strip().lower() in {"ke", "kenya", "ken"}
             query_row: dict[str, Any] = {
                 "source": "Dev Global Jobs",
                 "term": term,
+                "offset": offset,
                 "countryScoped": country_scope,
                 "received": len(items),
                 "accepted": 0,
@@ -709,7 +716,7 @@ def collect_opportunities() -> dict[str, Any]:
         "recencyWindowHours": 48,
         "targetAreas": ["All counties in Kenya", "remote roles available in Kenya"],
         "disclaimer": (
-            "Relevant vacancies from all counties in Kenya are included when the source location supports that. "
+            "All-category vacancies from all counties in Kenya are included when the source location supports that. "
             "Only vacancies with a source posting time within the last 48 hours are returned. "
             "Country-only vacancies are marked for location verification. Confirm exact dates, salary, "
             "eligibility and instructions on the original advert. No application is submitted automatically."
